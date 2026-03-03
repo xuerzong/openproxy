@@ -1,0 +1,46 @@
+{
+  "name": "server",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_ENV=development bun --watch index.ts",
+    "start": "bun run index.ts",
+    "migrate": "bun run scripts/migrate.ts",
+    "build": "bun build ./index.ts --outdir ./dist --target bun --external thread-stream",
+    "drizzle": "drizzle-kit"
+  },
+  "dependencies": {
+    "@aiproxy-shop/payment-provider": "workspace:*",
+    "@aiproxy-shop/phone-auth": "workspace:*",
+    "@axiomhq/js": "^1.3.1",
+    "@axiomhq/pino": "^1.3.1",
+    "@elysiajs/cookie": "^0.8.0",
+    "@elysiajs/cors": "^1.4.1",
+    "@elysiajs/html": "^1.4.0",
+    "@react-email/components": "^1.0.3",
+    "@react-email/render": "^2.0.1",
+    "@sentry/bun": "^10.32.1",
+    "better-auth": "^1.4.10",
+    "decimal.js": "^10.6.0",
+    "drizzle-orm": "^0.45.1",
+    "elysia": "^1.4.19",
+    "lodash": "^4.17.21",
+    "nanoid": "^5.1.6",
+    "nodemailer": "^7.0.12",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "resend": "^6.6.0",
+    "string-ts": "^2.3.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.23",
+    "@types/nodemailer": "^7.0.4",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "dotenv": "^17.2.3",
+    "drizzle-kit": "^0.31.8",
+    "postgres": "^3.4.8"
+  }
+}

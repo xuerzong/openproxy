@@ -1,0 +1,47 @@
+.ChartRoot {
+  display: flex;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  font-size: 0.75rem;
+  outline: none;
+
+  * {
+    outline: none !important;
+  }
+
+  :global(.recharts-layer) {
+    outline: none;
+  }
+
+  :global(.recharts-surface),
+  :global(.recharts-surface:focus),
+  :global(.recharts-surface:focus-visible) {
+    outline: none;
+  }
+
+  :global(.recharts-cartesian-axis-tick text) {
+    fill: color-mix(in oklab, var(--color-foreground) 60%, transparent);
+  }
+
+  :global(.recharts-cartesian-grid line[stroke='#ccc']),
+  :global(.recharts-polar-grid [stroke='#ccc']),
+  :global(.recharts-reference-line [stroke='#ccc']) {
+    stroke: color-mix(in oklab, var(--color-foreground) 10%, transparent);
+  }
+
+  :global(.recharts-curve.recharts-tooltip-cursor) {
+    stroke: color-mix(in oklab, var(--color-foreground) 20%, transparent);
+  }
+
+  :global(.recharts-dot[stroke='#fff']) {
+    stroke: transparent;
+  }
+
+  :global(.recharts-radial-bar-background-sector) {
+    fill: color-mix(in oklab, var(--color-foreground) 5%, transparent);
+  }
+
+  :global(.recharts-rectangle.recharts-tooltip-cursor) {
+    fill: color-mix(in oklab, var(--color-foreground) 10%, transparent);
+  }
+}

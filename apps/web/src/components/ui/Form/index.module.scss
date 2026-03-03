@@ -1,0 +1,22 @@
+.FormField {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.FormLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.FormError {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  transform: translateY(100%);
+  color: var(--color-danger);
+  font-size: 0.75rem;
+}

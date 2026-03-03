@@ -1,0 +1,52 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    ports:
+      - "5080:3888"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL
+      - BETTER_AUTH_SECRET
+      - BETTER_AUTH_TRUSTED_ORIGINS
+      - BETTER_AUTH_URL
+      - RESEND_API_KEY
+      - GITHUB_CLIENT_ID
+      - GITHUB_CLIENT_SECRET
+      - GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET
+      - RSA_PRIVATE_KEY
+      - RSA_PUBLIC_KEY
+      - ALIBABA_CLOUD_ACCESS_KEY_ID
+      - ALIBABA_CLOUD_ACCESS_KEY_SECRET
+      - ALI_CAPTCHA_API_KEY
+      - ZPAYZ_CID
+      - ZPAYZ_PID
+      - ZPAYZ_PAY_KEY
+      - ZPAYZ_GATEWAY
+    restart: always
+
+  web-tenant:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        BUILD_MODE: tenant
+    ports:
+      - "5090:80"
+    depends_on:
+      - server
+    restart: always
+
+  web-admin:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        BUILD_MODE: admin
+    ports:
+      - "5091:80"
+    depends_on:
+      - server
+    restart: always

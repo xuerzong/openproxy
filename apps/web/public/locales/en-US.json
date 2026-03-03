@@ -1,0 +1,249 @@
+{
+  "menu": {
+    "dashboard": "Dashboard",
+    "apiKeys": "API Keys",
+    "billing": "Billing",
+    "orders": "Orders",
+    "models": "Models",
+    "users": "Users",
+    "aiProviders": "AI Providers"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "balance": "Balance",
+    "refresh": "Refresh",
+    "recharge": "Recharge",
+    "chart": {
+      "title24h": "24h Request Trend",
+      "requests": "Requests"
+    },
+    "table": {
+      "time": "Time",
+      "model": "Model",
+      "costYuan": "Cost (CNY)",
+      "tokenInput": "Token Input",
+      "tokenOutput": "Token Output",
+      "responseSeconds": "Response Time (s)",
+      "completedSeconds": "Completion Time (s)",
+      "providerName": "Provider"
+    },
+    "pagination": {
+      "prev": "Prev",
+      "next": "Next"
+    }
+  },
+  "adminDashboard": {
+    "users": {
+      "total": "Total Users",
+      "todayNew": "New Users Today"
+    },
+    "recharge": {
+      "todayAmount": "Recharge Today (CNY)"
+    },
+    "usage": {
+      "rpm": "RPM (Last 1m)",
+      "tpm": "TPM (Last 1m)"
+    }
+  },
+  "common": {
+    "id": "ID",
+    "name": "Name",
+    "type": "Type",
+    "baseUrl": "Base URL",
+    "apiKey": "API Key",
+    "weight": "Weight",
+    "pleaseInput": "Please input",
+    "operation": "Operation",
+    "operationSuccess": "Success",
+    "operationFailed": "Operation failed",
+    "operationFailedWithStatus": "Operation failed: {{status}}",
+    "operationFailedWithMessage": "Operation failed: {{message}}",
+    "updateFailed": "Update failed",
+    "copySuccess": "Copied",
+    "custom": "Custom",
+    "expired": "Expired",
+    "unlimited": "Unlimited",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "emptyState": "Nothing here yet",
+    "noData": "No data",
+    "emptyListHint": "No records yet",
+    "prev": "Prev",
+    "next": "Next",
+    "yes": "Yes",
+    "no": "No",
+    "and": "and",
+    "free": "Free"
+  },
+  "actions": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "createNow": "Create now",
+    "edit": "Edit",
+    "delete": "Delete",
+    "confirmDelete": "Confirm delete",
+    "confirmChanges": "Confirm changes",
+    "confirmCreate": "Create",
+    "copy": "Copy",
+    "close": "Close"
+  },
+  "theme": {
+    "title": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System"
+  },
+  "settings": {
+    "title": "Settings"
+  },
+  "orders": {
+    "title": "Orders",
+    "table": {
+      "orderId": "Order ID",
+      "userId": "User ID",
+      "teamId": "Team ID",
+      "status": "Status",
+      "amount": "Amount",
+      "createdAt": "Created At"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "monthlyFreeAllowanceTitle": "Grant monthly free allowance",
+    "monthlyFreeAllowance": "Monthly free allowance",
+    "table": {
+      "email": "Email",
+      "emailVerified": "Email Verified",
+      "phone": "Phone",
+      "createdAt": "Created At"
+    },
+    "messages": {
+      "emailVerifyUpdated": "Email verification status updated"
+    }
+  },
+  "billing": {
+    "title": "Billing",
+    "alipay": "Alipay",
+    "amount": "Amount",
+    "confirmPayment": "Confirm payment",
+    "finishPayment": "Payment finished",
+    "maxAmount": "Maximum amount is 1000",
+    "scanHint": "Open Alipay on your phone and scan to pay"
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "createTitle": "Create API Key",
+    "editTitle": "Edit API Key",
+    "createWithCount": "Create API Key ({{count}}/10)",
+    "newTitle": "New API Key",
+    "newHint": "Store this API key in a safe and accessible place. For security reasons, you will not be able to view it again in API key management. If you lose it, you need to create a new one.",
+    "deleteWarning": "This API key will be disabled immediately. Requests made with this key will be rejected and may break systems depending on it. Once deleted, you can no longer view or modify this API key.",
+    "deleteSuccess": "API key deleted successfully",
+    "updateApiKey": "Update API Key",
+    "requests": "Requests",
+    "quota": "Quota",
+    "nameRequired": "Name (required)",
+    "namePlaceholder": "Please input name",
+    "modelList": "Model List",
+    "maxRequestsOptional": "Max Requests (optional)",
+    "maxQuotaOptional": "Max Quota (optional)",
+    "expiresAtOptional": "Expiration Time (optional)"
+  },
+  "aiProviders": {
+    "title": "AI Providers",
+    "add": "Add Provider",
+    "addTitle": "Add AI Provider",
+    "editTitle": "Edit AI Provider",
+    "provider": "Provider",
+    "deleteConfirm": "Are you sure you want to delete this provider?"
+  },
+  "models": {
+    "title": "Models",
+    "createTitle": "Create Model",
+    "detailTitle": "Model Detail - {{id}}",
+    "addModel": "Add Model",
+    "configure": "Configure Model",
+    "deleteModel": "Delete Model",
+    "confirmDeleteTitle": "Confirm delete model",
+    "deleteWarning": "Are you sure to delete this model? Existing features may be affected. Please proceed with caution.",
+    "deleteInputPrefix": "Please enter model ID",
+    "deleteInputSuffix": "to confirm model deletion",
+    "deletePlaceholder": "Please input model ID to delete",
+    "searchPlaceholder": "Search models...",
+    "rateHint": "USD/CNY conversion rate is 1:8",
+    "input": "Input",
+    "output": "Output",
+    "modelId": "Model ID",
+    "modelIdHelp": "Model ID is the unique identifier. To ensure uniqueness, the system appends random characters after the name you provide.",
+    "modelIdPlaceholder": "Please input model ID",
+    "displayName": "Display Name",
+    "displayNamePlaceholder": "Please input display name",
+    "modelName": "Model Name",
+    "modelNameHelp": "This name is used when calling provider APIs. Keep it consistent with provider-side configuration.",
+    "modelNamePlaceholder": "Please input model name (e.g. deepseek-chat)",
+    "description": "Description",
+    "descriptionPlaceholder": "Please input description",
+    "styles": "Styles",
+    "ownedBy": "Owned By",
+    "ownedByHelp": "Used only for model icon display",
+    "contextWindow": "Context Window",
+    "maxOutput": "Max Output",
+    "publicModel": "Public Model",
+    "pricingPerMillion": "Pricing (per million)",
+    "tabs": {
+      "basic": "Basic",
+      "providers": "Providers",
+      "settings": "Settings"
+    },
+    "type": {
+      "language": "Language (language)",
+      "image": "Image (image)",
+      "embedding": "Embedding (embedding)"
+    }
+  },
+  "account": {
+    "basicInfo": "Basic Information",
+    "saveName": "Save Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "unbound": "Not bound yet",
+    "settings": "Account Settings",
+    "logout": "Sign Out"
+  },
+  "team": {
+    "defaultName": "Hello",
+    "settings": "Team Settings",
+    "create": "Create Team",
+    "plan": "Free - 2000000 users"
+  },
+  "auth": {
+    "login": "Login",
+    "loginSuccess": "Login successful",
+    "phoneLogin": "Phone Login",
+    "passwordLogin": "Password Login",
+    "phonePlaceholder": "Please input phone number",
+    "codePlaceholder": "Please input verification code",
+    "accountPlaceholder": "Please input phone or email",
+    "passwordPlaceholder": "Please input password",
+    "invalidPhone": "Invalid phone number",
+    "invalidCode": "Invalid verification code",
+    "invalidAccount": "Invalid account",
+    "invalidPassword": "Invalid password",
+    "passwordOrEmailWrong": "Incorrect password or email",
+    "sendCode": "Send code",
+    "retryAfterSeconds": "{{seconds}}s to retry",
+    "fillValidPhoneFirst": "Please fill a valid phone number first",
+    "completeCaptchaFirst": "Please complete captcha verification first!",
+    "termsPrefix": "By signing up or logging in, you agree to our",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "termsSuffix": ". Unregistered phone numbers will be signed up automatically."
+  },
+  "notFound": {
+    "title": "404: Page not found",
+    "description": "Sorry, we searched everywhere but could not find the page you requested.",
+    "backToDashboard": "Back to dashboard"
+  }
+}

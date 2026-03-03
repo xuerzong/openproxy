@@ -1,0 +1,31 @@
+{
+  "name": "@aiproxy-shop/phone-auth",
+  "type": "module",
+  "exports": {
+    "./server": "./src/server/index.ts",
+    "./server/*": "./src/server/*.ts",
+    "./client": "./src/client/index.ts",
+    "./client/*": "./src/client/*.ts"
+  },
+  "dependencies": {
+    "@alicloud/credentials": "^2.4.4",
+    "@alicloud/dypnsapi20170525": "^2.0.0",
+    "@alicloud/openapi-client": "^0.4.15",
+    "@alicloud/tea-util": "^1.4.11",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "peerDependencies": {
+    "better-auth": "^1.4.10",
+    "zod": "^4.3.6",
+    "ahooks": "^3.9.6",
+    "lucide-react": ">=0.300.0",
+    "radix-ui": "^1.4.3",
+    "react": "^19.0.0",
+    "react-i18next": "^16.0.0",
+    "sonner": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.5"
+  }
+}

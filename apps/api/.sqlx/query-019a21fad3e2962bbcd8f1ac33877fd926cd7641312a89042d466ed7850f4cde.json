@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO usages (\n            id, cost, tokens_completion, tokens_prompt, response_time,\n            completed_time, team_id, api_key_id, model_id, model_name,\n            model_owned_by, is_stream, ai_provider_id, ai_provider_name, created_at\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Numeric",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Int4",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Text",
+        "Bool",
+        "Varchar",
+        "Text",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "019a21fad3e2962bbcd8f1ac33877fd926cd7641312a89042d466ed7850f4cde"
+}

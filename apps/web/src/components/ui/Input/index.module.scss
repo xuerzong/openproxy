@@ -1,0 +1,18 @@
+.Input,
+.Textarea {
+  box-sizing: border-box;
+}
+
+.InputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.InputSuffix {
+  flex-shrink: 0;
+}
+
+.Textarea {
+  padding: 0.875rem;
+}

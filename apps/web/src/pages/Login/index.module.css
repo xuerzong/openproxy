@@ -1,0 +1,7 @@
+.LoginMethods::before,
+.LoginMethods::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background-color: var(--color-border);
+}

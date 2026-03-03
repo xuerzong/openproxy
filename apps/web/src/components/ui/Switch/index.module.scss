@@ -1,0 +1,29 @@
+.Switch {
+  &[data-state='checked'] {
+    background-color: color-mix(
+      in oklab,
+      var(--color-success) 75%,
+      transparent
+    );
+  }
+}
+
+.SwitchButton {
+  &[data-state='checked'] {
+    left: 100%;
+    transform: translateX(-100%);
+
+    .SiwtchButtonCheckIcon {
+      opacity: 1;
+    }
+  }
+
+  &[data-state='unchecked'] {
+    left: 0;
+    transform: translateX(0);
+
+    .SiwtchButtonCheckIcon {
+      opacity: 0;
+    }
+  }
+}

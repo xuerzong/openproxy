@@ -1,0 +1,36 @@
+.Button {
+  &[data-loading='true'] {
+    position: relative;
+    cursor: progress;
+
+    & > *:not(.LoadingWrapper) {
+      opacity: 0;
+    }
+  }
+
+  &[data-size='icon-xs'],
+  &[data-size='xs'] {
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  svg {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+}
+
+.LoadingWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: progress;
+}

@@ -1,0 +1,40 @@
+.TableRoot {
+  table {
+    width: 100%;
+  }
+
+  table,
+  th,
+  td {
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    font-size: 0.875rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  tbody {
+    tr {
+      &:hover {
+        background-color: color-mix(
+          in oklab,
+          var(--color-muted) 50%,
+          transparent
+        );
+      }
+
+      &:last-child {
+        td {
+          border-bottom: none !important;
+        }
+      }
+    }
+  }
+
+  th {
+    font-weight: bold;
+  }
+}

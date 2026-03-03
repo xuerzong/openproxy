@@ -1,0 +1,7 @@
+.Checkbox {
+  &[data-state='checked'],
+  &[data-state='indeterminate'] {
+    background-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+}

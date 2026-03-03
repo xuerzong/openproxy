@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE api_keys\n        SET total_quota = total_quota + $1,\n            total_requests = total_requests + 1,\n            last_used_at = $2\n        WHERE id = $3\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Numeric",
+        "Timestamptz",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d7ae2a24d185c39c298248c3ac53fc7ab16a750b6ba475e288249efb7411a2a4"
+}
