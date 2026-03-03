@@ -22,7 +22,6 @@ aiproxy/
 │   ├── server/     # Bun/Elysia backend — auth, key management, admin API
 │   └── web/        # React frontend (Vite) — tenant dashboard + admin panel
 ├── packages/
-│   ├── auth/       # Shared auth utilities (isAdmin, etc.)
 │   └── schema/     # Shared Zod/TypeBox schemas
 └── docker-compose.yml
 ```
@@ -121,7 +120,7 @@ Copy the output values into both `.env` files.
 
 ```bash
 cd apps/server
-bun run drizzle migrate
+bun run migrate
 ```
 
 ### 5. Start development services
