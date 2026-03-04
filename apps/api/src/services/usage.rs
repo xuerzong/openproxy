@@ -17,6 +17,7 @@ pub struct UsageInput {
 pub struct ExtractedUsage {
     pub prompt_tokens: i32,
     pub completion_tokens: i32,
+    pub input_cache_read_tokens: i32,
 }
 
 #[derive(Debug, Clone)]
@@ -150,9 +151,20 @@ fn get_usage_from_resp(val: &Value) -> Option<ExtractedUsage> {
 
     let p = usage.get(p_key).and_then(|v| v.as_i64()).unwrap_or(0) as i32;
     let c = usage.get(c_key).and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+    let input_cache_read_tokens = usage
+        .get("cache_read_input_tokens")
+        .and_then(|v| v.as_i64())
+        .or_else(|| {
+            usage
+                .get("prompt_tokens_details")
+                .and_then(|v| v.get("cached_tokens"))
+                .and_then(|v| v.as_i64())
+        })
+        .unwrap_or(0) as i32;
 
     Some(ExtractedUsage {
         prompt_tokens: p,
         completion_tokens: c,
+        input_cache_read_tokens,
     })
 }

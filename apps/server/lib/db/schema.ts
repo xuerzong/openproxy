@@ -396,6 +396,7 @@ export const models = pgTable(
       .$type<{
         input: string
         output: string
+        input_cache_read: string
       }>()
       .notNull(),
     metadata: jsonb('metadata').default({}).notNull(),

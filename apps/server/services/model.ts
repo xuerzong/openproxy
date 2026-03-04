@@ -23,7 +23,7 @@ export async function createModel(params: {
   contextWindow?: number
   maxTokens?: number
   styles: string[]
-  pricing: { input: number; output: number }
+  pricing: { input: number; output: number; input_cache_read: number }
   tags?: string[]
   metadata?: any
 }) {
@@ -59,6 +59,7 @@ export async function createModel(params: {
     pricing: {
       input: new Decimal(pricing.input).toString(),
       output: new Decimal(pricing.output).toString(),
+      input_cache_read: new Decimal(pricing.input_cache_read).toString(),
     },
     tags: tags || [],
     metadata: metadata || {},
@@ -89,7 +90,7 @@ export async function updateModel(params: {
   contextWindow?: number
   maxTokens?: number
   styles: string[]
-  pricing: { input: number; output: number }
+  pricing: { input: number; output: number; input_cache_read: number }
   tags?: string[]
   metadata?: any
 }) {
@@ -125,6 +126,7 @@ export async function updateModel(params: {
     pricing: {
       input: new Decimal(pricing.input).toString(),
       output: new Decimal(pricing.output).toString(),
+      input_cache_read: new Decimal(pricing.input_cache_read).toString(),
     },
     tags: tags || [],
     metadata: metadata || {},

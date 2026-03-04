@@ -7,6 +7,7 @@ use sqlx::FromRow;
 pub struct Pricing {
     pub input: Decimal,
     pub output: Decimal,
+    pub input_cache_read: Decimal,
 }
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]

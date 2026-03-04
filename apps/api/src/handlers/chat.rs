@@ -227,7 +227,7 @@ async fn handle_json(
     ctx.response_time = start_time.elapsed().as_millis() as i32;
     ctx.completed_time = ctx.response_time;
     if let Some(usage_val) = services::usage::find_usage_recursive(&data) {
-        let input = extract_usage_input_with_tokens(&usage_val, &model.pricing);
+        let input = extract_usage_input_with_tokens(&usage_val, &model.pricing, style);
         rewrite_usage_field(&mut data, &usage_val, style);
         if let Err(e) = services::usage::add_usage(&pool, input, model, ctx).await {
             tracing::error!(error = %e, "Failed to record usage");
@@ -310,7 +310,7 @@ async fn handle_stream_line(
             && let Some(usage_val) = find_usage_recursive(&chunk)
         {
             ctx.completed_time = start_time.elapsed().as_millis() as i32;
-            let input = extract_usage_input_with_tokens(&usage_val, &model.pricing);
+            let input = extract_usage_input_with_tokens(&usage_val, &model.pricing, style);
             if is_usage_chunk {
                 rewrite_usage_field(&mut chunk, &usage_val, style);
             }
@@ -347,6 +347,7 @@ fn remove_provider_metadata_fields(v: &mut Value) {
 fn extract_usage_input_with_tokens(
     usage: &services::usage::ExtractedUsage,
     model_pricing: &Value,
+    style: UsageStyle,
 ) -> services::usage::UsageInput {
     use rust_decimal::Decimal;
     use std::str::FromStr;
@@ -369,11 +370,31 @@ fn extract_usage_input_with_tokens(
         .and_then(|s| Decimal::from_str(s).ok())
         .unwrap_or(Decimal::ZERO);
 
-    let p_tokens = Decimal::from(usage.prompt_tokens);
+    let input_cache_read_price = pricing_json
+        .get("input_cache_read")
+        .and_then(|v| v.as_str())
+        .and_then(|s| Decimal::from_str(s).ok())
+        .unwrap_or(Decimal::ZERO);
+
+    // Billing rules by provider style:
+    // - OpenAI: prompt_tokens usually include cached tokens, so cached part must be deducted
+    //   from regular input billing and charged with input_cache_read price.
+    // - Anthropic: input_tokens and cache_read_input_tokens are treated as separate dimensions;
+    //   input_tokens are billed with input price, cache_read_input_tokens with input_cache_read.
+    let cache_tokens_i32 = usage.input_cache_read_tokens.max(0);
+    let prompt_tokens_without_cache_i32 = match style {
+        UsageStyle::OpenAI => (usage.prompt_tokens - cache_tokens_i32).max(0),
+        UsageStyle::Anthropic => usage.prompt_tokens.max(0),
+    };
+
+    let p_tokens = Decimal::from(prompt_tokens_without_cache_i32);
+    let cache_tokens = Decimal::from(cache_tokens_i32);
     let c_tokens = Decimal::from(usage.completion_tokens);
     let divisor = Decimal::from(1_000_000);
 
-    let total_cost = (input_price * p_tokens + output_price * c_tokens) / divisor;
+    let total_cost =
+        (input_price * p_tokens + input_cache_read_price * cache_tokens + output_price * c_tokens)
+            / divisor;
 
     services::usage::UsageInput {
         cost: total_cost,
