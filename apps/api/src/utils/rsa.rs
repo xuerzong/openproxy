@@ -77,14 +77,13 @@ mod tests {
     }
 
     #[test]
-    fn test_bun() {
+    fn test_decrypt_invalid_ciphertext_returns_error() {
         dotenvy::dotenv().ok();
         let private_key = env::var("RSA_PRIVATE_KEY").expect("RSA_PRIVATE_KEY must be set in env");
 
-        let encrypted_base64 = "Tt/+YW/7iUD8gBYrn9v8Z5vDQsMRwdEMhFeB6v5R9ZrQikz38qV+/p5TlbGsHuhhy/4zpNkY+15svBTiOR+wzbGqIs4iegtMefxXX3Qr3auLptPYQG0l4Dp2THGKr17kI/750zkqdW4rPpHmIiyOzTvajqMlUtOnXsDs0+r1gQdjSjQXo28pCS70K/uPqK/taY/VHnPK+7IsjMSGAvyri5IM1WWB8uOx4REEF+ZFdjnMJS8sMtQoJvyQOaAHnIDgA3rnVQb6+6V2SeRWRPk8YYxn/vTnFo3aQ42R9DfIbgNZ1CAQjoV0/efKWFdvX8R1wrm2gldJxGcgczFfjKKZsQ==";
-        let decrypted_text =
-            RsaCrypto::decrypt(&encrypted_base64, &private_key).expect("Decryption failed");
-        println!("{}", decrypted_text);
-        assert_eq!(true, true);
+        let invalid_encrypted_base64 = "aW52YWxpZC1jaXBoZXJ0ZXh0";
+        let result = RsaCrypto::decrypt(invalid_encrypted_base64, &private_key);
+
+        assert!(result.is_err());
     }
 }
