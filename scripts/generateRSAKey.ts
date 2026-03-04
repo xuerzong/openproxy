@@ -12,10 +12,10 @@ const { publicKey, privateKey } = generateKeyPairSync('rsa', {
   },
 })
 
-console.log('公钥已生成', publicKey.split('\n').join('\\n'))
-console.log('私钥已生成', privateKey.split('\n').join('\\n'))
+console.log('Public key generated', publicKey.split('\n').join('\\n'))
+console.log('Private key generated', privateKey.split('\n').join('\\n'))
 
-console.log('--- 公钥 ---')
+console.log('--- Public Key ---')
 console.log(publicKey.replace(/\\n/g, '\n'))
-console.log('--- 私钥 ---')
+console.log('--- Private Key ---')
 console.log(privateKey.replace(/\\n/g, '\n'))
