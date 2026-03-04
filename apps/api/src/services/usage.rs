@@ -142,6 +142,9 @@ pub fn find_usage_recursive(val: &Value) -> Option<ExtractedUsage> {
 
 fn get_usage_from_resp(val: &Value) -> Option<ExtractedUsage> {
     let usage = val.get("usage")?;
+    if usage.is_null() {
+        return None;
+    }
 
     let (p_key, c_key) = if usage.get("input_tokens").is_some() {
         ("input_tokens", "output_tokens")
@@ -167,4 +170,40 @@ fn get_usage_from_resp(val: &Value) -> Option<ExtractedUsage> {
         completion_tokens: c,
         input_cache_read_tokens,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn get_usage_from_resp_returns_none_when_usage_is_null() {
+        let val = json!({
+            "usage": null
+        });
+
+        let usage = get_usage_from_resp(&val);
+
+        assert!(usage.is_none());
+    }
+
+    #[test]
+    fn get_usage_from_resp_extracts_usage_when_present() {
+        let val = json!({
+            "usage": {
+                "prompt_tokens": 123,
+                "completion_tokens": 45,
+                "prompt_tokens_details": {
+                    "cached_tokens": 7
+                }
+            }
+        });
+
+        let usage = get_usage_from_resp(&val).expect("usage should be extracted");
+
+        assert_eq!(usage.prompt_tokens, 123);
+        assert_eq!(usage.completion_tokens, 45);
+        assert_eq!(usage.input_cache_read_tokens, 7);
+    }
 }
