@@ -253,6 +253,7 @@ fn handle_stream(
     );
 
     let mut lines = FramedRead::new(body_reader, LinesCodec::new());
+    let mut usage_recorded = false;
 
     let event_stream = async_stream::stream! {
         while let Some(line_result) = lines.next().await {
@@ -263,6 +264,7 @@ fn handle_stream(
                         &pool,
                         &model,
                         &mut ctx,
+                        &mut usage_recorded,
                         start_time,
                         style
                     ).await {
@@ -282,6 +284,7 @@ async fn handle_stream_line(
     pool: &sqlx::PgPool,
     model: &services::usage::ModelInfo,
     ctx: &mut services::usage::UsageContext,
+    usage_recorded: &mut bool,
     start_time: std::time::Instant,
     style: UsageStyle,
 ) -> Option<String> {
@@ -307,6 +310,7 @@ async fn handle_stream_line(
     {
         let is_not_start = chunk["type"].as_str() != Some("message_start");
         if is_not_start
+            && !*usage_recorded
             && let Some(usage_val) = find_usage_recursive(&chunk)
         {
             ctx.completed_time = start_time.elapsed().as_millis() as i32;
@@ -318,6 +322,8 @@ async fn handle_stream_line(
                 services::usage::add_usage(pool, input, model.clone(), ctx.clone()).await
             {
                 tracing::error!(error = ?e, "Failed to record stream usage");
+            } else {
+                *usage_recorded = true;
             }
         }
 
