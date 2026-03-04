@@ -1,5 +1,5 @@
 {
-  "id": "e757d681-e035-4626-ad4c-465f2cd2b430",
+  "id": "0cd33a77-bee2-48e3-abf5-f548a9254748",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -1434,6 +1434,13 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'tenant'"
         },
         "created_at": {
           "name": "created_at",
