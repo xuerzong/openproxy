@@ -11,6 +11,7 @@ export const ModelTypeSchema = t.Union([
 export const PricingSchema = t.Object({
   input: t.Numeric({ minimum: 0, maximum: 99999 }),
   output: t.Numeric({ minimum: 0, maximum: 99999 }),
+  input_cache_read: t.Numeric({ minimum: 0, maximum: 99999 }),
 })
 
 // Create model request body

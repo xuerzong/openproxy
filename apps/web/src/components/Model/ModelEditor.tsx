@@ -110,6 +110,9 @@ export const ModelEditor = ({
                         output: values.pricing?.output
                           ? Number(values.pricing?.output)
                           : 0,
+                        input_cache_read: values.pricing?.input_cache_read
+                          ? Number(values.pricing?.input_cache_read)
+                          : 0,
                       },
                       metadata: values.metadata,
                     }
