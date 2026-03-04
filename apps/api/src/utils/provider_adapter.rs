@@ -34,22 +34,16 @@ impl ProviderAdapter for BailianProviderAdapter {
 static DEFAULT_PROVIDER_ADAPTER: DefaultProviderAdapter = DefaultProviderAdapter;
 static BAILIAN_PROVIDER_ADAPTER: BailianProviderAdapter = BailianProviderAdapter;
 
-pub fn resolve_provider_adapter(provider: &ProviderInfo) -> &'static dyn ProviderAdapter {
-    if is_bailian_provider(provider) {
-        &BAILIAN_PROVIDER_ADAPTER
-    } else {
-        &DEFAULT_PROVIDER_ADAPTER
-    }
-}
+pub struct ProviderAdapterFactory;
 
-pub fn adapt_request_body(
-    body: &mut Value,
-    provider: &ProviderInfo,
-    style: UsageStyle,
-    is_stream: bool,
-) {
-    let adapter = resolve_provider_adapter(provider);
-    adapter.adapt_request_body(body, style, is_stream);
+impl ProviderAdapterFactory {
+    pub fn for_provider(provider: &ProviderInfo) -> &'static dyn ProviderAdapter {
+        if is_bailian_provider(provider) {
+            &BAILIAN_PROVIDER_ADAPTER
+        } else {
+            &DEFAULT_PROVIDER_ADAPTER
+        }
+    }
 }
 
 fn is_bailian_provider(provider: &ProviderInfo) -> bool {
@@ -99,9 +93,12 @@ mod tests {
             "stream": true
         });
 
-        adapt_request_body(
+        let adapter = ProviderAdapterFactory::for_provider(&provider(
+            "Bailian",
+            "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        ));
+        adapter.adapt_request_body(
             &mut body,
-            &provider("Bailian", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
             UsageStyle::OpenAI,
             true,
         );
@@ -121,9 +118,12 @@ mod tests {
             "stream": true
         });
 
-        adapt_request_body(
+        let adapter = ProviderAdapterFactory::for_provider(&provider(
+            "OpenAI",
+            "https://api.openai.com/v1",
+        ));
+        adapter.adapt_request_body(
             &mut body,
-            &provider("OpenAI", "https://api.openai.com/v1"),
             UsageStyle::OpenAI,
             true,
         );
@@ -138,9 +138,12 @@ mod tests {
             "stream": true
         });
 
-        adapt_request_body(
+        let adapter = ProviderAdapterFactory::for_provider(&provider(
+            "Anthropic",
+            "https://api.anthropic.com",
+        ));
+        adapter.adapt_request_body(
             &mut body,
-            &provider("Anthropic", "https://api.anthropic.com"),
             UsageStyle::Anthropic,
             true,
         );
@@ -155,9 +158,12 @@ mod tests {
             "stream": true
         });
 
-        adapt_request_body(
+        let adapter = ProviderAdapterFactory::for_provider(&provider(
+            "Bailian",
+            "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        ));
+        adapter.adapt_request_body(
             &mut body,
-            &provider("Bailian", "https://dashscope.aliyuncs.com/compatible-mode/v1"),
             UsageStyle::Anthropic,
             true,
         );
