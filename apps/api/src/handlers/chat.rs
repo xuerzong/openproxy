@@ -16,7 +16,7 @@ use crate::utils::chat::{
     UsageStyle, extract_usage_input_with_tokens, remove_provider_metadata_fields,
     rewrite_usage_field,
 };
-use crate::utils::provider_adapter::adapt_request_body;
+use crate::utils::provider_adapter::ProviderAdapterFactory;
 
 use crate::{
     models::provider::ModelAccessResult,
@@ -89,7 +89,11 @@ pub async fn chat_handler(
         // Clone body JSON for each retry so we can patch the model field per-provider
         let mut retry_body_json = body_json.clone();
         retry_body_json["model"] = Value::String(provider.model_model_name.clone());
-        adapt_request_body(&mut retry_body_json, provider, target_style, is_stream);
+        ProviderAdapterFactory::for_provider(provider).adapt_request_body(
+            &mut retry_body_json,
+            target_style,
+            is_stream,
+        );
 
         let next_body_bytes = serde_json::to_vec(&retry_body_json).unwrap();
         let next_body = bytes::Bytes::from(next_body_bytes);
