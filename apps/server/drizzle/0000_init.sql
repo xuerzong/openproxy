@@ -32,7 +32,7 @@ CREATE TABLE "api_keys" (
 	"name" text NOT NULL,
 	"api_key" varchar NOT NULL,
 	"api_key_hash" varchar NOT NULL,
-	"status" smallint DEFAULT 0 NOT NULL,
+	"status" smallint DEFAULT 1 NOT NULL,
 	"expires_at" timestamp with time zone,
 	"max_requests" integer DEFAULT 0 NOT NULL,
 	"max_quota" numeric(20, 10) DEFAULT '0' NOT NULL,
@@ -78,6 +78,7 @@ CREATE TABLE "models" (
 CREATE TABLE "models_to_ai_providers" (
 	"model_id" varchar NOT NULL,
 	"ai_provider_id" varchar NOT NULL,
+	"status" smallint DEFAULT 0 NOT NULL,
 	"model" text DEFAULT '' NOT NULL,
 	"weight" integer DEFAULT 0 NOT NULL,
 	CONSTRAINT "models_to_ai_providers_model_id_ai_provider_id_pk" PRIMARY KEY("model_id","ai_provider_id")

@@ -7,6 +7,7 @@ import { Form, FormField, useForm } from '../ui/Form'
 import { Input } from '../ui/Input'
 import { Dialog, DialogFooter } from '../ui/Dialog'
 import { NumberInput } from '../ui/NumberInput'
+import { Switch } from '../ui/Switch'
 import { Card } from '../Card'
 import { Table } from '../ui/Table'
 import { ModelIcon } from '../ModelIcon'
@@ -34,6 +35,7 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
   const [providerModelForm] = useForm({})
   const [providerId, setProviderId] = useState('')
   const [deleteProviderId, setDeleteProviderId] = useState('')
+  const [switchingProviderId, setSwitchingProviderId] = useState('')
 
   const providersDataSource = useMemo(() => {
     return (
@@ -46,10 +48,11 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
           name: provider.name,
           model: currentProvider?.model,
           weight: currentProvider?.weight,
+          status: currentProvider?.status ?? 1,
         }
       }) || []
     )
-  }, [aiProvidersQuery.data])
+  }, [aiProvidersQuery.data, providers])
 
   return (
     <>
@@ -79,6 +82,53 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
               key: 'weight',
               label: t('common.weight', { defaultValue: 'Weight' }),
               render: (text) => text ?? '-',
+            },
+            {
+              key: 'status',
+              label: t('common.status', { defaultValue: 'Status' }),
+              render: (_, record) => {
+                if (!record.model) return '-'
+
+                return (
+                  <Switch
+                    checked={record.status === 1}
+                    disabled={switchingProviderId === record.id}
+                    onCheckedChange={(checked) => {
+                      setSwitchingProviderId(record.id)
+                      request.models.upsertProvider
+                        .post({
+                          modelId: id,
+                          provider: {
+                            id: record.id,
+                            model: record.model,
+                            weight: record.weight || 0,
+                            status: checked ? 1 : 0,
+                          },
+                        })
+                        .then((res) => {
+                          if (res.error) {
+                            toast.error(
+                              t('common.operationFailedWithStatus', {
+                                defaultValue: `Operation failed: ${res.error.status}`,
+                                status: res.error.status,
+                              })
+                            )
+                            return
+                          }
+                          toast.success(
+                            t('common.operationSuccess', {
+                              defaultValue: 'Success',
+                            })
+                          )
+                          onSuccess?.()
+                        })
+                        .finally(() => {
+                          setSwitchingProviderId('')
+                        })
+                    }}
+                  />
+                )
+              },
             },
             {
               key: 'operation',
@@ -145,6 +195,7 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                       id: providerId,
                       model: values.model,
                       weight: values.weight || 0,
+                      status: values.status ?? 1,
                     },
                   })
                   .then((res) => {

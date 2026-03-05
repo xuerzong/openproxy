@@ -158,6 +158,7 @@ export async function getModelById(id: string) {
         columns: {
           model: true,
           weight: true,
+          status: true,
         },
         with: {
           provider: {
@@ -183,6 +184,7 @@ export const upsertModelProviders = async (
     id: string
     model: string
     weight: number
+    status?: number
   }
 ) => {
   await db
@@ -190,6 +192,7 @@ export const upsertModelProviders = async (
     .values({
       modelId: modelId,
       aiProviderId: provider.id,
+      status: provider.status ?? 1,
       model: provider.model,
       weight: provider.weight,
     })
@@ -199,6 +202,7 @@ export const upsertModelProviders = async (
         dbSchema.modelsToAIProviders.aiProviderId,
       ],
       set: {
+        status: provider.status ?? 1,
         model: provider.model,
         weight: provider.weight,
       },
