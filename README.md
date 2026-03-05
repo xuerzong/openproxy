@@ -1,4 +1,4 @@
-# AIProxy
+# OpenProxy
 
 A self-hosted AI API proxy service. Manage multiple AI provider backends (OpenAI, Anthropic, etc.) behind a unified API interface, with API key management, usage tracking, and a web dashboard.
 
@@ -16,7 +16,7 @@ A self-hosted AI API proxy service. Manage multiple AI provider backends (OpenAI
 ## Architecture
 
 ```
-aiproxy/
+openproxy/
 ├── apps/
 │   ├── api/        # Rust proxy service (axum) — forwards AI requests, tracks usage
 │   ├── server/     # Bun/Elysia backend — auth, key management, admin API
@@ -60,8 +60,8 @@ Client → apps/api (Rust, port 5060)
 ### 1. Clone and install dependencies
 
 ```bash
-git clone https://github.com/your-org/aiproxy.git
-cd aiproxy
+git clone https://github.com/your-org/openproxy.git
+cd openproxy
 bun install
 ```
 
@@ -75,7 +75,7 @@ Edit `apps/server/.env`:
 
 ```dotenv
 # PostgreSQL connection string
-DATABASE_URL=postgres://user:password@localhost:5432/aiproxy
+DATABASE_URL=postgres://user:password@localhost:5432/openproxy
 
 # Generate with: openssl rand -base64 32
 BETTER_AUTH_SECRET=your-secret-here
@@ -103,7 +103,7 @@ GOOGLE_CLIENT_SECRET=
 Create `apps/api/.env`:
 
 ```dotenv
-DATABASE_URL=postgres://user:password@localhost:5432/aiproxy
+DATABASE_URL=postgres://user:password@localhost:5432/openproxy
 RSA_PRIVATE_KEY=        # Same key as server
 PORT=5060
 ```

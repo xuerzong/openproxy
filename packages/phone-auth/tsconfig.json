@@ -17,7 +17,7 @@
     "jsx": "react-jsx",
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
-      "@aiproxy-shop/phone-auth/*": ["./src/*"]
+      "@openproxy/phone-auth/*": ["./src/*"]
     }
   }
 }

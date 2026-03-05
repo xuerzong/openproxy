@@ -1,4 +1,4 @@
-import { ModelFormSchema } from '@aiproxy-shop/schema/model'
+import { ModelFormSchema } from '@openproxy/schema/model'
 import { Settings2Icon, SettingsIcon, StoreIcon } from 'lucide-react'
 import { useRequest } from '@/contexts/ApiContext'
 import { useNavigate, useSearchParams } from 'react-router'

@@ -17,13 +17,13 @@
     "apps/server": {
       "name": "server",
       "dependencies": {
-        "@aiproxy-shop/payment-provider": "workspace:*",
-        "@aiproxy-shop/phone-auth": "workspace:*",
         "@axiomhq/js": "^1.3.1",
         "@axiomhq/pino": "^1.3.1",
         "@elysiajs/cookie": "^0.8.0",
         "@elysiajs/cors": "^1.4.1",
         "@elysiajs/html": "^1.4.0",
+        "@openproxy/payment-provider": "workspace:*",
+        "@openproxy/phone-auth": "workspace:*",
         "@react-email/components": "^1.0.3",
         "@react-email/render": "^2.0.1",
         "@sentry/bun": "^10.32.1",
@@ -54,10 +54,10 @@
       "name": "web",
       "version": "0.0.0",
       "dependencies": {
-        "@aiproxy-shop/phone-auth": "workspace:*",
-        "@aiproxy-shop/schema": "workspace:*",
         "@elysiajs/eden": "^1.4.6",
         "@number-flow/react": "^0.5.10",
+        "@openproxy/phone-auth": "workspace:*",
+        "@openproxy/schema": "workspace:*",
         "@sentry/react": "^10.32.1",
         "@tailwindcss/vite": "^4.1.18",
         "@tanstack/react-query": "^5.90.16",
@@ -108,10 +108,10 @@
       },
     },
     "packages/payment-provider": {
-      "name": "@aiproxy-shop/payment-provider",
+      "name": "@openproxy/payment-provider",
     },
     "packages/phone-auth": {
-      "name": "@aiproxy-shop/phone-auth",
+      "name": "@openproxy/phone-auth",
       "dependencies": {
         "@alicloud/credentials": "^2.4.4",
         "@alicloud/dypnsapi20170525": "^2.0.0",
@@ -135,7 +135,7 @@
       },
     },
     "packages/schema": {
-      "name": "@aiproxy-shop/schema",
+      "name": "@openproxy/schema",
       "dependencies": {
         "zod": "^4.3.6",
       },
@@ -145,12 +145,6 @@
     },
   },
   "packages": {
-    "@aiproxy-shop/payment-provider": ["@aiproxy-shop/payment-provider@workspace:packages/payment-provider"],
-
-    "@aiproxy-shop/phone-auth": ["@aiproxy-shop/phone-auth@workspace:packages/phone-auth"],
-
-    "@aiproxy-shop/schema": ["@aiproxy-shop/schema@workspace:packages/schema"],
-
     "@alicloud/credentials": ["@alicloud/credentials@2.4.4", "https://registry.npmmirror.com/@alicloud/credentials/-/credentials-2.4.4.tgz", { "dependencies": { "@alicloud/tea-typescript": "^1.8.0", "httpx": "^2.3.3", "ini": "^1.3.5", "kitx": "^2.0.0" } }, "sha512-/eRAGSKcniLIFQ1UCpDhB/IrHUZisQ1sc65ws/c2avxUMpXwH1rWAohb76SVAUJhiF4mwvLzLJM1Mn1XL4Xe/Q=="],
 
     "@alicloud/darabonba-array": ["@alicloud/darabonba-array@0.1.2", "https://registry.npmmirror.com/@alicloud/darabonba-array/-/darabonba-array-0.1.2.tgz", { "dependencies": { "@alicloud/tea-typescript": "^1.7.1" } }, "sha512-ZPuQ+bJyjrd8XVVm55kl+ypk7OQoi1ZH/DiToaAEQaGvgEjrTcvQkg71//vUX/6cvbLIF5piQDvhrLb+lUEIPQ=="],
@@ -362,6 +356,12 @@
     "@noble/hashes": ["@noble/hashes@2.0.1", "https://registry.npmmirror.com/@noble/hashes/-/hashes-2.0.1.tgz", {}, "sha512-XlOlEbQcE9fmuXxrVTXCTlG2nlRXa9Rj3rr5Ue/+tX+nmkgbX720YHh0VR3hBF9xDvwnb8D2shVGOwNx+ulArw=="],
 
     "@number-flow/react": ["@number-flow/react@0.5.11", "https://registry.npmmirror.com/@number-flow/react/-/react-0.5.11.tgz", { "dependencies": { "esm-env": "^1.1.4", "number-flow": "0.5.9" }, "peerDependencies": { "react": "^18 || ^19", "react-dom": "^18 || ^19" } }, "sha512-xo7QFAfQlKiIRbLjoIjZNXsNQmY+QxkyxkNWy+BCP9u1/SkqyqQ/1pYWa7d175V2r4OdmvCvlAnACSYOP1pTaw=="],
+
+    "@openproxy/payment-provider": ["@openproxy/payment-provider@workspace:packages/payment-provider"],
+
+    "@openproxy/phone-auth": ["@openproxy/phone-auth@workspace:packages/phone-auth"],
+
+    "@openproxy/schema": ["@openproxy/schema@workspace:packages/schema"],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "https://registry.npmmirror.com/@opentelemetry/api/-/api-1.9.0.tgz", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
 

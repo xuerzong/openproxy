@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react'
 import { CircleQuestionMarkIcon } from 'lucide-react'
-import z from '@aiproxy-shop/schema/zod'
+import z from '@openproxy/schema/zod'
 import { Slot } from 'radix-ui'
 import { cn } from '@/utils/cn'
 import { Tooltip } from '../Tooltip'

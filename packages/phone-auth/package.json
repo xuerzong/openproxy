@@ -1,5 +1,5 @@
 {
-  "name": "@aiproxy-shop/phone-auth",
+  "name": "@openproxy/phone-auth",
   "type": "module",
   "exports": {
     "./server": "./src/server/index.ts",

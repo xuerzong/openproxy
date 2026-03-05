@@ -1,5 +1,5 @@
 {
-  "name": "@aiproxy-shop/payment-provider",
+  "name": "@openproxy/payment-provider",
   "module": "src/index.ts",
   "main": "src/index.ts",
   "exports": {

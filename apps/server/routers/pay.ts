@@ -8,7 +8,7 @@ import { pascalCase } from 'string-ts'
 import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import { CLIENT_ORIGIN } from '@server/constants'
-import { ZpayzPaymentProvider } from '@aiproxy-shop/payment-provider'
+import { ZpayzPaymentProvider } from '@openproxy/payment-provider'
 
 const ZPAYZ_CID = process.env.ZPAYZ_CID?.trim()
 const ZPAYZ_PID = process.env.ZPAYZ_PID?.trim()

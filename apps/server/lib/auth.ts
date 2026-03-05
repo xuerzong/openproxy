@@ -9,7 +9,7 @@ import { renderEmail } from '@server/lib/emails/render'
 import { createAuthMiddleware, APIError } from 'better-auth/api'
 import { IS_DEV, APP_DOMAIN } from '@server/constants'
 import { teamPlugin } from '@server/lib/better-auth/team'
-import { createPhoneAuthConfig } from '@aiproxy-shop/phone-auth/server'
+import { createPhoneAuthConfig } from '@openproxy/phone-auth/server'
 import { createTeam, getTeams } from '@server/services/team'
 
 const githubProviderEnable = Boolean(

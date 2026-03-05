@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { PhoneLoginForm } from '@aiproxy-shop/phone-auth/client'
+import { PhoneLoginForm } from '@openproxy/phone-auth/client'
 import { LockIcon, SmartphoneIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -26,7 +26,8 @@ const Page = () => {
       <div className="flex flex-col items-center justify-center mb-8">
         <Logo className="h-12 w-auto" />
         <span className="text-xs text-primary font-bold">
-          {loginMethod === 'phone' && showPhoneLogin &&
+          {loginMethod === 'phone' &&
+            showPhoneLogin &&
             t('auth.phoneLogin', { defaultValue: 'Phone Login' })}
           {loginMethod === 'password' &&
             t('auth.passwordLogin', { defaultValue: 'Password Login' })}

@@ -14,8 +14,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aiproxy-shop/phone-auth": "workspace:*",
-    "@aiproxy-shop/schema": "workspace:*",
+    "@openproxy/phone-auth": "workspace:*",
+    "@openproxy/schema": "workspace:*",
     "@elysiajs/eden": "^1.4.6",
     "@number-flow/react": "^0.5.10",
     "@sentry/react": "^10.32.1",

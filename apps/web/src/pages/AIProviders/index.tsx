@@ -6,7 +6,7 @@ import {
   RotateCcwKeyIcon,
   Trash2Icon,
 } from 'lucide-react'
-import { AIProviderFormSchema } from '@aiproxy-shop/schema'
+import { AIProviderFormSchema } from '@openproxy/schema'
 import { AIProviderForm } from '@/components/AIProvider/AIProviderForm'
 import { Card } from '@/components/Card'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
