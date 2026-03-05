@@ -221,7 +221,7 @@ export const apiKeys = pgTable(
     name: text('name').notNull(),
     apiKey: varchar('api_key').notNull(),
     apiKeyHash: varchar('api_key_hash').notNull(),
-    status: smallint('status').notNull().default(0),
+    status: smallint('status').notNull().default(1),
     expiresAt: timestamp('expires_at', {
       mode: 'date',
       withTimezone: true,
@@ -455,6 +455,7 @@ export const modelsToAIProviders = pgTable(
     aiProviderId: varchar('ai_provider_id')
       .notNull()
       .references(() => aiProviders.id, { onDelete: 'cascade' }),
+    status: smallint('status').notNull().default(0),
     model: text('model').notNull().default(''),
     weight: integer('weight').notNull().default(0),
   },

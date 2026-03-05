@@ -16,8 +16,8 @@ const Page = () => {
   const [loading, setLoading] = useState(true)
   const modelId = params['*'] || ''
 
-  const fetchModel = async (id: string) => {
-    setLoading(true)
+  const fetchModel = async (refresh = false) => {
+    setLoading(!refresh)
     await request.models
       .get({ query: { id: modelId } })
       .then((res) => {
@@ -38,8 +38,8 @@ const Page = () => {
       })
   }
   useEffect(() => {
-    fetchModel(modelId)
-  }, [modelId])
+    fetchModel()
+  }, [])
 
   if (loading) {
     return (
@@ -64,7 +64,7 @@ const Page = () => {
       <ModelEditor
         defaultValues={model}
         isEdit
-        onRefresh={() => fetchModel(modelId)}
+        onRefresh={() => fetchModel(true)}
       />
     </PageContainer>
   )

@@ -56,7 +56,6 @@ export const ModelTable: React.FC<ModelTableProps> = ({
               onClick={() => {
                 navigate('/models/new')
               }}
-              disabled={dataSource.length >= 2}
             >
               <PlusIcon />
               {t('models.addModel', { defaultValue: 'Add Model' })}

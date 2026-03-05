@@ -1,5 +1,5 @@
 {
-  "id": "0cd33a77-bee2-48e3-abf5-f548a9254748",
+  "id": "5083a344-af05-4eca-b005-be0b639bc51b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -237,7 +237,7 @@
           "type": "smallint",
           "primaryKey": false,
           "notNull": true,
-          "default": 0
+          "default": 1
         },
         "expires_at": {
           "name": "expires_at",
@@ -679,6 +679,13 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "model": {
           "name": "model",

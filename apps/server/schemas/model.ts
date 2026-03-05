@@ -67,6 +67,7 @@ export const UpsertModelProviderSchema = t.Object({
     id: t.String(),
     model: t.String(),
     weight: t.Number(),
+    status: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
   }),
 })
 

@@ -51,7 +51,8 @@ pub async fn validate_model_access(
                 COALESCE(mtap.weight, 1) as provider_weight
             FROM models_to_ai_providers mtap
             INNER JOIN ai_providers ap ON mtap.ai_provider_id = ap.id
-            WHERE mtap.model_id = $2
+                        WHERE mtap.model_id = $2
+                            AND mtap.status = 1
         ),
         team_info AS (
             SELECT 
