@@ -1,7 +1,5 @@
 import { Switch as RadixSwitch } from 'radix-ui'
-import { CheckIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
-import s from './index.module.scss'
 
 export const Switch: React.FC<RadixSwitch.SwitchProps> = ({
   className,
@@ -11,25 +9,20 @@ export const Switch: React.FC<RadixSwitch.SwitchProps> = ({
     <RadixSwitch.Root
       className={cn(
         className,
-        s.Switch,
-        'relative w-10 h-5 bg-muted rounded-full cursor-pointer transition-all duration-300'
+        'Switch',
+        'relative w-8 h-4 ring-1 ring-muted bg-muted rounded-full cursor-pointer transition-all duration-300',
+        'data-[state=checked]:ring-success/75 data-[state=checked]:bg-success/75 data-[state=unchecked]:ring-muted'
       )}
       {...restProps}
     >
       <RadixSwitch.Thumb
         className={cn(
-          s.SwitchButton,
-          'absolute top-0 left-0 flex items-center justify-center w-5 h-5 bg-background rounded-full shadow',
-          'transition-all duration-300'
+          'SwitchButton',
+          'absolute top-[50%] left-0 translate-y-[-50%] flex items-center justify-center w-4 h-4 bg-background rounded-full shadow',
+          'transition-all duration-300',
+          'data-[state=checked]:left-full data-[state=checked]:-translate-x-full data-[state=unchecked]:left-0 data-[state=unchecked]:translate-x-0'
         )}
-      >
-        <CheckIcon
-          className={cn(
-            s.SiwtchButtonCheckIcon,
-            'inset-0 w-4 h-4 text-success'
-          )}
-        />
-      </RadixSwitch.Thumb>
+      />
     </RadixSwitch.Root>
   )
 }
