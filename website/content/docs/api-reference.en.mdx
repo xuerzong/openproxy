@@ -1,0 +1,57 @@
+---
+title: API Reference
+description: Proxy endpoints and request examples for OpenProxy
+---
+
+This page documents public endpoints of `apps/api` (Rust Proxy).
+
+## Base URL
+
+Default local URL:
+
+```text
+http://localhost:5060
+```
+
+## Authentication
+
+All business endpoints except health checks require bearer auth:
+
+```http
+Authorization: Bearer <your-api-key>
+```
+
+## Endpoints
+
+| Method | Path | Description |
+| --- | --- | --- |
+| GET | /health | Health check |
+| GET | /v1/models | List available models |
+| POST | /v1/chat/completions | OpenAI-style chat endpoint |
+| POST | /v1/messages | Anthropic-style messages endpoint |
+| POST | /v1/embeddings | Embeddings endpoint |
+
+## Example: chat completions
+
+```bash
+curl http://localhost:5060/v1/chat/completions \
+  -H "Authorization: Bearer <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+## Example: models
+
+```bash
+curl http://localhost:5060/v1/models \
+  -H "Authorization: Bearer <your-api-key>"
+```
+
+## Troubleshooting
+
+- `401/403`: API key may be invalid, expired, or missing model permissions
+- `5xx`: check upstream provider status and network connectivity
+- Slow response: check upstream model latency or proxy resource bottlenecks

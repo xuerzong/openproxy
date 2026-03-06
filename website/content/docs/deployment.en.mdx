@@ -1,0 +1,62 @@
+---
+title: Deployment
+description: Deploy OpenProxy via Docker Compose or manually
+---
+
+## Docker Compose deployment
+
+The root `docker-compose.yml` includes these services by default:
+
+- `server` (host port `5080`)
+- `web-tenant` (host port `5090`)
+- `web-admin` (host port `5091`)
+
+### 1) Prepare environment variables
+
+`docker-compose.yml` consumes environment variables. At minimum provide:
+
+- `DATABASE_URL`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_TRUSTED_ORIGINS`
+- `BETTER_AUTH_URL`
+- `RSA_PRIVATE_KEY`
+- `RSA_PUBLIC_KEY`
+
+Also provide email/OAuth/SMS/payment variables based on your actual setup.
+
+### 2) Start services
+
+```bash
+docker-compose up -d
+```
+
+### 3) Verify endpoints
+
+- `http://localhost:5080` for server
+- `http://localhost:5090` for tenant web
+- `http://localhost:5091` for admin web
+
+## Rust Proxy deployment note
+
+Current `docker-compose.yml` does not include `apps/api`. Deploy it separately:
+
+```bash
+cd apps/api
+cargo run --release
+```
+
+For production, use `systemd`, container orchestration, or a process supervisor.
+
+## Manual deployment (without Docker)
+
+1. Deploy PostgreSQL
+2. Deploy `apps/server`
+3. Deploy `apps/api`
+4. Build and host `apps/web` (tenant/admin)
+
+## Production recommendations
+
+- Use a reverse proxy for unified domain and HTTPS
+- Set `BETTER_AUTH_URL` and `BETTER_AUTH_TRUSTED_ORIGINS` to production domains
+- Enable database backup strategy
+- Avoid logging plaintext keys or sensitive fields

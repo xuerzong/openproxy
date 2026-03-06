@@ -1,0 +1,67 @@
+---
+title: 本地开发
+description: OpenProxy 开发模式与常用命令
+---
+
+## Monorepo 结构
+
+```text
+openproxy/
+├── apps/
+│   ├── api/      # Rust proxy
+│   ├── server/   # Bun + Elysia backend
+│   └── web/      # React + Vite frontend
+├── packages/     # 共享包
+└── website/      # 文档站（Fumadocs + Next.js）
+```
+
+## 根目录常用命令
+
+```bash
+bun run dev
+```
+
+- 含义：执行 `turbo run dev`
+- 用途：一键拉起所有支持 `dev` 的工作区
+
+## 子应用独立启动
+
+### Rust Proxy
+
+```bash
+cd apps/api
+cargo run
+```
+
+### Business Server
+
+```bash
+cd apps/server
+bun run dev
+```
+
+### Web（租户端）
+
+```bash
+cd apps/web
+bun run dev:tenant
+```
+
+### Web（管理端）
+
+```bash
+cd apps/web
+bun run dev:admin
+```
+
+## 开发建议
+
+- 先启动 `apps/server`，确认鉴权与配置接口可用
+- 再启动 `apps/api`，用 `/health` 验证代理层健康
+- 最后启动 `apps/web`，联调 UI 与后端接口
+
+## 关键端口
+
+- `apps/server`：`3888`（默认）
+- `apps/api`：`5060`（默认）
+- `apps/web`：`5173`（Vite 开发端口，按实际输出为准）

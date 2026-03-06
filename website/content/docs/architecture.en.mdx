@@ -1,0 +1,43 @@
+---
+title: Architecture
+description: OpenProxy component layout and request flow
+---
+
+## High-level architecture
+
+`OpenProxy` uses a three-layer architecture:
+
+1. `apps/api` (Rust): proxy forwarding, model adaptation, API key verification, usage persistence
+2. `apps/server` (Bun): business management (users, keys, models, providers, orders)
+3. `apps/web` (React): tenant and admin interfaces
+
+## Request flow
+
+```text
+Client
+  -> apps/api (Rust)
+      -> validate API key
+      -> choose upstream provider for model
+      -> forward to OpenAI / Anthropic / other providers
+      -> write tokens / cost / latency to database
+```
+
+## Core capabilities
+
+- Unified API: OpenAI/Anthropic-style interfaces
+- Multi-provider routing: multiple backends per model
+- Failure fallback: switch providers when upstream fails
+- Cost tracking: token-based billing and latency records
+- Key security: provider keys stored with RSA encryption
+
+## Data and auth
+
+- Business data is managed in `apps/server` (Drizzle + PostgreSQL)
+- `apps/api` and `apps/server` share one database for key/model/usage workflows
+- Login/session is handled by `better-auth` (email, OAuth, SMS, etc.)
+
+## Code organization suggestions
+
+- Put shared protocol/validation types in `packages/schema`
+- Isolate payment and phone auth into `packages/*`
+- Reuse shared packages across frontend/backend to reduce duplication

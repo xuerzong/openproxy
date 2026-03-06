@@ -1,0 +1,62 @@
+---
+title: 部署指南
+description: 使用 Docker Compose 或手动方式部署 OpenProxy
+---
+
+## Docker Compose 部署
+
+仓库根目录包含 `docker-compose.yml`，默认包含以下服务：
+
+- `server`（映射到主机 `5080`）
+- `web-tenant`（映射到主机 `5090`）
+- `web-admin`（映射到主机 `5091`）
+
+### 1) 准备环境变量
+
+`docker-compose.yml` 会读取环境变量，请在部署环境中准备：
+
+- `DATABASE_URL`
+- `BETTER_AUTH_SECRET`
+- `BETTER_AUTH_TRUSTED_ORIGINS`
+- `BETTER_AUTH_URL`
+- `RSA_PRIVATE_KEY`
+- `RSA_PUBLIC_KEY`
+
+以及你实际使用到的邮件、OAuth、短信、支付相关变量。
+
+### 2) 启动
+
+```bash
+docker-compose up -d
+```
+
+### 3) 验证
+
+- 访问 `http://localhost:5080` 检查 server
+- 访问 `http://localhost:5090` 检查租户端
+- 访问 `http://localhost:5091` 检查管理端
+
+## Rust Proxy 的部署说明
+
+当前 `docker-compose.yml` 未包含 `apps/api` 服务，建议单独部署 `apps/api`：
+
+```bash
+cd apps/api
+cargo run --release
+```
+
+生产环境建议使用 `systemd`、容器编排或进程守护工具管理该服务。
+
+## 手动部署（无 Docker）
+
+1. 部署 PostgreSQL
+2. 部署 `apps/server`
+3. 部署 `apps/api`
+4. 构建并托管 `apps/web`（tenant/admin）
+
+## 生产建议
+
+- 通过反向代理统一域名和 HTTPS
+- 将 `BETTER_AUTH_URL`、`BETTER_AUTH_TRUSTED_ORIGINS` 设置为生产域名
+- 为数据库启用备份策略
+- 不在日志中输出明文密钥与敏感字段
