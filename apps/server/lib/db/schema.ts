@@ -303,7 +303,6 @@ export const usages = pgTable(
     modelName: text('model_name').notNull().default(''),
     modelOwnedBy: text('model_owned_by').notNull().default(''),
     aiProviderId: varchar('ai_provider_id').notNull().default(''),
-    aiProviderName: text('ai_provider_name').notNull().default(''),
     isStream: boolean('is_stream').notNull().default(false),
     responseTime: integer('response_time').notNull(),
     completedTime: integer('completed_time').notNull().default(0),
@@ -432,6 +431,7 @@ export const aiProviders = pgTable(
     baseUrl: text('base_url').notNull(),
     apiKey: text('api_key').notNull(),
     apiKeyHash: varchar('api_key_hash').notNull(),
+    icon: text('icon').notNull().default(''),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
       .defaultNow()
       .notNull(),
@@ -449,6 +449,10 @@ export const aiProvidersRelations = relations(aiProviders, ({ many }) => ({
 export const modelsToAIProviders = pgTable(
   'models_to_ai_providers',
   {
+    id: varchar('id')
+      .notNull()
+      .$defaultFn(() => generateDBId())
+      .primaryKey(),
     modelId: varchar('model_id')
       .notNull()
       .references(() => models.id, { onDelete: 'cascade' }),
@@ -459,7 +463,7 @@ export const modelsToAIProviders = pgTable(
     model: text('model').notNull().default(''),
     weight: integer('weight').notNull().default(0),
   },
-  (table) => [primaryKey({ columns: [table.modelId, table.aiProviderId] })]
+  (table) => [index('models_to_ai_providers_model_id_index').on(table.modelId)]
 )
 
 export const modelsToAIProvidersRelations = relations(

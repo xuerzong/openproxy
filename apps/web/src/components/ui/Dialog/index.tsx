@@ -1,8 +1,10 @@
 import { Dialog as RadixDialog, Slot } from 'radix-ui'
+import { useEffect, useState } from 'react'
 import { CloseButton } from '../CloseButton'
 import { Button, type ButtonProps } from '../Button'
 import { cn } from '@/utils/cn'
 import { useTranslation } from 'react-i18next'
+import { useZIndexStore } from '@/stores/zIndex'
 import s from './index.module.scss'
 
 interface DialogProps {
@@ -28,23 +30,32 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
   contentProps,
   overlayProps,
 }) => {
+  const nextZIndex = useZIndexStore((state) => state.next)
+  const [dialogZIndex, setDialogZIndex] = useState<number>(1000)
+
+  useEffect(() => {
+    if (!open) return
+    setDialogZIndex(nextZIndex())
+  }, [open, nextZIndex])
+
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
       <RadixDialog.Portal>
         <Slot.Root className={s.DialogOverlay} {...overlayProps}>
           <RadixDialog.Overlay
+            style={{ zIndex: dialogZIndex - 1 }}
             className={cn(
               s.DialogOverlay,
-              'fixed inset-0 w-screen h-screen bg-background/50 backdrop-blur-md z-999'
+              'fixed inset-0 w-screen h-screen bg-background/50 backdrop-blur-md'
             )}
           />
         </Slot.Root>
         <Slot.Root {...contentProps}>
           <RadixDialog.Content
-            style={{ width }}
+            style={{ width, zIndex: dialogZIndex }}
             className={cn(
               s.DialogContent,
-              'p-6 bg-background ring-1 ring-foreground/10 rounded-lg z-1000 max-w-[80vw] max-h-[90vh] min-h-0 shadow-xl'
+              'p-6 bg-background ring-1 ring-foreground/10 rounded-lg max-w-[80vw] max-h-[90vh] min-h-0 shadow-xl'
             )}
           >
             <div className="flex flex-col mb-6">

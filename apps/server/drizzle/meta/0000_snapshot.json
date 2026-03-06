@@ -1,5 +1,5 @@
 {
-  "id": "5083a344-af05-4eca-b005-be0b639bc51b",
+  "id": "86ebb4dc-9d05-47f1-b924-51daeda11976",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -160,6 +160,13 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
         },
         "created_at": {
           "name": "created_at",
@@ -668,6 +675,12 @@
       "name": "models_to_ai_providers",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
         "model_id": {
           "name": "model_id",
           "type": "varchar",
@@ -702,7 +715,23 @@
           "default": 0
         }
       },
-      "indexes": {},
+      "indexes": {
+        "models_to_ai_providers_model_id_index": {
+          "name": "models_to_ai_providers_model_id_index",
+          "columns": [
+            {
+              "expression": "model_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "models_to_ai_providers_model_id_models_id_fk": {
           "name": "models_to_ai_providers_model_id_models_id_fk",
@@ -731,15 +760,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "models_to_ai_providers_model_id_ai_provider_id_pk": {
-          "name": "models_to_ai_providers_model_id_ai_provider_id_pk",
-          "columns": [
-            "model_id",
-            "ai_provider_id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -1212,13 +1233,6 @@
         "ai_provider_id": {
           "name": "ai_provider_id",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        },
-        "ai_provider_name": {
-          "name": "ai_provider_name",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "default": "''"

@@ -39,7 +39,6 @@ pub struct UsageContext {
     pub completed_time: i32,
     pub is_stream: bool,
     pub ai_provider_id: String,
-    pub ai_provider_name: String,
 }
 
 pub async fn add_usage(
@@ -54,31 +53,30 @@ pub async fn add_usage(
 
     tracing::debug!(id = %id, cost = %input.cost, model_id = %model.id, "Recording usage");
 
-    sqlx::query!(
+    sqlx::query(
         r#"
         INSERT INTO usages (
             id, cost, tokens_completion, tokens_prompt, response_time,
             completed_time, team_id, api_key_id, model_id, model_name,
-            model_owned_by, is_stream, ai_provider_id, ai_provider_name, created_at
+            model_owned_by, is_stream, ai_provider_id, created_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         "#,
-        id,
-        input.cost,
-        input.completion_tokens,
-        input.prompt_tokens,
-        ctx.response_time,
-        ctx.completed_time,
-        ctx.team_id,
-        ctx.api_key_id,
-        model.id,
-        model.name,
-        model.owned_by,
-        ctx.is_stream,
-        ctx.ai_provider_id,
-        ctx.ai_provider_name,
-        Utc::now()
     )
+    .bind(id)
+    .bind(input.cost)
+    .bind(input.completion_tokens)
+    .bind(input.prompt_tokens)
+    .bind(ctx.response_time)
+    .bind(ctx.completed_time)
+    .bind(&ctx.team_id)
+    .bind(&ctx.api_key_id)
+    .bind(model.id)
+    .bind(model.name)
+    .bind(model.owned_by)
+    .bind(ctx.is_stream)
+    .bind(ctx.ai_provider_id)
+    .bind(Utc::now())
     .execute(&mut *tx)
     .await?;
 

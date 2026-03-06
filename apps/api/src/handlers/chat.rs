@@ -70,7 +70,6 @@ pub async fn chat_handler(
         completed_time: 0,
         is_stream,
         ai_provider_id: String::new(),
-        ai_provider_name: String::new(),
     };
 
     // Try each provider in order; fall back to the next one on failure
@@ -145,7 +144,6 @@ pub async fn chat_handler(
 
                 let mut provider_ctx = usage_ctx.clone();
                 provider_ctx.ai_provider_id = provider.ai_provider_id.clone();
-                provider_ctx.ai_provider_name = provider.ai_provider_name.clone();
 
                 let resp = if is_stream || is_event_stream {
                     handle_stream(

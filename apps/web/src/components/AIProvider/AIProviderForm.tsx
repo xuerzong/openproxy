@@ -1,6 +1,9 @@
-import { Form, FormField, useForm, type FormInstance } from '../ui/Form'
+import { Form, FormField, type FormInstance } from '../ui/Form'
 import { Input } from '../ui/Input'
 import { useTranslation } from 'react-i18next'
+import { Select } from '../ui/Select'
+import { ICON_SVG_MAP } from '@/constants/icons'
+import { ModelIcon } from '../ModelIcon'
 
 interface AIProviderFormProps {
   form: FormInstance
@@ -14,6 +17,18 @@ export const AIProviderForm: React.FC<AIProviderFormProps> = ({
   const { t } = useTranslation('common')
   return (
     <Form form={form}>
+      <FormField name="icon" label={t('common.icon', { defaultValue: 'Icon' })}>
+        <Select
+          options={Object.keys(ICON_SVG_MAP).map((key) => ({
+            label: key,
+            value: key,
+            icon: <ModelIcon model={key} />,
+          }))}
+          placeholder={t('common.selectPlaceholder', {
+            defaultValue: 'Please select',
+          })}
+        />
+      </FormField>
       <FormField name="name" label={t('common.name', { defaultValue: 'Name' })}>
         <Input
           placeholder={t('common.pleaseInput', {

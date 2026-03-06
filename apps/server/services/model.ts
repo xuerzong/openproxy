@@ -156,6 +156,7 @@ export async function getModelById(id: string) {
     with: {
       modelsToAIProviders: {
         columns: {
+          id: true,
           model: true,
           weight: true,
           status: true,
@@ -178,8 +179,26 @@ export async function getModelById(id: string) {
   }
 }
 
-export const upsertModelProviders = async (
+export const insertModelProvider = async (
   modelId: string,
+  aiProviderId: string,
+  provider: {
+    model: string
+    weight: number
+    status?: number
+  }
+) => {
+  await db.insert(dbSchema.modelsToAIProviders).values({
+    modelId: modelId,
+    aiProviderId,
+    status: provider.status ?? 1,
+    model: provider.model,
+    weight: provider.weight,
+  })
+}
+
+export const updateModelProvider = async (
+  aiProviderId: string,
   provider: {
     id: string
     model: string
@@ -188,40 +207,19 @@ export const upsertModelProviders = async (
   }
 ) => {
   await db
-    .insert(dbSchema.modelsToAIProviders)
-    .values({
-      modelId: modelId,
-      aiProviderId: provider.id,
+    .update(dbSchema.modelsToAIProviders)
+    .set({
+      aiProviderId,
       status: provider.status ?? 1,
       model: provider.model,
       weight: provider.weight,
     })
-    .onConflictDoUpdate({
-      target: [
-        dbSchema.modelsToAIProviders.modelId,
-        dbSchema.modelsToAIProviders.aiProviderId,
-      ],
-      set: {
-        status: provider.status ?? 1,
-        model: provider.model,
-        weight: provider.weight,
-      },
-    })
+    .where(eq(dbSchema.modelsToAIProviders.id, provider.id))
 }
 
-export const delModelProvider = async (
-  modelId: string,
-  provider: {
-    id: string
-  }
-) => {
+export const delModelProvider = async (provider: { id: string }) => {
   await db
     .delete(dbSchema.modelsToAIProviders)
-    .where(
-      and(
-        eq(dbSchema.modelsToAIProviders.modelId, modelId),
-        eq(dbSchema.modelsToAIProviders.aiProviderId, provider.id)
-      )
-    )
+    .where(eq(dbSchema.modelsToAIProviders.id, provider.id))
     .returning()
 }

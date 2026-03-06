@@ -12,6 +12,7 @@ export const createAIProvider = async (input: {
   name: string
   apiKey: string
   baseUrl: string
+  icon?: string
 }) => {
   const { generateDeApiKey } = await import('@server/lib/generate')
   const { rsaEncrypt } = await import('@server/lib/utils/rsa')
@@ -20,6 +21,7 @@ export const createAIProvider = async (input: {
     apiKey: generateDeApiKey(input.apiKey),
     apiKeyHash: rsaEncrypt(input.apiKey),
     baseUrl: input.baseUrl,
+    icon: input.icon ?? '',
   })
 }
 
@@ -27,12 +29,14 @@ export const updateAIProvider = async (input: {
   id: string
   name: string
   baseUrl: string
+  icon?: string
 }) => {
   await db
     .update(dbSchema.aiProviders)
     .set({
       name: input.name,
       baseUrl: input.baseUrl,
+      ...(input.icon !== undefined ? { icon: input.icon } : {}),
     })
     .where(eq(dbSchema.aiProviders.id, input.id))
 }

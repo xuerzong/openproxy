@@ -194,11 +194,20 @@ const Page = () => {
               render: (text) => text / 1000,
             },
             {
-              key: 'aiProviderName',
+              key: 'aiProvider',
               label: translateDashboard('table.providerName', 'Provider'),
-              width: 160,
+              width: 180,
               align: 'left',
-              render: (text) => text || '-',
+              render: (_, record) => {
+                return (
+                  <div className="flex items-center gap-1">
+                    {record.aiProvider?.icon && (
+                      <ModelIcon model={record.aiProvider.icon} />
+                    )}
+                    <span>{record.aiProvider?.name || '-'}</span>
+                  </div>
+                )
+              },
             },
           ]}
           data={usagesQuery.data || []}

@@ -61,8 +61,18 @@ export const ModelIdParamSchema = t.Object({
   id: t.String(),
 })
 
-export const UpsertModelProviderSchema = t.Object({
+export const InsertModelProviderSchema = t.Object({
   modelId: t.String(),
+  aiProviderId: t.String(),
+  provider: t.Object({
+    model: t.String(),
+    weight: t.Number(),
+    status: t.Optional(t.Number({ minimum: 0, maximum: 1 })),
+  }),
+})
+
+export const UpdateModelProviderSchema = t.Object({
+  aiProviderId: t.String(),
   provider: t.Object({
     id: t.String(),
     model: t.String(),
@@ -72,7 +82,6 @@ export const UpsertModelProviderSchema = t.Object({
 })
 
 export const DelModelProviderSchema = t.Object({
-  modelId: t.String(),
   provider: t.Object({
     id: t.String(),
   }),

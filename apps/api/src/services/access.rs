@@ -237,7 +237,6 @@ fn weighted_random_sort(candidates: &[ProviderCandidate]) -> Vec<ProviderInfo> {
             model_api_key_hash: selected.api_key_hash,
             model_api_key: selected.api_key,
             ai_provider_id: selected.id,
-            ai_provider_name: selected.name,
         });
     }
 

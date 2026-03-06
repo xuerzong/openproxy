@@ -1,5 +1,7 @@
 import { cn } from '@/utils/cn'
 import { DropdownMenu as RadixDropdownMenu, Slot } from 'radix-ui'
+import { useEffect, useState } from 'react'
+import { useZIndexStore } from '@/stores/zIndex'
 
 export type DropdownMenuItem =
   | {
@@ -18,12 +20,22 @@ interface DropdownMenuProps extends RadixDropdownMenu.DropdownMenuContentProps {
 export const DropdownMenu: React.FC<
   React.PropsWithChildren<DropdownMenuProps>
 > = ({ children, menus, ...contentProps }) => {
+  const nextZIndex = useZIndexStore((state) => state.next)
+  const [open, setOpen] = useState(false)
+  const [menuZIndex, setMenuZIndex] = useState(1000)
+
+  useEffect(() => {
+    if (!open) return
+    setMenuZIndex(nextZIndex())
+  }, [open, nextZIndex])
+
   return (
-    <RadixDropdownMenu.Root>
+    <RadixDropdownMenu.Root onOpenChange={setOpen}>
       <RadixDropdownMenu.Trigger asChild>{children}</RadixDropdownMenu.Trigger>
       <RadixDropdownMenu.Portal>
         <RadixDropdownMenu.Content
           {...contentProps}
+          style={{ zIndex: menuZIndex, ...contentProps.style }}
           className={cn(
             'min-w-48 bg-background border border-border rounded-lg overflow-hidden shadow-xl',
             contentProps.className

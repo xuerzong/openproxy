@@ -20,6 +20,7 @@ CREATE TABLE "ai_providers" (
 	"base_url" text NOT NULL,
 	"api_key" text NOT NULL,
 	"api_key_hash" varchar NOT NULL,
+	"icon" text DEFAULT '' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "ai_providers_name_unique" UNIQUE("name")
@@ -76,12 +77,12 @@ CREATE TABLE "models" (
 );
 --> statement-breakpoint
 CREATE TABLE "models_to_ai_providers" (
+	"id" varchar PRIMARY KEY NOT NULL,
 	"model_id" varchar NOT NULL,
 	"ai_provider_id" varchar NOT NULL,
 	"status" smallint DEFAULT 0 NOT NULL,
 	"model" text DEFAULT '' NOT NULL,
-	"weight" integer DEFAULT 0 NOT NULL,
-	CONSTRAINT "models_to_ai_providers_model_id_ai_provider_id_pk" PRIMARY KEY("model_id","ai_provider_id")
+	"weight" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "orders" (
@@ -137,7 +138,6 @@ CREATE TABLE "usages" (
 	"model_name" text DEFAULT '' NOT NULL,
 	"model_owned_by" text DEFAULT '' NOT NULL,
 	"ai_provider_id" varchar DEFAULT '' NOT NULL,
-	"ai_provider_name" text DEFAULT '' NOT NULL,
 	"is_stream" boolean DEFAULT false NOT NULL,
 	"response_time" integer NOT NULL,
 	"completed_time" integer DEFAULT 0 NOT NULL,
@@ -205,6 +205,7 @@ CREATE INDEX "api_keys_team_id_index" ON "api_keys" USING btree ("team_id");--> 
 CREATE INDEX "models_owned_by_index" ON "models" USING btree ("owned_by");--> statement-breakpoint
 CREATE INDEX "models_type_index" ON "models" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "models_is_public_index" ON "models" USING btree ("is_public");--> statement-breakpoint
+CREATE INDEX "models_to_ai_providers_model_id_index" ON "models_to_ai_providers" USING btree ("model_id");--> statement-breakpoint
 CREATE INDEX "orders_status_index" ON "orders" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "orders_usage_status_index" ON "orders" USING btree ("usage_status");--> statement-breakpoint
 CREATE INDEX "orders_team_id_index" ON "orders" USING btree ("team_id");--> statement-breakpoint
