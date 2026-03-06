@@ -5,7 +5,7 @@ export const revalidate = false;
 
 export const { staticGET: GET } = createFromSource(source, {
   localeMap: {
-    zh: 'chinese',
+    zh: 'english',
     en: 'english',
   },
 });
