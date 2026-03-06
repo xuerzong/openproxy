@@ -21,7 +21,7 @@ export const Tooltip: React.FC<React.PropsWithChildren<TooltipProps>> = ({
 
   return (
     <RadixTooltip.Provider>
-      <RadixTooltip.Root onOpenChange={setOpen}>
+      <RadixTooltip.Root open={open} onOpenChange={setOpen}>
         <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
         <RadixTooltip.Portal>
           <RadixTooltip.Content

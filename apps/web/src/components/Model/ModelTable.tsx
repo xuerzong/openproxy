@@ -1,9 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { CircleQuestionMarkIcon, EditIcon, PlusIcon } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import { useNavigate } from 'react-router'
 import { useModelsQuery } from '@/hooks/queries/useModelsQuery'
-import { cn } from '@/utils/cn'
 import { Table } from '@/components/ui/Table'
 import { CopyButton } from '@/components/CopyButton'
 import { ModelIcon } from '@/components/ModelIcon'
@@ -140,6 +139,30 @@ export const ModelTable: React.FC<ModelTableProps> = ({
                   return Number(value) ? `¥${value}` : '-'
                 },
                 align: 'right',
+              },
+              {
+                key: 'providers',
+                label: t('models.providers', { defaultValue: 'Providers' }),
+                width: 120,
+                render(_, record) {
+                  const providers = record.providers || []
+                  const uniqueProviders = Array.from(
+                    new Map(providers.map((p) => [p.icon, p])).values()
+                  )
+                  return uniqueProviders.length > 0 ? (
+                    <div className="flex items-center">
+                      {uniqueProviders.map((provider, providerIndex) => (
+                        <Tooltip key={providerIndex} content={provider.name}>
+                          <span className="inline-flex mr-1">
+                            <ModelIcon model={provider.icon} />
+                          </span>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  ) : (
+                    '-'
+                  )
+                },
               },
             ]}
             data={dataSource}

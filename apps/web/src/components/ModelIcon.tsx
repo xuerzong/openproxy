@@ -40,9 +40,14 @@ export const ModelIcon: React.FC<ModelIconProps> = ({ model, className }) => {
     )
   }
   return (
-    <div className="flex items-center justify-center w-6 h-6 border border-border rounded-full bg-muted">
+    <div
+      className={cn(
+        'flex items-center justify-center w-6 h-6 border border-border rounded-full bg-muted',
+        className
+      )}
+    >
       <img
-        className={cn('w-4 h-4', className)}
+        className={cn('w-4 h-4')}
         src={`/images/icons/${getModelIcon(modelOwnedBy)}.svg`}
         onError={(e) => {
           setError(true)

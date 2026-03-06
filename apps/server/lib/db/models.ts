@@ -9,16 +9,31 @@ interface GetModelsInput {
 export const getModels = async (input?: GetModelsInput) => {
   const userId = input?.userId
 
-  const models = await db
-    .select()
-    .from(dbSchema.models)
-    .where(and(eq(dbSchema.models.isPublic, true)))
-    .orderBy(
+  const models = await db.query.models.findMany({
+    where: eq(dbSchema.models.isPublic, true),
+    orderBy: [
       asc(dbSchema.models.ownedBy),
       asc(dbSchema.models.id),
-      desc(dbSchema.models.updatedAt)
-    )
-  return models
+      desc(dbSchema.models.updatedAt),
+    ],
+    with: {
+      modelsToAIProviders: {
+        columns: {},
+        with: {
+          provider: {
+            columns: {
+              icon: true,
+              name: true,
+            },
+          },
+        },
+      },
+    },
+  })
+  return models.map(({ modelsToAIProviders, ...model }) => ({
+    ...model,
+    providers: modelsToAIProviders.map((item) => item.provider),
+  }))
 }
 
 export const getModel = async (modelId: string) => {
