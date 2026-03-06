@@ -9,7 +9,6 @@ pub struct ProviderInfo {
     pub model_api_key_hash: String,
     pub model_api_key: String,
     pub ai_provider_id: String,
-    pub ai_provider_name: String,
 }
 
 /// Full result of validating an API key and selecting providers for a model.

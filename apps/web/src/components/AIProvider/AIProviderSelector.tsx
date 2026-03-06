@@ -47,6 +47,7 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
       model: item.model,
       weight: item.weight,
       status: item.status ?? 1,
+      icon: item.provider?.icon,
     }))
   }, [providers])
 
@@ -77,19 +78,18 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
             {
               key: 'name',
               label: t('common.provider', { defaultValue: 'Provider' }),
+              render: (_, record) => {
+                return (
+                  <div className="flex items-center gap-1">
+                    <ModelIcon model={record.icon} />
+                    <span>{record.name}</span>
+                  </div>
+                )
+              },
             },
             {
               key: 'model',
               label: t('models.modelName', { defaultValue: 'Model Name' }),
-              render: (text) =>
-                text ? (
-                  <div className="flex items-center gap-2">
-                    <ModelIcon className="w-4 h-4" model={text} />
-                    {text}
-                  </div>
-                ) : (
-                  '-'
-                ),
             },
             {
               key: 'weight',

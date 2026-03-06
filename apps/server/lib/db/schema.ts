@@ -303,7 +303,6 @@ export const usages = pgTable(
     modelName: text('model_name').notNull().default(''),
     modelOwnedBy: text('model_owned_by').notNull().default(''),
     aiProviderId: varchar('ai_provider_id').notNull().default(''),
-    aiProviderName: text('ai_provider_name').notNull().default(''),
     isStream: boolean('is_stream').notNull().default(false),
     responseTime: integer('response_time').notNull(),
     completedTime: integer('completed_time').notNull().default(0),
@@ -432,6 +431,7 @@ export const aiProviders = pgTable(
     baseUrl: text('base_url').notNull(),
     apiKey: text('api_key').notNull(),
     apiKeyHash: varchar('api_key_hash').notNull(),
+    icon: text('icon').notNull().default(''),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
       .defaultNow()
       .notNull(),

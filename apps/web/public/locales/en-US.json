@@ -51,6 +51,7 @@
     "type": "Type",
     "baseUrl": "Base URL",
     "provider": "Provider",
+    "icon": "Icon",
     "apiKey": "API Key",
     "weight": "Weight",
     "pleaseInput": "Please input",

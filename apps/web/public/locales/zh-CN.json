@@ -51,6 +51,7 @@
     "type": "类型",
     "baseUrl": "基础 URL",
     "provider": "供应商",
+    "icon": "图标",
     "apiKey": "API Key",
     "weight": "权重",
     "pleaseInput": "请输入",

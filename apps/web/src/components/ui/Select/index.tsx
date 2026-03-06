@@ -101,12 +101,8 @@ export const Select: React.FC<SelectProps> = ({
                 value={option.value}
                 disabled={option.disabled}
               >
-                <div className="flex items-center gap-0.5">
-                  {option.icon && (
-                    <span className="mr-2 flex h-4 w-4 items-center justify-center">
-                      {option.icon}
-                    </span>
-                  )}
+                <div className="flex items-center gap-1">
+                  {option.icon}
                   <span>{option.label}</span>
                 </div>
               </SelectItem>

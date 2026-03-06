@@ -21,8 +21,7 @@ import { DropdownMenu } from '@/components/ui/DropdownMenu'
 import { AIProviderUpdateAPIKeyModal } from '@/components/AIProvider/AIProviderUpdateAPIKeyModal'
 import { AIProviderDeleteModal } from '@/components/AIProvider/AIProviderDeleteModal'
 import { useTranslation } from 'react-i18next'
-import { Select } from '@/components/ui/Select'
-import { supportedAIProviders } from '@/constants/ai-providers'
+import { ModelIcon } from '@/components/ModelIcon'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -33,6 +32,7 @@ const Page = () => {
       name: '',
       baseUrl: '',
       apiKey: '',
+      icon: '',
     },
     zodResolver: AIProviderFormSchema,
   })
@@ -92,6 +92,14 @@ const Page = () => {
             {
               key: 'name',
               label: t('common.name', { defaultValue: 'Name' }),
+              render: (_, record) => {
+                return (
+                  <div className="flex items-center gap-1">
+                    <ModelIcon model={record.icon} />
+                    <span>{record.name}</span>
+                  </div>
+                )
+              },
             },
             {
               key: 'baseUrl',

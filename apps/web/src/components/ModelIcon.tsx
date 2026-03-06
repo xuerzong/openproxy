@@ -31,21 +31,23 @@ export const ModelIcon: React.FC<ModelIconProps> = ({ model, className }) => {
     return (
       <div
         className={cn(
-          'flex items-center justify-center w-4 h-4 text-primary border border-border rounded-full',
+          'flex items-center justify-center w-6 h-6 text-primary border border-border rounded-full',
           className
         )}
       >
-        <BoxIcon className="w-3 h-3" />
+        <BoxIcon className="w-4 h-4" />
       </div>
     )
   }
   return (
-    <img
-      className={cn('w-4 h-4', className)}
-      src={`/images/icons/${getModelIcon(modelOwnedBy)}.svg`}
-      onError={(e) => {
-        setError(true)
-      }}
-    />
+    <div className="flex items-center justify-center w-6 h-6 border border-border rounded-full bg-muted">
+      <img
+        className={cn('w-4 h-4', className)}
+        src={`/images/icons/${getModelIcon(modelOwnedBy)}.svg`}
+        onError={(e) => {
+          setError(true)
+        }}
+      />
+    </div>
   )
 }

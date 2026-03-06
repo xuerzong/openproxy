@@ -1,4 +1,4 @@
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 
 use crate::{models::provider::ProviderInfo, utils::chat::UsageStyle};
 
@@ -47,12 +47,9 @@ impl ProviderAdapterFactory {
 }
 
 fn is_bailian_provider(provider: &ProviderInfo) -> bool {
-    let provider_name = provider.ai_provider_name.to_ascii_lowercase();
     let base_url = provider.model_base_url.to_ascii_lowercase();
 
-    provider_name.contains("bailian")
-        || base_url.contains("bailian")
-        || base_url.contains("dashscope")
+    base_url.contains("bailian") || base_url.contains("dashscope")
 }
 
 fn ensure_stream_options_include_usage(body: &mut Value) {
@@ -75,14 +72,13 @@ fn ensure_stream_options_include_usage(body: &mut Value) {
 mod tests {
     use super::*;
 
-    fn provider(name: &str, base_url: &str) -> ProviderInfo {
+    fn provider(_name: &str, base_url: &str) -> ProviderInfo {
         ProviderInfo {
             model_model_name: "qwen-plus".to_string(),
             model_base_url: base_url.to_string(),
             model_api_key_hash: "hash".to_string(),
             model_api_key: "key".to_string(),
             ai_provider_id: "provider-id".to_string(),
-            ai_provider_name: name.to_string(),
         }
     }
 
@@ -97,11 +93,7 @@ mod tests {
             "Bailian",
             "https://dashscope.aliyuncs.com/compatible-mode/v1",
         ));
-        adapter.adapt_request_body(
-            &mut body,
-            UsageStyle::OpenAI,
-            true,
-        );
+        adapter.adapt_request_body(&mut body, UsageStyle::OpenAI, true);
 
         assert_eq!(
             body.get("stream_options")
@@ -118,15 +110,9 @@ mod tests {
             "stream": true
         });
 
-        let adapter = ProviderAdapterFactory::for_provider(&provider(
-            "OpenAI",
-            "https://api.openai.com/v1",
-        ));
-        adapter.adapt_request_body(
-            &mut body,
-            UsageStyle::OpenAI,
-            true,
-        );
+        let adapter =
+            ProviderAdapterFactory::for_provider(&provider("OpenAI", "https://api.openai.com/v1"));
+        adapter.adapt_request_body(&mut body, UsageStyle::OpenAI, true);
 
         assert!(body.get("stream_options").is_none());
     }
@@ -142,11 +128,7 @@ mod tests {
             "Anthropic",
             "https://api.anthropic.com",
         ));
-        adapter.adapt_request_body(
-            &mut body,
-            UsageStyle::Anthropic,
-            true,
-        );
+        adapter.adapt_request_body(&mut body, UsageStyle::Anthropic, true);
 
         assert!(body.get("stream_options").is_none());
     }
@@ -162,11 +144,7 @@ mod tests {
             "Bailian",
             "https://dashscope.aliyuncs.com/compatible-mode/v1",
         ));
-        adapter.adapt_request_body(
-            &mut body,
-            UsageStyle::Anthropic,
-            true,
-        );
+        adapter.adapt_request_body(&mut body, UsageStyle::Anthropic, true);
 
         assert!(body.get("stream_options").is_none());
     }

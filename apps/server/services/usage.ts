@@ -11,8 +11,18 @@ export async function getUsagesByTeamId(
   const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
   const usageList = await db
-    .select()
+    .select({
+      usage: dbSchema.usages,
+      aiProvider: {
+        name: dbSchema.aiProviders.name,
+        icon: dbSchema.aiProviders.icon,
+      },
+    })
     .from(dbSchema.usages)
+    .leftJoin(
+      dbSchema.aiProviders,
+      eq(dbSchema.usages.aiProviderId, dbSchema.aiProviders.id)
+    )
     .where(
       and(
         eq(dbSchema.usages.teamId, teamId),
@@ -23,10 +33,10 @@ export async function getUsagesByTeamId(
     .limit(limit)
     .offset(offset)
     .orderBy(desc(dbSchema.usages.createdAt))
-
-  return usageList.map((usage) => ({
+  return usageList.map(({ usage, aiProvider }) => ({
     ...usage,
     cost: Number(usage.cost),
+    aiProvider,
   }))
 }
 

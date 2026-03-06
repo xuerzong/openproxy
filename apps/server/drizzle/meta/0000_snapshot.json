@@ -1,5 +1,5 @@
 {
-  "id": "5b2cf5c2-a730-4995-b519-c8115b89ca11",
+  "id": "86ebb4dc-9d05-47f1-b924-51daeda11976",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -160,6 +160,13 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "icon": {
+          "name": "icon",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
         },
         "created_at": {
           "name": "created_at",
@@ -1226,13 +1233,6 @@
         "ai_provider_id": {
           "name": "ai_provider_id",
           "type": "varchar",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "''"
-        },
-        "ai_provider_name": {
-          "name": "ai_provider_name",
-          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "default": "''"

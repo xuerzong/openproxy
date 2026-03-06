@@ -20,6 +20,7 @@ CREATE TABLE "ai_providers" (
 	"base_url" text NOT NULL,
 	"api_key" text NOT NULL,
 	"api_key_hash" varchar NOT NULL,
+	"icon" text DEFAULT '' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "ai_providers_name_unique" UNIQUE("name")
@@ -137,7 +138,6 @@ CREATE TABLE "usages" (
 	"model_name" text DEFAULT '' NOT NULL,
 	"model_owned_by" text DEFAULT '' NOT NULL,
 	"ai_provider_id" varchar DEFAULT '' NOT NULL,
-	"ai_provider_name" text DEFAULT '' NOT NULL,
 	"is_stream" boolean DEFAULT false NOT NULL,
 	"response_time" integer NOT NULL,
 	"completed_time" integer DEFAULT 0 NOT NULL,
