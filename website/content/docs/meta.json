@@ -1,0 +1,11 @@
+{
+  "title": "OpenProxy 文档",
+  "pages": [
+    "index",
+    "getting-started",
+    "development",
+    "architecture",
+    "deployment",
+    "api-reference"
+  ]
+}

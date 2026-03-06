@@ -1,0 +1,43 @@
+---
+title: 系统架构
+description: OpenProxy 的组件关系与请求链路
+---
+
+## 总体架构
+
+`OpenProxy` 采用三层结构：
+
+1. `apps/api`（Rust）负责代理转发、模型适配、鉴权校验与用量写库
+2. `apps/server`（Bun）负责业务管理：用户、密钥、模型、供应商、订单等
+3. `apps/web`（React）提供租户端和管理端界面
+
+## 请求流
+
+```text
+Client
+  -> apps/api (Rust)
+      -> 校验 API Key
+      -> 选择模型对应的上游 provider
+      -> 转发到 OpenAI / Anthropic 等上游
+      -> 回写 tokens / cost / latency 到数据库
+```
+
+## 关键能力
+
+- 统一 API：对外提供 OpenAI/Anthropic 风格接口
+- 多供应商路由：同一模型可配置多个后端
+- 失败兜底：上游失败可切换其他 provider
+- 成本追踪：按 token 计费并记录耗时
+- 密钥安全：供应商密钥使用 RSA 加密存储
+
+## 数据与鉴权
+
+- 业务数据由 `apps/server` 维护（Drizzle + PostgreSQL）
+- `apps/api` 与 `apps/server` 共享数据库进行 key/模型/用量协作
+- 登录与会话由 `better-auth` 负责（邮箱、OAuth、短信等）
+
+## 代码组织建议
+
+- 将协议/校验结构放到 `packages/schema`
+- 将支付、手机登录等能力封装在 `packages/*`
+- 前后端都引用共享包，减少重复定义

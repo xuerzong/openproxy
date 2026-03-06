@@ -1,0 +1,31 @@
+---
+title: OpenProxy Documentation
+description: Project overview and guides for OpenProxy
+---
+
+`OpenProxy` is a self-hosted AI API gateway that provides a unified interface, multi-provider routing, authentication, billing, and an admin dashboard.
+
+## Documentation Index
+
+1. [Getting Started](./getting-started)
+2. [Development](./development)
+3. [Architecture](./architecture)
+4. [Deployment](./deployment)
+5. [API Reference](./api-reference)
+
+## Who Is This For
+
+- Developers who want to run the full stack locally (Rust Proxy + Bun Server + Web)
+- Teams that need self-hosted deployment with their own database and auth/payment integrations
+- Applications that want a unified OpenAI/Anthropic-style interface for multiple providers
+
+## Project Components
+
+- `apps/api`: Rust + Axum proxy layer for request forwarding and usage tracking
+- `apps/server`: Bun + Elysia backend for auth, management, billing, and configuration
+- `apps/web`: React + Vite frontend (tenant panel + admin panel)
+- `packages/*`: Shared packages (schema, payment, phone auth, etc.)
+
+## Recommended Reading Order
+
+Start with [Getting Started](./getting-started), then continue with [Development](./development) and [Architecture](./architecture).

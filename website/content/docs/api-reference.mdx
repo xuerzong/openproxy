@@ -1,0 +1,57 @@
+---
+title: API 参考
+description: OpenProxy 代理层接口与调用示例
+---
+
+本文档主要说明 `apps/api`（Rust Proxy）对外暴露的接口。
+
+## Base URL
+
+本地默认地址：
+
+```text
+http://localhost:5060
+```
+
+## 鉴权方式
+
+除健康检查外，业务接口需要 `Bearer Token`：
+
+```http
+Authorization: Bearer <your-api-key>
+```
+
+## 接口列表
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| GET | /health | 健康检查 |
+| GET | /v1/models | 获取可用模型列表 |
+| POST | /v1/chat/completions | OpenAI 风格对话接口 |
+| POST | /v1/messages | Anthropic 风格消息接口 |
+| POST | /v1/embeddings | 向量接口 |
+
+## 示例：chat completions
+
+```bash
+curl http://localhost:5060/v1/chat/completions \
+  -H "Authorization: Bearer <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+## 示例：models
+
+```bash
+curl http://localhost:5060/v1/models \
+  -H "Authorization: Bearer <your-api-key>"
+```
+
+## 错误排查
+
+- `401/403`：检查 API Key 是否有效、是否过期、是否有模型访问权限
+- `5xx`：检查上游 provider 可用性与网络连通性
+- 响应慢：检查上游模型延迟或代理服务资源瓶颈

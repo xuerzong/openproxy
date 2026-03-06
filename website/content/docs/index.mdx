@@ -1,0 +1,31 @@
+---
+title: OpenProxy 文档
+description: OpenProxy 项目总览与使用文档
+---
+
+`OpenProxy` 是一个可自托管的 AI API 代理系统，提供统一接口、多供应商路由、鉴权计费与管理后台。
+
+## 文档目录
+
+1. [快速开始](./getting-started)
+2. [本地开发](./development)
+3. [系统架构](./architecture)
+4. [部署指南](./deployment)
+5. [API 参考](./api-reference)
+
+## 适用对象
+
+- 想在本地启动整套服务（Rust Proxy + Bun Server + Web）的开发者
+- 想进行自部署、接入自有数据库和支付/鉴权能力的团队
+- 想通过统一 OpenAI/Anthropic 风格接口接入多模型的应用方
+
+## 项目组成
+
+- `apps/api`：Rust + Axum 实现的代理层，负责模型请求转发与用量记录
+- `apps/server`：Bun + Elysia 业务后端，负责鉴权、管理、计费和配置
+- `apps/web`：React + Vite 前端（租户端 + 管理端）
+- `packages/*`：共享包（Schema、支付、手机号鉴权等）
+
+## 建议阅读顺序
+
+先看 [快速开始](./getting-started)，再看 [本地开发](./development) 与 [系统架构](./architecture)。

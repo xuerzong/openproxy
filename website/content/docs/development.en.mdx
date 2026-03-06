@@ -1,0 +1,67 @@
+---
+title: Development
+description: Local development workflow and common commands
+---
+
+## Monorepo Structure
+
+```text
+openproxy/
+├── apps/
+│   ├── api/      # Rust proxy
+│   ├── server/   # Bun + Elysia backend
+│   └── web/      # React + Vite frontend
+├── packages/     # Shared packages
+└── website/      # Docs site (Fumadocs + Next.js)
+```
+
+## Common root command
+
+```bash
+bun run dev
+```
+
+- Meaning: runs `turbo run dev`
+- Purpose: starts all workspaces that expose a `dev` script
+
+## Start apps individually
+
+### Rust Proxy
+
+```bash
+cd apps/api
+cargo run
+```
+
+### Business Server
+
+```bash
+cd apps/server
+bun run dev
+```
+
+### Web (Tenant)
+
+```bash
+cd apps/web
+bun run dev:tenant
+```
+
+### Web (Admin)
+
+```bash
+cd apps/web
+bun run dev:admin
+```
+
+## Development suggestions
+
+- Start `apps/server` first and verify auth/config APIs
+- Then start `apps/api` and verify `/health`
+- Finally start `apps/web` for end-to-end UI integration
+
+## Key ports
+
+- `apps/server`: `3888` (default)
+- `apps/api`: `5060` (default)
+- `apps/web`: `5173` (Vite dev port, check actual output)
