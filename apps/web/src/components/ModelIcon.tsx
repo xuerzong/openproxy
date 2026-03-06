@@ -42,7 +42,7 @@ export const ModelIcon: React.FC<ModelIconProps> = ({ model, className }) => {
   return (
     <img
       className={cn('w-4 h-4', className)}
-      src={`/images/model/${getModelIcon(modelOwnedBy)}.svg`}
+      src={`/images/icons/${getModelIcon(modelOwnedBy)}.svg`}
       onError={(e) => {
         setError(true)
       }}

@@ -79,17 +79,6 @@ const Page = () => {
       title={t('aiProviders.title', { defaultValue: 'AI Providers' })}
       className="h-screen"
     >
-      <Select options={supportedAIProviders.map((provider) => ({
-        value: provider.name,
-        label: provider.name,
-        icon: (
-          <img
-            src={provider.icon}
-            alt={provider.name}
-            className="h-4 w-4 rounded-sm object-contain"
-          />
-        ),
-      }))} />
       <Card className="flex justify-end">
         <Button onClick={onAIProviderShow}>
           {t('aiProviders.add', { defaultValue: 'Add Provider' })}
