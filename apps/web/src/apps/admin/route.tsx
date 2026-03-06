@@ -3,8 +3,7 @@ import {
   RouterProvider as ReactRouterProvider,
 } from 'react-router'
 import { lazy } from 'react'
-import { ErrorBoundary, RouterError } from '@/components/ErrorBoundary'
-import { authClient } from '@/utils/better-auth'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const router = createBrowserRouter([
   {
@@ -58,7 +57,7 @@ const router = createBrowserRouter([
       },
       {
         path: 'ai-providers',
-        Component: lazy(() => import('@/pages/AIProviders')),
+        Component: lazy(() => import('./pages/AIProviders')),
       },
       {
         path: 'orders',

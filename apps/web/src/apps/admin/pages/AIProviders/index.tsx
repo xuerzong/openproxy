@@ -21,6 +21,8 @@ import { DropdownMenu } from '@/components/ui/DropdownMenu'
 import { AIProviderUpdateAPIKeyModal } from '@/components/AIProvider/AIProviderUpdateAPIKeyModal'
 import { AIProviderDeleteModal } from '@/components/AIProvider/AIProviderDeleteModal'
 import { useTranslation } from 'react-i18next'
+import { Select } from '@/components/ui/Select'
+import { supportedAIProviders } from '@/constants/ai-providers'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -77,6 +79,10 @@ const Page = () => {
       title={t('aiProviders.title', { defaultValue: 'AI Providers' })}
       className="h-screen"
     >
+      <Select options={supportedAIProviders.map((provider) => ({
+        value: provider.name,
+        label: provider.name,
+      }))} />
       <Card className="flex justify-end">
         <Button onClick={onAIProviderShow}>
           {t('aiProviders.add', { defaultValue: 'Add Provider' })}
