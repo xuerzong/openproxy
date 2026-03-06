@@ -82,6 +82,13 @@ const Page = () => {
       <Select options={supportedAIProviders.map((provider) => ({
         value: provider.name,
         label: provider.name,
+        icon: (
+          <img
+            src={provider.icon}
+            alt={provider.name}
+            className="h-4 w-4 rounded-sm object-contain"
+          />
+        ),
       }))} />
       <Card className="flex justify-end">
         <Button onClick={onAIProviderShow}>

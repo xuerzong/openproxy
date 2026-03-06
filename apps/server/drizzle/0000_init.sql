@@ -76,12 +76,12 @@ CREATE TABLE "models" (
 );
 --> statement-breakpoint
 CREATE TABLE "models_to_ai_providers" (
+	"id" varchar PRIMARY KEY NOT NULL,
 	"model_id" varchar NOT NULL,
 	"ai_provider_id" varchar NOT NULL,
 	"status" smallint DEFAULT 0 NOT NULL,
 	"model" text DEFAULT '' NOT NULL,
-	"weight" integer DEFAULT 0 NOT NULL,
-	CONSTRAINT "models_to_ai_providers_model_id_ai_provider_id_pk" PRIMARY KEY("model_id","ai_provider_id")
+	"weight" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "orders" (
@@ -205,6 +205,7 @@ CREATE INDEX "api_keys_team_id_index" ON "api_keys" USING btree ("team_id");--> 
 CREATE INDEX "models_owned_by_index" ON "models" USING btree ("owned_by");--> statement-breakpoint
 CREATE INDEX "models_type_index" ON "models" USING btree ("type");--> statement-breakpoint
 CREATE INDEX "models_is_public_index" ON "models" USING btree ("is_public");--> statement-breakpoint
+CREATE INDEX "models_to_ai_providers_model_id_index" ON "models_to_ai_providers" USING btree ("model_id");--> statement-breakpoint
 CREATE INDEX "orders_status_index" ON "orders" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "orders_usage_status_index" ON "orders" USING btree ("usage_status");--> statement-breakpoint
 CREATE INDEX "orders_team_id_index" ON "orders" USING btree ("team_id");--> statement-breakpoint

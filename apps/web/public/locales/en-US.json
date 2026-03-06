@@ -50,6 +50,7 @@
     "name": "Name",
     "type": "Type",
     "baseUrl": "Base URL",
+    "provider": "Provider",
     "apiKey": "API Key",
     "weight": "Weight",
     "pleaseInput": "Please input",
@@ -68,6 +69,7 @@
     "emptyState": "Nothing here yet",
     "noData": "No data",
     "emptyListHint": "No records yet",
+    "selectPlaceholder": "Please select",
     "prev": "Prev",
     "next": "Next",
     "yes": "Yes",
@@ -156,7 +158,6 @@
     "add": "Add Provider",
     "addTitle": "Add AI Provider",
     "editTitle": "Edit AI Provider",
-    "provider": "Provider",
     "deleteConfirm": "Are you sure you want to delete this provider?"
   },
   "models": {
@@ -164,7 +165,8 @@
     "createTitle": "Create Model",
     "detailTitle": "Model Detail - {{id}}",
     "addModel": "Add Model",
-    "configure": "Configure Model",
+    "editProvider": "Edit Provider",
+    "addProvider": "Add Provider",
     "deleteModel": "Delete Model",
     "confirmDeleteTitle": "Confirm delete model",
     "deleteWarning": "Are you sure to delete this model? Existing features may be affected. Please proceed with caution.",

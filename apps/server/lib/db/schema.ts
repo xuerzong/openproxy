@@ -449,6 +449,10 @@ export const aiProvidersRelations = relations(aiProviders, ({ many }) => ({
 export const modelsToAIProviders = pgTable(
   'models_to_ai_providers',
   {
+    id: varchar('id')
+      .notNull()
+      .$defaultFn(() => generateDBId())
+      .primaryKey(),
     modelId: varchar('model_id')
       .notNull()
       .references(() => models.id, { onDelete: 'cascade' }),
@@ -459,7 +463,7 @@ export const modelsToAIProviders = pgTable(
     model: text('model').notNull().default(''),
     weight: integer('weight').notNull().default(0),
   },
-  (table) => [primaryKey({ columns: [table.modelId, table.aiProviderId] })]
+  (table) => [index('models_to_ai_providers_model_id_index').on(table.modelId)]
 )
 
 export const modelsToAIProvidersRelations = relations(

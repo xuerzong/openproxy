@@ -8,7 +8,8 @@ import {
   updateModel,
   deleteModel,
   getModelById,
-  upsertModelProviders,
+  insertModelProvider,
+  updateModelProvider,
   delModelProvider,
 } from '@server/services/model'
 import { CreateModelBodySchema, UpdateModelBodySchema } from '@server/schemas'
@@ -16,7 +17,8 @@ import {
   DelModelBodySchema,
   DelModelProviderSchema,
   GetModelDetailQuerySchema,
-  UpsertModelProviderSchema,
+  InsertModelProviderSchema,
+  UpdateModelProviderSchema,
 } from '@server/schemas/model'
 
 export const modelsRouter = new Elysia()
@@ -118,19 +120,29 @@ export const modelsRouter = new Elysia()
     { auth: { role: true }, query: GetModelDetailQuerySchema }
   )
   .post(
-    'models/upsertProvider',
+    'models/insertProvider',
     async ({ body }) => {
-      await upsertModelProviders(body.modelId, body.provider)
+      await insertModelProvider(body.modelId, body.aiProviderId, body.provider)
     },
     {
       auth: { role: 'admin' },
-      body: UpsertModelProviderSchema,
+      body: InsertModelProviderSchema,
+    }
+  )
+  .post(
+    'models/updateProvider',
+    async ({ body }) => {
+      await updateModelProvider(body.aiProviderId, body.provider)
+    },
+    {
+      auth: { role: 'admin' },
+      body: UpdateModelProviderSchema,
     }
   )
   .post(
     'models/delProvider',
     async ({ body }) => {
-      await delModelProvider(body.modelId, body.provider)
+      await delModelProvider(body.provider)
     },
     {
       auth: { role: 'admin' },

@@ -15,6 +15,7 @@ import { DropdownMenu } from '../ui/DropdownMenu'
 import { useRequest } from '@/contexts/ApiContext'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { Select } from '../ui/Select'
 
 interface AIProviderSelectorProps extends Omit<CheckboxGroupProps, 'options'> {
   id: string
@@ -33,7 +34,8 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
   const aiProvidersQuery = useAIProvidersQuery()
 
   const [providerModelForm] = useForm({})
-  const [providerId, setProviderId] = useState('')
+  const [providerOpen, setProviderOpen] = useState(false)
+  const [editingProviderId, setEditingProviderId] = useState('')
   const [deleteProviderId, setDeleteProviderId] = useState('')
   const [switchingProviderId, setSwitchingProviderId] = useState('')
 
@@ -44,7 +46,8 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
           (d: any) => d.provider.id === provider.id
         )
         return {
-          id: provider.id,
+          id: currentProvider?.id || provider.id,
+          aiProviderId: provider.id,
           name: provider.name,
           model: currentProvider?.model,
           weight: currentProvider?.weight,
@@ -54,8 +57,25 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
     )
   }, [aiProvidersQuery.data, providers])
 
+  const handleProviderClose = () => {
+    providerModelForm.resetValues()
+    providerModelForm.resetErrors()
+    setEditingProviderId('')
+    setProviderOpen(false)
+  }
+
   return (
     <>
+      <div>
+        <Button
+          onClick={() => {
+            setEditingProviderId('')
+            setProviderOpen(true)
+          }}
+        >
+          添加供应商
+        </Button>
+      </div>
       <Card className="p-0 overflow-hidden my-4">
         <Table
           rowKey={(d) => d.id}
@@ -63,7 +83,7 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
           columns={[
             {
               key: 'name',
-              label: t('aiProviders.provider', { defaultValue: 'Provider' }),
+              label: t('common.provider', { defaultValue: 'Provider' }),
             },
             {
               key: 'model',
@@ -95,9 +115,9 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                     disabled={switchingProviderId === record.id}
                     onCheckedChange={(checked) => {
                       setSwitchingProviderId(record.id)
-                      request.models.upsertProvider
+                      request.models.updateProvider
                         .post({
-                          modelId: id,
+                          aiProviderId: record.aiProviderId,
                           provider: {
                             id: record.id,
                             model: record.model,
@@ -148,8 +168,14 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                           label: t('actions.edit', { defaultValue: 'Edit' }),
                           icon: <PenSquareIcon />,
                           onClick() {
-                            providerModelForm.setValues(record)
-                            setProviderId(record.id)
+                            providerModelForm.setValues({
+                              providerId: record.aiProviderId,
+                              model: record.model,
+                              weight: record.weight,
+                              status: record.status,
+                            })
+                            setEditingProviderId(record.id)
+                            setProviderOpen(true)
                           },
                         },
                         {
@@ -177,43 +203,58 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
         />
       </Card>
       <Dialog
-        title={t('models.configure', { defaultValue: 'Configure Model' })}
-        open={Boolean(providerId)}
+        title={
+          editingProviderId
+            ? t('models.editProvider', { defaultValue: 'Edit Provider' })
+            : t('models.addProvider', { defaultValue: 'Add Provider' })
+        }
+        open={providerOpen}
         onOpenChange={(open) => {
           if (!open) {
-            setProviderId('')
+            handleProviderClose()
           }
+          setProviderOpen(open)
         }}
         footer={
           <DialogFooter
             onOk={() => {
               providerModelForm.onSubmit((values) => {
-                request.models.upsertProvider
-                  .post({
-                    modelId: id,
-                    provider: {
-                      id: providerId,
-                      model: values.model,
-                      weight: values.weight || 0,
-                      status: values.status ?? 1,
-                    },
-                  })
-                  .then((res) => {
-                    if (res.error) {
-                      toast.error(
-                        t('common.operationFailedWithStatus', {
-                          defaultValue: `Operation failed: ${res.error.status}`,
-                          status: res.error.status,
-                        })
-                      )
-                      return
-                    }
-                    toast.success(
-                      t('common.operationSuccess', { defaultValue: 'Success' })
+                const api = editingProviderId
+                  ? request.models.updateProvider.post({
+                      aiProviderId: values.providerId,
+                      provider: {
+                        id: editingProviderId,
+                        model: values.model,
+                        weight: values.weight || 0,
+                        status: values.status ?? 1,
+                      },
+                    })
+                  : request.models.insertProvider.post({
+                      modelId: id,
+                      aiProviderId: values.providerId,
+                      provider: {
+                        model: values.model,
+                        weight: values.weight || 0,
+                        status: values.status ?? 1,
+                      },
+                    })
+
+                api.then((res) => {
+                  if (res.error) {
+                    toast.error(
+                      t('common.operationFailedWithStatus', {
+                        defaultValue: `Operation failed: ${res.error.status}`,
+                        status: res.error.status,
+                      })
                     )
-                    onSuccess?.()
-                    setProviderId('')
-                  })
+                    return
+                  }
+                  toast.success(
+                    t('common.operationSuccess', { defaultValue: 'Success' })
+                  )
+                  onSuccess?.()
+                  handleProviderClose()
+                })
               })
             }}
           />
@@ -228,6 +269,21 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
               placeholder={t('common.pleaseInput', {
                 defaultValue: 'Please input',
               })}
+            />
+          </FormField>
+
+          <FormField
+            name="providerId"
+            label={t('common.provider', { defaultValue: 'Provider' })}
+          >
+            <Select
+              placeholder={t('common.selectPlaceholder', {
+                defaultValue: 'Please select',
+              })}
+              options={aiProvidersQuery.data?.map((provider) => ({
+                value: provider.id,
+                label: provider.name,
+              }))}
             />
           </FormField>
 
@@ -265,7 +321,6 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
             onOk={() => {
               request.models.delProvider
                 .post({
-                  modelId: id,
                   provider: { id: deleteProviderId },
                 })
                 .then((res) => {

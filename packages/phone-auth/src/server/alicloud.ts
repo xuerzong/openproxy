@@ -157,7 +157,9 @@ function createPhoneLoginPlugin(deps: PhoneAuthDeps) {
 
           const session = await ctx.context.internalAdapter.createSession(user!.id)
           await setSessionCookie(ctx, { session, user: user as any })
-          await ctx.context.internalAdapter.deleteVerificationValue(verification.id)
+          await ctx.context.internalAdapter.deleteVerificationByIdentifier(
+            verification.identifier
+          )
 
           return ctx.json({ data: { user, session }, error: null })
         }
