@@ -40,22 +40,15 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
   const [switchingProviderId, setSwitchingProviderId] = useState('')
 
   const providersDataSource = useMemo(() => {
-    return (
-      aiProvidersQuery.data?.map((provider) => {
-        const currentProvider = providers.find(
-          (d: any) => d.provider.id === provider.id
-        )
-        return {
-          id: currentProvider?.id || provider.id,
-          aiProviderId: provider.id,
-          name: provider.name,
-          model: currentProvider?.model,
-          weight: currentProvider?.weight,
-          status: currentProvider?.status ?? 1,
-        }
-      }) || []
-    )
-  }, [aiProvidersQuery.data, providers])
+    return providers.map((item: any) => ({
+      id: item.id,
+      aiProviderId: item.provider?.id,
+      name: item.provider?.name,
+      model: item.model,
+      weight: item.weight,
+      status: item.status ?? 1,
+    }))
+  }, [providers])
 
   const handleProviderClose = () => {
     providerModelForm.resetValues()
