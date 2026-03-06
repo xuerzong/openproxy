@@ -8,7 +8,7 @@ COPY apps/ ./apps/
 COPY packages/ ./packages/
 COPY website/package.json ./website/package.json
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY . .
 
