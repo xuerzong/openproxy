@@ -136,7 +136,6 @@ pub async fn validate_model_access(
         .map(|r| ProviderCandidate {
             weight: r.provider_weight.unwrap_or(1),
             id: r.provider_id.clone(),
-            name: r.provider_name.clone(),
             model_name: r.provider_model_name.clone(),
             base_url: r.provider_base_url.clone(),
             api_key_hash: r.provider_api_key_hash.clone(),
@@ -194,7 +193,6 @@ pub async fn validate_model_access(
 struct ProviderCandidate {
     weight: i32,
     id: String,
-    name: String,
     model_name: String,
     base_url: String,
     api_key_hash: String,
