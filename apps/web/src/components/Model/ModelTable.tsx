@@ -35,7 +35,7 @@ export const ModelTable: React.FC<ModelTableProps> = ({
   const dataSource = modelsQuery.data || []
 
   return (
-    <div className="flex flex-col gap-4 flex-1 min-h-0 h-full">
+    <div className="flex flex-col gap-4 flex-1 min-w-0 min-h-0 h-full">
       <div className="flex gap-4 shrink-0">
         <div className="w-full">
           <Input

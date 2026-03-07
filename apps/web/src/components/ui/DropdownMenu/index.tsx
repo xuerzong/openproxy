@@ -2,6 +2,9 @@ import { cn } from '@/utils/cn'
 import { DropdownMenu as RadixDropdownMenu, Slot } from 'radix-ui'
 import { useEffect, useState } from 'react'
 import { useZIndexStore } from '@/stores/zIndex'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { Drawer } from '../Drawer'
+import { Button } from '../Button'
 
 export type DropdownMenuItem =
   | {
@@ -23,14 +26,44 @@ export const DropdownMenu: React.FC<
   const nextZIndex = useZIndexStore((state) => state.next)
   const [open, setOpen] = useState(false)
   const [menuZIndex, setMenuZIndex] = useState(1000)
+  const breakpoint = useBreakpoint()
 
   useEffect(() => {
     if (!open) return
     setMenuZIndex(nextZIndex())
   }, [open, nextZIndex])
 
+  if (breakpoint.md) {
+    return (
+      <>
+        <Slot.Root onClick={() => setOpen(!open)}>{children}</Slot.Root>
+        <Drawer open={open} onOpenChange={setOpen}>
+          {menus.map((menu, menuIndex) => {
+            if (menu.type === 'separator') {
+              return <hr key={menuIndex} className="border-t border-border" />
+            }
+            return (
+              <Button
+                key={menu.key}
+                onClick={() => {
+                  menu.onClick()
+                  setOpen(false)
+                }}
+                variant={menu.color === 'danger' ? 'danger' : 'ghost'}
+                className="justify-start"
+              >
+                {menu.icon && <Slot.Root>{menu.icon}</Slot.Root>}
+                {menu.label}
+              </Button>
+            )
+          })}
+        </Drawer>
+      </>
+    )
+  }
+
   return (
-    <RadixDropdownMenu.Root onOpenChange={setOpen}>
+    <RadixDropdownMenu.Root open={open} onOpenChange={setOpen}>
       <RadixDropdownMenu.Trigger asChild>{children}</RadixDropdownMenu.Trigger>
       <RadixDropdownMenu.Portal>
         <RadixDropdownMenu.Content

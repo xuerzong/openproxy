@@ -76,3 +76,7 @@ input:-webkit-autofill {
 .min-h-screen {
   min-height: var(--true-vh, 100vh) !important;
 }
+
+.webkit-scrollbar-hidden::-webkit-scrollbar {
+  display: inline;
+}

@@ -6,6 +6,8 @@ import { cn } from '@/utils/cn'
 import { useTranslation } from 'react-i18next'
 import { useZIndexStore } from '@/stores/zIndex'
 import s from './index.module.scss'
+import { useBreakpoint } from '@/hooks/useBreakpoint'
+import { Drawer } from '../Drawer'
 
 interface DialogProps {
   open?: boolean
@@ -32,11 +34,29 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
 }) => {
   const nextZIndex = useZIndexStore((state) => state.next)
   const [dialogZIndex, setDialogZIndex] = useState<number>(1000)
+  const breakpoint = useBreakpoint()
 
   useEffect(() => {
     if (!open) return
     setDialogZIndex(nextZIndex())
   }, [open, nextZIndex])
+
+  if (breakpoint.md) {
+    return (
+      <>
+        <Drawer open={open} onOpenChange={onOpenChange}>
+          <div className="flex flex-col mb-6">
+            <h2 className="text-xl font-bold">{title}</h2>
+            <p>{description}</p>
+          </div>
+
+          {children}
+
+          {footer && <div className="mt-4">{footer}</div>}
+        </Drawer>
+      </>
+    )
+  }
 
   return (
     <RadixDialog.Root open={open} onOpenChange={onOpenChange}>
@@ -46,7 +66,7 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
             style={{ zIndex: dialogZIndex - 1 }}
             className={cn(
               s.DialogOverlay,
-              'fixed inset-0 w-screen h-screen bg-background/50 backdrop-blur-md'
+              'fixed inset-0 w-screen h-screen bg-black/50 backdrop-blur-md'
             )}
           />
         </Slot.Root>
