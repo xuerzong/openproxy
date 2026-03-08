@@ -41,10 +41,17 @@ export async function getUsagesByTeamId(
 }
 
 export async function getUsagesCountByTeamId(teamId: string) {
+  const now = new Date()
+  const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
   const result = await db
     .select({ count: count() })
     .from(dbSchema.usages)
-    .where(and(eq(dbSchema.usages.teamId, teamId)))
+    .where(
+      and(
+        eq(dbSchema.usages.teamId, teamId),
+        gte(dbSchema.usages.createdAt, last24Hours)
+      )
+    )
   return result[0]?.count || 0
 }
 
