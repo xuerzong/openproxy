@@ -7,10 +7,7 @@ import Decimal from 'decimal.js'
 
 export async function getApiKeysByTeamId(teamId: string) {
   const apiKeys = await db.query.apiKeys.findMany({
-    where: and(
-      eq(dbSchema.apiKeys.teamId, teamId),
-      eq(dbSchema.apiKeys.status, 0)
-    ),
+    where: and(eq(dbSchema.apiKeys.teamId, teamId)),
     orderBy: desc(dbSchema.apiKeys.createdAt),
     with: {
       apiKeysToModels: {
