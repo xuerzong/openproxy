@@ -19,7 +19,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/Chart'
 import type { ChartConfig } from '@/components/ui/Chart'
-import { Bar, BarChart, CartesianGrid, XAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { useTranslation } from 'react-i18next'
 
 const Page = () => {
@@ -97,7 +97,7 @@ const Page = () => {
             {translateDashboard('chart.title24h', '24h Request Trend')}
           </div>
           <ChartContainer config={chartConfig} className="h-72 w-full">
-            <BarChart data={chartData}>
+            <AreaChart data={chartData}>
               <CartesianGrid vertical={false} />
               <XAxis
                 dataKey="bucketLabel"
@@ -106,12 +106,16 @@ const Page = () => {
                 minTickGap={24}
               />
               <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-              <Bar
+              <Area
                 dataKey="requests"
-                fill="var(--color-foreground)"
+                type="monotone"
                 radius={0}
+                stroke="var(--color-primary)"
+                strokeWidth={2}
+                fill="var(--color-primary)"
+                fillOpacity={0.2}
               />
-            </BarChart>
+            </AreaChart>
           </ChartContainer>
         </Card>
       </div>
