@@ -1,0 +1,65 @@
+services:
+  postgresql:
+    image: postgres:16
+    restart: always
+    networks:
+      - openproxy-net
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: openproxy
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  server:
+    image: ghcr.io/xuerzong/openproxy-server:latest
+    ports:
+      - "5080:5080"
+    env_file:
+      - .env
+    depends_on:
+      - postgresql
+    restart: always
+    networks:
+      - openproxy-net
+
+  api:
+    image: ghcr.io/xuerzong/openproxy-api:latest
+    ports:
+      - "5060:5060"
+    env_file:
+      - .env
+    depends_on:
+      - postgresql
+    restart: always
+    networks:
+      - openproxy-net
+
+  web-tenant:
+    image: ghcr.io/xuerzong/openproxy-web:latest
+    ports:
+      - "5090:5090"
+    depends_on:
+      - server
+    restart: always
+    networks:
+      - openproxy-net
+
+  web-admin:
+    image: ghcr.io/xuerzong/openproxy-web:latest
+    ports:
+      - "5091:5091"
+    depends_on:
+      - server
+    restart: always
+    networks:
+      - openproxy-net
+
+volumes:
+  pgdata:
+
+networks:
+  openproxy-net:
+    driver: bridge
