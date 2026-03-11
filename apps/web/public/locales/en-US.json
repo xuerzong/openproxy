@@ -200,6 +200,8 @@
       "providers": "Providers",
       "settings": "Settings"
     },
+    "visibility": "Visibility",
+    "providers": "Providers",
     "type": {
       "language": "Language (language)",
       "image": "Image (image)",

@@ -200,6 +200,8 @@
       "providers": "供应商",
       "settings": "设置"
     },
+    "visibility": "可见性",
+    "providers": "供应商",
     "type": {
       "language": "语言（language）",
       "image": "图片（image）",

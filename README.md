@@ -110,11 +110,13 @@ PORT=5060
 
 ### 3. Generate RSA key pair
 
+To generate an RSA key pair for encrypting provider API keys, run:
+
 ```bash
 bun scripts/generateRSAKey.ts
 ```
 
-Copy the output values into both `.env` files.
+Copy the output (RSA_PRIVATE_KEY and RSA_PUBLIC_KEY) into your .env files for both server and api.
 
 ### 4. Run database migrations
 
@@ -136,23 +138,59 @@ cd apps/web   && bun run dev:tenant   # tenant dashboard on :5173
 cd apps/web   && bun run dev:admin    # admin panel on :5173
 ```
 
-## Docker Deployment
+## Docker Compose Deployment
+
+It is recommended to use `docker/docker-compose.yml` for one-click deployment, including server, api, web-tenant, web-admin, and postgresql.
+
+### Steps
+
+1. Copy and edit the environment variable file:
 
 ```bash
-# Copy and edit environment variables
-cp apps/server/.env.example .env
-# Fill in DATABASE_URL, BETTER_AUTH_SECRET, RSA keys, etc.
-
-docker-compose up -d
+cp docker/.env.example docker/.env
+# Edit docker/.env and fill in database, secret keys, etc.
 ```
 
-| Service      | Port | Description      |
-| ------------ | ---- | ---------------- |
-| `server`     | 5080 | Backend API      |
-| `web-tenant` | 5090 | Tenant dashboard |
-| `web-admin`  | 5091 | Admin panel      |
+2. Start all services:
 
-> The Rust proxy (`apps/api`) is deployed separately. Point `DATABASE_URL` and `RSA_PRIVATE_KEY` to the same database as `server`.
+```bash
+cd docker
+# Start all services in the background
+docker compose up -d
+```
+
+3. Domain and port mapping
+
+- web-tenant: 5090
+- web-admin: 5091
+- server: 3888
+- api: 5060
+
+To bind domains, use Nginx as a reverse proxy. For example:
+
+```nginx
+server {
+    listen 80;
+    server_name tenant.example.com;
+    location / {
+        proxy_pass http://127.0.0.1:5090;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+server {
+    listen 80;
+    server_name admin.example.com;
+    location / {
+        proxy_pass http://127.0.0.1:5091;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+For more details, see `docker/docker-compose.yml` and `docker/.env.example`.
 
 ## API Reference
 
