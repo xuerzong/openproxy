@@ -252,6 +252,7 @@
     "description": "Description",
     "descriptionPlaceholder": "Please input description",
     "styles": "Styles",
+    "allOwnedBy": "All providers",
     "ownedBy": "Owned By",
     "ownedByHelp": "Used only for model icon display",
     "contextWindow": "Context Window",
