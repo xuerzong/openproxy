@@ -20,7 +20,7 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/APIKeys')),
       },
       {
-        path: 'settings/',
+        path: 'account/settings/',
         Component: lazy(() => import('@/layouts/SettingsLayout')),
         children: [
           {
