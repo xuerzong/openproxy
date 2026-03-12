@@ -3,10 +3,10 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
-  useState,
+  useRef,
   type CSSProperties,
 } from 'react'
-import { useMap } from 'ahooks'
+import { useMap, useScroll, useSize } from 'ahooks'
 import { cn } from '@/utils/cn'
 import { Checkbox } from '../Checkbox'
 import s from './index.module.scss'
@@ -19,6 +19,7 @@ export interface TableColumn<T> {
   width?: string | number
   ellipsis?: boolean
   align?: 'left' | 'center' | 'right'
+  fixed?: 'left' | 'right'
 }
 
 interface TableProps<T = any> {
@@ -42,10 +43,15 @@ export function Table<T extends Record<string, any> = {}>({
   onSelectedRowKeysChange,
 }: TableProps<T>) {
   const { t } = useTranslation('common')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const tableRef = useRef<HTMLTableElement>(null)
   const [selectedIndexesMap, selectedIndexesMapAction] = useMap<
     string,
     boolean
   >(selectedRowKeys?.map((d) => [d, true]))
+  const scroll = useScroll(scrollContainerRef)
+  const scrollContainerSize = useSize(scrollContainerRef)
+  const tableSize = useSize(tableRef)
 
   useEffect(() => {
     onSelectedRowKeysChange?.(Array.from(selectedIndexesMap.keys()))
@@ -73,12 +79,87 @@ export function Table<T extends Record<string, any> = {}>({
 
     return hasChecked ? true : false
   }, [selectedIndexesMap, data, rowKey])
-  const [scrollTop, setScrollTop] = useState(0)
+  const scrollTop = scroll?.top || 0
+  const scrollLeft = scroll?.left || 0
+  const maxScrollLeft = useMemo(() => {
+    const containerWidth = scrollContainerSize?.width || 0
+    const tableWidth = tableRef.current?.scrollWidth || tableSize?.width || 0
+
+    return Math.max(tableWidth - containerWidth, 0)
+  }, [scrollContainerSize?.width, tableSize?.width])
+  const scrollState = useMemo(
+    () => ({
+      canScrollLeft: scrollLeft > 0,
+      canScrollRight: scrollLeft < maxScrollLeft - 1,
+    }),
+    [maxScrollLeft, scrollLeft]
+  )
+  const leftFixedOffsets = useMemo(() => {
+    let accumulatedLeft = selectable ? 80 : 0
+    const offsets = new Map<string, number>()
+
+    for (const column of columns) {
+      if (column.fixed !== 'left') {
+        continue
+      }
+
+      offsets.set(column.key, accumulatedLeft)
+      accumulatedLeft += Number(column.width || 160)
+    }
+
+    return offsets
+  }, [columns, selectable])
+  const rightFixedOffsets = useMemo(() => {
+    let accumulatedRight = 0
+    const offsets = new Map<string, number>()
+
+    for (let index = columns.length - 1; index >= 0; index -= 1) {
+      const column = columns[index]
+      if (column.fixed !== 'right') {
+        continue
+      }
+
+      offsets.set(column.key, accumulatedRight)
+      accumulatedRight += Number(column.width || 160)
+    }
+
+    return offsets
+  }, [columns])
   const selectableColProps: {
     style: CSSProperties
   } = {
     style: { width: 80, minWidth: 80, textAlign: 'center' },
   }
+
+  const getCellStyle = useCallback(
+    (col: TableColumn<T>, isHeader = false): CSSProperties => {
+      const isFixedLeft = col.fixed === 'left'
+      const isFixedRight = col.fixed === 'right'
+
+      return {
+        width: col.width,
+        minWidth: col.width,
+        ...(col.ellipsis && {
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+        }),
+        textAlign: col.align || 'left',
+        ...(isFixedLeft && {
+          position: 'sticky',
+          left: leftFixedOffsets.get(col.key) || 0,
+          zIndex: isHeader ? 12 : 2,
+          background: 'var(--color-background)',
+        }),
+        ...(isFixedRight && {
+          position: 'sticky',
+          right: rightFixedOffsets.get(col.key) || 0,
+          zIndex: isHeader ? 12 : 2,
+          background: 'var(--color-background)',
+        }),
+      }
+    },
+    [leftFixedOffsets, rightFixedOffsets]
+  )
 
   const defaultRowRender = useCallback(
     (record: T) => {
@@ -101,15 +182,15 @@ export function Table<T extends Record<string, any> = {}>({
           {columns.map((col) => (
             <td
               key={col.key}
-              style={{
-                width: col.width,
-                minWidth: col.width,
-                ...(col.ellipsis && {
-                  overflow: 'hidden',
-                  whiteSpace: 'nowrap',
-                }),
-                textAlign: col.align || 'left',
-              }}
+              style={getCellStyle(col)}
+              className={cn({
+                [s.FixedLeftCell]: col.fixed === 'left',
+                [s.FixedLeftShadow]:
+                  col.fixed === 'left' && scrollState.canScrollLeft,
+                [s.FixedRightCell]: col.fixed === 'right',
+                [s.FixedRightShadow]:
+                  col.fixed === 'right' && scrollState.canScrollRight,
+              })}
             >
               {col.render
                 ? col.render(record[col.key], record)
@@ -119,18 +200,16 @@ export function Table<T extends Record<string, any> = {}>({
         </tr>
       )
     },
-    [rowKey, columns, selectable, selectedIndexesMap]
+    [rowKey, columns, selectable, selectedIndexesMap, getCellStyle, scrollState]
   )
 
   return (
     <div
-      onScroll={(e) => {
-        setScrollTop((e.target as HTMLTableElement).scrollTop || 0)
-      }}
+      ref={scrollContainerRef}
       className={cn(s.TableRoot, 'w-full h-full rounded-md overflow-x-auto')}
     >
       <div className="w-full h-full">
-        <table>
+        <table ref={tableRef}>
           <thead
             className={cn(
               'sticky top-0 z-10',
@@ -158,12 +237,15 @@ export function Table<T extends Record<string, any> = {}>({
               )}
               {columns.map((col) => (
                 <th
-                  style={{
-                    minWidth: col.width,
-                    width: col.width,
-                    textAlign: col.align || 'left',
-                  }}
-                  className="bg-background"
+                  style={getCellStyle(col, true)}
+                  className={cn('bg-background', {
+                    [s.FixedLeftCell]: col.fixed === 'left',
+                    [s.FixedLeftShadow]:
+                      col.fixed === 'left' && scrollState.canScrollLeft,
+                    [s.FixedRightCell]: col.fixed === 'right',
+                    [s.FixedRightShadow]:
+                      col.fixed === 'right' && scrollState.canScrollRight,
+                  })}
                   key={col.key}
                 >
                   {col.label}

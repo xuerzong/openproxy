@@ -1,4 +1,60 @@
 .TableRoot {
+  .FixedLeftCell {
+    position: relative;
+    background: color-mix(
+      in oklab,
+      var(--color-background) 94%,
+      var(--color-muted) 6%
+    );
+  }
+
+  .FixedLeftShadow {
+    &::after {
+      content: '';
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      width: 14px;
+      height: calc(100% + 2px);
+      pointer-events: none;
+      background: linear-gradient(
+        to right,
+        rgba(15, 23, 42, 0.18),
+        rgba(15, 23, 42, 0.08) 25%,
+        transparent 100%
+      );
+      transform: translateX(100%);
+    }
+  }
+
+  .FixedRightCell {
+    position: relative;
+    background: color-mix(
+      in oklab,
+      var(--color-background) 94%,
+      var(--color-muted) 6%
+    );
+  }
+
+  .FixedRightShadow {
+    &::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: 14px;
+      height: calc(100% + 2px);
+      pointer-events: none;
+      background: linear-gradient(
+        to left,
+        rgba(15, 23, 42, 0.18),
+        rgba(15, 23, 42, 0.08) 25%,
+        transparent 100%
+      );
+      transform: translateX(-100%);
+    }
+  }
+
   table {
     width: 100%;
   }
