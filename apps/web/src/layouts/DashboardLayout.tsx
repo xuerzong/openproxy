@@ -1,6 +1,7 @@
 import { Portal, Slot } from 'radix-ui'
 import React, { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Logo } from '@/components/Logo'
 import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { UserAccount } from '@/components/UserAccount'
@@ -78,6 +79,7 @@ export const DashboardLayout: React.FC<MainLayoutProps> = ({ menus }) => {
         </div>
 
         <div className="mt-auto"></div>
+        <LanguageSwitcher />
         <ThemeSwitcher />
         <div className="h-px bg-border" />
 
