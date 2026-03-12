@@ -22,7 +22,7 @@ export const UserAccount = () => {
           label: t('account.settings', { defaultValue: 'Account Settings' }),
           icon: <SettingsIcon />,
           onClick: () => {
-            navigate('/settings')
+            navigate('/account/settings')
           },
         },
         {

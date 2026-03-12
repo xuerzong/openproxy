@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 const Page = () => {
   const navigate = useNavigate()
   useEffect(() => {
-    navigate('/settings/general', { replace: true })
+    navigate('/account/settings/general', { replace: true })
   }, [])
   return null
 }
