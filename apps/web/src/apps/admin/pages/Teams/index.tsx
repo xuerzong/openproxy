@@ -297,6 +297,7 @@ const Page = () => {
               label: t('common.operation', { defaultValue: 'Operation' }),
               width: 120,
               align: 'center',
+              fixed: 'right',
               render: (_, record) => (
                 <Button
                   variant="ghost"
