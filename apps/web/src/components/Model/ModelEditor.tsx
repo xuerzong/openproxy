@@ -41,19 +41,51 @@ export const ModelEditor = ({
   const [submitLoading, setSubmitLoading] = useState(false)
   const [delOpen, setDelOpen] = useState(false)
   const modelId = defaultValues.id
+  const isNewModel = !modelId
   const [searchParams] = useSearchParams()
 
   const type = useMemo<ModelEditorType>(() => {
+    if (isNewModel) return 'base' as ModelEditorType
     const type = searchParams.get('type')
     if (modelEditorTypes.includes(type as any)) {
       return type as ModelEditorType
     }
     return modelEditorTypes[0]
-  }, [searchParams])
+  }, [searchParams, isNewModel])
 
   useUpdateEffect(() => {
     form.setValues(defaultValues)
   }, [defaultValues])
+
+  const tabItems = useMemo(() => {
+    if (isNewModel) {
+      return [
+        {
+          key: 'base',
+          label: t('models.tabs.basic', { defaultValue: 'Basic' }),
+          icon: <Settings2Icon />,
+        },
+      ]
+    }
+
+    return [
+      {
+        key: 'base',
+        label: t('models.tabs.basic', { defaultValue: 'Basic' }),
+        icon: <Settings2Icon />,
+      },
+      {
+        key: 'provider',
+        label: t('models.tabs.providers', { defaultValue: 'Providers' }),
+        icon: <StoreIcon />,
+      },
+      {
+        key: 'setting',
+        label: t('models.tabs.settings', { defaultValue: 'Settings' }),
+        icon: <SettingsIcon />,
+      },
+    ]
+  }, [isNewModel])
 
   return (
     <>
@@ -63,23 +95,7 @@ export const ModelEditor = ({
           onValueChange={(value) => {
             navigate(`/models/${modelId}?type=${value}`)
           }}
-          items={[
-            {
-              key: 'base',
-              label: t('models.tabs.basic', { defaultValue: 'Basic' }),
-              icon: <Settings2Icon />,
-            },
-            {
-              key: 'provider',
-              label: t('models.tabs.providers', { defaultValue: 'Providers' }),
-              icon: <StoreIcon />,
-            },
-            {
-              key: 'setting',
-              label: t('models.tabs.settings', { defaultValue: 'Settings' }),
-              icon: <SettingsIcon />,
-            },
-          ]}
+          items={tabItems}
         />
       </div>
       {type === 'base' && (
@@ -168,7 +184,7 @@ export const ModelEditor = ({
         </>
       )}
 
-      {type === 'provider' && (
+      {type === 'provider' && !isNewModel && (
         <AIProviderSelector
           id={modelId}
           providers={defaultValues.providers || []}
@@ -178,7 +194,7 @@ export const ModelEditor = ({
         />
       )}
 
-      {type === 'setting' && (
+      {type === 'setting' && !isNewModel && (
         <Card>
           <div className="text-lg font-bold mb-2">
             {t('models.deleteModel', { defaultValue: 'Delete Model' })}
