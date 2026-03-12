@@ -1,6 +1,7 @@
 import { Elysia } from 'elysia'
 import { auth } from '@server/lib/auth'
 import { getUserTeamById } from '@server/services/user'
+import { parseTeamMetadata } from '@server/services/team'
 
 const getSessionOrThrow = async (
   headers: Headers,
@@ -53,6 +54,11 @@ export const betterAuthTeamPlugin = new Elysia({
       if (!userTeam) {
         set.status = 404
         throw new Error('Team Not Found')
+      }
+
+      if (parseTeamMetadata(userTeam.team.metadata).disabled) {
+        set.status = 403
+        throw new Error('Team Disabled')
       }
 
       return {

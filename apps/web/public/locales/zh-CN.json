@@ -6,6 +6,7 @@
     "orders": "订单管理",
     "models": "模型列表",
     "users": "用户列表",
+    "teams": "团队管理",
     "aiProviders": "AI 供应商"
   },
   "dashboard": {
@@ -124,6 +125,68 @@
     },
     "messages": {
       "emailVerifyUpdated": "邮箱验证状态更改成功"
+    }
+  },
+  "teams": {
+    "title": "团队管理",
+    "detailTitle": "团队详情",
+    "detailDescription": "查看团队信息并更新限额配置。",
+    "searchPlaceholder": "按团队名称搜索...",
+    "actions": {
+      "manage": "管理",
+      "resetInviteCode": "重置邀请码",
+      "enable": "启用团队",
+      "disable": "禁用团队",
+      "delete": "删除团队"
+    },
+    "messages": {
+      "updateSuccess": "团队更新成功",
+      "inviteCodeReset": "邀请码重置成功",
+      "enabledSuccess": "团队已启用",
+      "disabledSuccess": "团队已禁用",
+      "deleteSuccess": "团队删除成功"
+    },
+    "form": {
+      "name": "团队名称",
+      "namePlaceholder": "请输入团队名称",
+      "inviteCode": "邀请码",
+      "inviteCodePlaceholder": "请输入邀请码",
+      "apiKeyLimit": "API Key 限额",
+      "usersLimit": "用户限额"
+    },
+    "status": {
+      "active": "正常",
+      "disabled": "已禁用"
+    },
+    "members": {
+      "title": "成员列表",
+      "name": "名称",
+      "email": "邮箱",
+      "role": "角色",
+      "joinedAt": "加入时间"
+    },
+    "dangerZone": {
+      "title": "危险操作",
+      "description": "禁用团队会阻止该团队的团队级访问；删除团队会永久移除相关团队数据。"
+    },
+    "confirm": {
+      "deleteTitle": "删除团队",
+      "deleteDescription": "该操作会永久删除团队及其相关记录，且无法撤销。",
+      "disableTitle": "禁用团队",
+      "disableDescription": "禁用后，该团队的所有团队级访问都会被阻止，直到重新启用。",
+      "enableTitle": "启用团队",
+      "enableDescription": "启用后，该团队成员的团队级访问将恢复。"
+    },
+    "table": {
+      "name": "名称",
+      "inviteCode": "邀请码",
+      "status": "状态",
+      "memberCount": "成员数",
+      "apiKeyLimit": "API Key 限额",
+      "usersLimit": "用户限额",
+      "amount": "余额",
+      "createdAt": "创建时间",
+      "updatedAt": "更新时间"
     }
   },
   "billing": {

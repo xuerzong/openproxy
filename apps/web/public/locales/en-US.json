@@ -6,6 +6,7 @@
     "orders": "Orders",
     "models": "Models",
     "users": "Users",
+    "teams": "Teams",
     "aiProviders": "AI Providers"
   },
   "dashboard": {
@@ -124,6 +125,68 @@
     },
     "messages": {
       "emailVerifyUpdated": "Email verification status updated"
+    }
+  },
+  "teams": {
+    "title": "Teams",
+    "detailTitle": "Team Details",
+    "detailDescription": "Review team information and update limits.",
+    "searchPlaceholder": "Search teams by name...",
+    "actions": {
+      "manage": "Manage",
+      "resetInviteCode": "Reset Invite Code",
+      "enable": "Enable Team",
+      "disable": "Disable Team",
+      "delete": "Delete Team"
+    },
+    "messages": {
+      "updateSuccess": "Team updated successfully",
+      "inviteCodeReset": "Invite code reset successfully",
+      "enabledSuccess": "Team enabled successfully",
+      "disabledSuccess": "Team disabled successfully",
+      "deleteSuccess": "Team deleted successfully"
+    },
+    "form": {
+      "name": "Team Name",
+      "namePlaceholder": "Please input team name",
+      "inviteCode": "Invite Code",
+      "inviteCodePlaceholder": "Please input invite code",
+      "apiKeyLimit": "API Key Limit",
+      "usersLimit": "User Limit"
+    },
+    "status": {
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "members": {
+      "title": "Members",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "joinedAt": "Joined At"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Disabling a team blocks team-scoped access. Deleting a team permanently removes related team data."
+    },
+    "confirm": {
+      "deleteTitle": "Delete Team",
+      "deleteDescription": "This will permanently delete the team and related records. This action cannot be undone.",
+      "disableTitle": "Disable Team",
+      "disableDescription": "Disabling a team will block all team-scoped access until it is enabled again.",
+      "enableTitle": "Enable Team",
+      "enableDescription": "Enabling the team will restore team-scoped access for its members."
+    },
+    "table": {
+      "name": "Name",
+      "inviteCode": "Invite Code",
+      "status": "Status",
+      "memberCount": "Members",
+      "apiKeyLimit": "API Key Limit",
+      "usersLimit": "User Limit",
+      "amount": "Balance",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
     }
   },
   "billing": {

@@ -56,6 +56,10 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/Users')),
       },
       {
+        path: 'teams',
+        Component: lazy(() => import('./pages/Teams')),
+      },
+      {
         path: 'ai-providers',
         Component: lazy(() => import('./pages/AIProviders')),
       },
