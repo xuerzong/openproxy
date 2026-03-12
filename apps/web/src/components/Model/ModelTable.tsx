@@ -8,9 +8,12 @@ import { CopyButton } from '@/components/CopyButton'
 import { ModelIcon } from '@/components/ModelIcon'
 import { Button } from '@/components/ui/Button'
 import { Input } from '../ui/Input'
+import { Select } from '../ui/Select'
 import { Tooltip } from '../ui/Tooltip'
 import { FlexScrollViewer } from '../FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
+
+const ALL_OWNED_BY_VALUE = '__all__'
 
 interface ModelTableProps {
   selectable?: boolean
@@ -27,17 +30,46 @@ export const ModelTable: React.FC<ModelTableProps> = ({
 }) => {
   const { t } = useTranslation('common')
   const [searchValue, setSearchValue] = useState('')
+  const [ownedByValue, setOwnedByValue] = useState(ALL_OWNED_BY_VALUE)
   const [debouncedSearchValue] = useDebounce(searchValue, 300)
   const modelsQuery = useModelsQuery()
   const canManage = mode === 'admin'
   const navigate = useNavigate()
 
+  const ownedByOptions = useMemo(() => {
+    const values = Array.from(
+      new Set(
+        (modelsQuery.data || []).map((model) => model.ownedBy).filter(Boolean)
+      )
+    ).sort((left, right) => left.localeCompare(right))
+
+    return [
+      {
+        label: t('models.allOwnedBy', { defaultValue: 'All providers' }),
+        value: ALL_OWNED_BY_VALUE,
+      },
+      ...values.map((value) => ({
+        label: (
+          <div className="flex items-center gap-2">
+            <ModelIcon className="w-4 h-4" model={value} />
+            <span className="capitalize">{value}</span>
+          </div>
+        ),
+        value,
+      })),
+    ]
+  }, [modelsQuery.data, t])
+
   const dataSource = useMemo(() => {
     return (modelsQuery.data || []).filter((model) => {
       const keyword = debouncedSearchValue.toLowerCase()
-      return model.id.toLowerCase().includes(keyword)
+      const matchesKeyword = model.id.toLowerCase().includes(keyword)
+      const matchesOwnedBy =
+        ownedByValue === ALL_OWNED_BY_VALUE || model.ownedBy === ownedByValue
+
+      return matchesKeyword && matchesOwnedBy
     })
-  }, [modelsQuery.data, debouncedSearchValue])
+  }, [modelsQuery.data, debouncedSearchValue, ownedByValue])
 
   return (
     <div className="flex flex-col gap-4 flex-1 min-w-0 min-h-0 h-full">
@@ -52,6 +84,14 @@ export const ModelTable: React.FC<ModelTableProps> = ({
             onChange={(e) => {
               setSearchValue(e.target.value)
             }}
+          />
+        </div>
+        <div className="w-48 shrink-0">
+          <Select
+            options={ownedByOptions}
+            value={ownedByValue}
+            onChange={setOwnedByValue}
+            placeholder={t('models.ownedBy', { defaultValue: 'Owned By' })}
           />
         </div>
         {canManage && (

@@ -252,6 +252,7 @@
     "description": "模型描述",
     "descriptionPlaceholder": "请输入模型描述",
     "styles": "风格",
+    "allOwnedBy": "全部供应商",
     "ownedBy": "所属主体",
     "ownedByHelp": "仅用于展示模型图标",
     "contextWindow": "上下文",
