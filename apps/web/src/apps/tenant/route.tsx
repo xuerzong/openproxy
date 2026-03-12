@@ -20,6 +20,24 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/APIKeys')),
       },
       {
+        path: 'settings/',
+        Component: lazy(() => import('./layouts/TeamSettingsLayout')),
+        children: [
+          {
+            path: '',
+            Component: lazy(() => import('./pages/TeamSettings')),
+          },
+          {
+            path: 'general',
+            Component: lazy(() => import('./pages/TeamSettings/General')),
+          },
+          {
+            path: 'members',
+            Component: lazy(() => import('./pages/TeamSettings/Members')),
+          },
+        ],
+      },
+      {
         path: 'account/settings/',
         Component: lazy(() => import('@/layouts/SettingsLayout')),
         children: [
@@ -42,6 +60,10 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/Orders')),
       },
     ],
+  },
+  {
+    path: '/join/:inviteCode',
+    Component: lazy(() => import('./pages/JoinTeam')),
   },
   {
     path: '/auth/',

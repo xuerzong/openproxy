@@ -107,6 +107,77 @@
   "settings": {
     "title": "Settings"
   },
+  "teamSettings": {
+    "title": "Team Settings",
+    "backToWorkspace": "Back to Workspace",
+    "messages": {
+      "updateSuccess": "Team information updated successfully",
+      "deleteSuccess": "Team deleted successfully"
+    },
+    "actions": {
+      "deleteTeam": "Delete Team"
+    },
+    "general": {
+      "menu": "Basic Information",
+      "basicInfo": "Basic Information",
+      "basicInfoDescription": "Update the current team name and review the active invitation link.",
+      "memberQuota": "Member Quota",
+      "seats": "seats",
+      "inviteEnabled": "Invite enabled",
+      "namePlaceholder": "Please input team name",
+      "inviteLink": "Invite Link"
+    },
+    "members": {
+      "menu": "User Management",
+      "inviteTitle": "Invite Members",
+      "inviteDescription": "Share the invitation link to let users join the current team. When seats are full, invitees will see a warning.",
+      "seatsUsed": "seats used",
+      "limitReached": "The current team has no remaining seats. New users cannot join until a seat is freed.",
+      "listTitle": "User Management",
+      "manageDescription": "Owners can change member roles and remove members from the team.",
+      "readonlyDescription": "Only team owners can change roles or remove members.",
+      "remove": "Remove",
+      "confirmRemoveTitle": "Remove this member?",
+      "confirmRemoveDescription": "The member will immediately lose access to the current team after removal.",
+      "roles": {
+        "owner": "Owner",
+        "member": "Member"
+      },
+      "messages": {
+        "lastOwner": "At least one owner must remain in the team.",
+        "roleUpdated": "Member role updated successfully",
+        "selfRemoveBlocked": "You cannot remove yourself from this page.",
+        "memberRemoved": "Member removed successfully"
+      }
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Deleting the team will remove the workspace for all members. This action cannot be undone."
+    },
+    "confirmDelete": {
+      "title": "Delete current team?",
+      "description": "This will remove the current team and all team-scoped data for every member."
+    },
+    "join": {
+      "switchSuccess": "Switched to the invited team",
+      "loadingTitle": "Joining team...",
+      "loadingDescription": "Please wait while we verify the invitation.",
+      "successTitle": "Invitation accepted",
+      "successDescription": "You have joined the invited team successfully.",
+      "alreadyMemberTitle": "Already in this team",
+      "alreadyMemberDescription": "Your account is already a member of the invited team.",
+      "fullTitle": "No seats available",
+      "fullDescription": "The team has reached its member limit. Please contact the team owner to free up a seat.",
+      "notFoundTitle": "Invitation not found",
+      "notFoundDescription": "This invitation link is invalid or has expired.",
+      "forbiddenTitle": "Unable to join team",
+      "forbiddenDescription": "This team is currently unavailable.",
+      "errorTitle": "Join failed",
+      "errorDescription": "We could not process this invitation right now.",
+      "switchTeam": "Switch to this team",
+      "backHome": "Back to dashboard"
+    }
+  },
   "orders": {
     "title": "Orders",
     "table": {

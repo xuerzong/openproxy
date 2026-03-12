@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { PhoneLoginForm } from '@openproxy/phone-auth/client'
 import { LockIcon, SmartphoneIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
@@ -16,7 +16,9 @@ const Page = () => {
   const { t } = useTranslation('common')
   const { refreshSession } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const showPhoneLogin = import.meta.env.VITE_SHOW_PHONE_LOGIN !== 'false'
+  const redirect = searchParams.get('redirect') || '/'
   const [loginMethod, setLoginMethod] = useState<'phone' | 'password'>(
     showPhoneLogin ? 'phone' : 'password'
   )
@@ -54,7 +56,7 @@ const Page = () => {
           }}
           onSuccess={async () => {
             await refreshSession()
-            navigate('/', { replace: true })
+            navigate(redirect, { replace: true })
           }}
           footer={<TermsAndPrivacy />}
         />

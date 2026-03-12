@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
@@ -17,6 +17,8 @@ export const PasswordLoginForm = () => {
   const [submitLoading, setSubmitLoading] = useState(false)
   const { signIn } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get('redirect') || '/'
 
   const [formValues, setFormValues] = useState<{
     account: string
@@ -77,7 +79,7 @@ export const PasswordLoginForm = () => {
     setSubmitLoading(false)
     if (!success) {
       toast.error(
-        t('auth.passwordOrEmailWrong', {
+        t('auth.loginFailed', {
           defaultValue: 'Incorrect password or email',
         })
       )
@@ -85,7 +87,7 @@ export const PasswordLoginForm = () => {
     }
 
     toast.success(t('auth.loginSuccess', { defaultValue: 'Login successful' }))
-    navigate('/')
+      navigate(redirect, { replace: true })
   }
   return (
     <div className="gap-2">

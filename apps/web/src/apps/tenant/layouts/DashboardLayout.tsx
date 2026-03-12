@@ -1,14 +1,24 @@
 import { AuthRequiredRoute } from '@/components/AuthRequiredRoute'
 import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayout'
-import { BoxIcon, GaugeIcon, KeyRoundIcon, StampIcon } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import {
+  ArrowLeftIcon,
+  BoxIcon,
+  GaugeIcon,
+  KeyRoundIcon,
+  SettingsIcon,
+  StampIcon,
+  UsersIcon,
+} from 'lucide-react'
+import { useMemo } from 'react'
+import { useLocation, useNavigate } from 'react-router'
 import { TeamLayout } from '@/layouts/TeamLayout'
 import { useTranslation } from 'react-i18next'
 
 export const DashboardLayout = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { t } = useTranslation('common')
-  const menus = [
+  const mainMenus = [
     {
       key: '/',
       icon: <GaugeIcon className="w-5 h-5" />,
@@ -45,7 +55,63 @@ export const DashboardLayout = () => {
       },
       access: 'public',
     },
+    {
+      key: '/settings',
+      icon: <SettingsIcon className="w-5 h-5" />,
+      label: t('teamSettings.title', { defaultValue: 'Team Settings' }),
+      onClick() {
+        navigate('/settings/general')
+      },
+      access: 'public',
+      matchPath(pathname: string) {
+        return pathname.startsWith('/settings')
+      },
+    },
   ]
+
+  const settingsMenus = useMemo(
+    () => [
+      {
+        key: '/settings-back',
+        icon: <ArrowLeftIcon className="w-5 h-5" />,
+        label: t('teamSettings.backToWorkspace', {
+          defaultValue: 'Back to Workspace',
+        }),
+        onClick() {
+          navigate('/')
+        },
+        access: 'public',
+      },
+      {
+        key: '/settings/general',
+        icon: <SettingsIcon className="w-5 h-5" />,
+        label: t('teamSettings.general.menu', {
+          defaultValue: 'Basic Information',
+        }),
+        onClick() {
+          navigate('/settings/general')
+        },
+        access: 'public',
+      },
+      {
+        key: '/settings/members',
+        icon: <UsersIcon className="w-5 h-5" />,
+        label: t('teamSettings.members.menu', {
+          defaultValue: 'User Management',
+        }),
+        onClick() {
+          navigate('/settings/members')
+        },
+        access: 'public',
+      },
+    ],
+    [navigate, t]
+  )
+
+  const menus = location.pathname.startsWith('/settings')
+    ? settingsMenus
+    : mainMenus
+
   return (
     <AuthRequiredRoute>
       <TeamLayout>

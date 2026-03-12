@@ -26,6 +26,13 @@ export {
   UpdateAdminTeamStatusBodySchema,
 } from './admin'
 
+export {
+  JoinTeamByInviteCodeBodySchema,
+  TeamMemberIdSchema,
+  UpdateCurrentTeamBodySchema,
+  UpdateCurrentTeamMemberRoleBodySchema,
+} from './team'
+
 // Common Schemas
 export {
   PaginationQuerySchema,
