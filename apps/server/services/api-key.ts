@@ -27,27 +27,26 @@ export async function getApiKeysByTeamId(teamId: string) {
 
 export async function createApiKey(params: {
   teamId: string
-  userId: string
+  teamUserId: string
   name: string
   expiresAt: Date | null
   maxQuota?: number
   maxRequests?: number
   modelIds: string[]
 }) {
-  const { teamId, userId, name, expiresAt, maxQuota, maxRequests, modelIds } =
-    params
+  const {
+    teamId,
+    teamUserId,
+    name,
+    expiresAt,
+    maxQuota,
+    maxRequests,
+    modelIds,
+  } = params
+
   const apiKey = generateApiKey()
 
   await db.transaction(async (tx) => {
-    const [row] = await tx
-      .select({ value: count() })
-      .from(dbSchema.apiKeys)
-      .where(eq(dbSchema.apiKeys.teamId, teamId))
-
-    if (row && row.value >= 10) {
-      throw new Error(`每个用户最多只能创建 ${10} 个 API Key`)
-    }
-
     const apiKeys = await tx
       .insert(dbSchema.apiKeys)
       .values({
@@ -55,7 +54,7 @@ export async function createApiKey(params: {
         apiKey: generateDeApiKey(apiKey),
         apiKeyHash: await hash(apiKey),
         teamId,
-        userId,
+        userId: teamUserId,
         expiresAt,
         maxQuota: maxQuota?.toString(),
         maxRequests,
@@ -78,6 +77,15 @@ export async function createApiKey(params: {
   })
 
   return apiKey
+}
+
+export const getApiKeyCountByTeamId = async (teamId: string) => {
+  const [row] = await db
+    .select({ value: count() })
+    .from(dbSchema.apiKeys)
+    .where(eq(dbSchema.apiKeys.teamId, teamId))
+
+  return row?.value || 0
 }
 
 export async function updateApiKey(params: {

@@ -1,5 +1,5 @@
 import Elysia from 'elysia'
-import { betterAuthPlugin } from '../better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
   createAIProvider,
   delAIProviderAPIKey,

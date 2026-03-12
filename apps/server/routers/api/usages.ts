@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { betterAuthPlugin } from '@server/routers/better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { PaginationQuerySchema, UsageGroupedQuerySchema } from '@server/schemas'
 import {
   getUsagesByTeamId,
@@ -15,7 +15,8 @@ export const usagesRouter = new Elysia()
       return await getUsagesByTeamId(teamId, query.limit, query.offset)
     },
     {
-      auth: { role: true, team: true },
+      auth: { role: true },
+      team: true,
       query: PaginationQuerySchema,
     }
   )
@@ -29,7 +30,8 @@ export const usagesRouter = new Elysia()
       )
     },
     {
-      auth: { role: true, team: true },
+      auth: { role: true },
+      team: true,
       query: UsageGroupedQuerySchema,
     }
   )
@@ -39,6 +41,7 @@ export const usagesRouter = new Elysia()
       return await getUsagesCountByTeamId(teamId)
     },
     {
-      auth: { role: true, team: true },
+      auth: { role: true },
+      team: true,
     }
   )

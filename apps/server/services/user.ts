@@ -2,7 +2,6 @@ import { and, count, desc, eq, sql } from 'drizzle-orm'
 import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import Decimal from 'decimal.js'
-import { UserExperienceQuota } from '@server/constants'
 
 export async function getUserByEmail(email: string) {
   const [user] = await db
@@ -26,7 +25,6 @@ export async function getUserConfig(userId: string) {
     .insert(dbSchema.userConfigs)
     .values({
       userId,
-      // amount: UserExperienceQuota,
     })
     .returning()
 
@@ -93,6 +91,10 @@ export const getUserTeamById = async (userId: string, teamId: string) => {
       eq(dbSchema.teamUsers.teamId, teamId),
       eq(dbSchema.teamUsers.userId, userId)
     ),
+    with: {
+      team: true,
+    },
   })
+
   return team
 }

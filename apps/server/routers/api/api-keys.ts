@@ -1,11 +1,12 @@
 import { Elysia, t } from 'elysia'
 import omit from 'lodash/omit'
-import { betterAuthPlugin } from '@server/routers/better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
   getApiKeysByTeamId,
   createApiKey,
   updateApiKey,
   deleteApiKey,
+  getApiKeyCountByTeamId,
 } from '@server/services/api-key'
 import { CreateApiKeyBodySchema, UpdateApiKeyBodySchema } from '@server/schemas'
 
@@ -22,15 +23,22 @@ export const apiKeysRouter = new Elysia()
         maxQuota: apiKey.maxQuota,
       }))
     },
-    { auth: { role: true, team: true } }
+    { auth: { role: true }, team: true }
   )
   .post(
     'apiKeys',
-    async ({ teamUserId, teamId, body, status }) => {
+    async ({ teamUserId, teamId, team, body, status }) => {
       try {
+        const hasCreatedApiKeyCount = await getApiKeyCountByTeamId(teamId)
+        if (hasCreatedApiKeyCount >= team.apiKeyLimit) {
+          return status(422, {
+            code: 'API_KEY_LIMIT_EXCEEDED',
+            message: `每个用户最多只能创建 ${team.apiKeyLimit} 个 API Key`,
+          })
+        }
         const apiKey = await createApiKey({
           teamId,
-          userId: teamUserId,
+          teamUserId,
           name: body.name,
           expiresAt: body.expiresAt,
           maxQuota: body.maxQuota,
@@ -46,7 +54,8 @@ export const apiKeysRouter = new Elysia()
     },
     {
       body: CreateApiKeyBodySchema,
-      auth: { role: true, team: true },
+      auth: { role: true },
+      team: true,
     }
   )
   .put(
@@ -70,7 +79,8 @@ export const apiKeysRouter = new Elysia()
       }
     },
     {
-      auth: { role: true, team: true },
+      auth: { role: true },
+      team: true,
       body: UpdateApiKeyBodySchema,
     }
   )
@@ -79,5 +89,5 @@ export const apiKeysRouter = new Elysia()
     async ({ teamId, params }) => {
       await deleteApiKey(params.id, teamId)
     },
-    { auth: { role: true, team: true } }
+    { auth: { role: true }, team: true }
   )

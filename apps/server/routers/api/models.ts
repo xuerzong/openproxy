@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import omit from 'lodash/omit'
-import { betterAuthPlugin } from '@server/routers/better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { auth } from '@server/lib/auth'
 import {
   getModelsWithPermission,

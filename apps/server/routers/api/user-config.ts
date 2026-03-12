@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { betterAuthPlugin } from '@server/routers/better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { getUserConfigWithBalance } from '@server/services/user'
 import {
   getOrdersByTeamId,
@@ -22,14 +22,14 @@ export const userConfigRouter = new Elysia()
     async ({ teamId, query }) => {
       return await getOrdersByTeamId(teamId, query.limit, query.offset)
     },
-    { auth: { role: true, team: true }, query: PaginationQuerySchema }
+    { auth: { role: true }, team: true, query: PaginationQuerySchema }
   )
   .get(
     'orders/count',
     async ({ teamId }) => {
       return await getOrdersCountByTeamId(teamId)
     },
-    { auth: { role: true, team: true } }
+    { auth: { role: true }, team: true }
   )
   .get(
     'team',
@@ -41,5 +41,5 @@ export const userConfigRouter = new Elysia()
       }
       return team
     },
-    { auth: { role: true, team: true } }
+    { auth: { role: true }, team: true }
   )

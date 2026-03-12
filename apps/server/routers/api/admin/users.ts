@@ -1,6 +1,6 @@
 import { Elysia } from 'elysia'
 import { auth } from '@server/lib/auth'
-import { betterAuthPlugin } from '@server/routers/better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
   getUserByEmail,
   getUsersWithConfig,

@@ -1,6 +1,6 @@
 import Elysia, { status, t } from 'elysia'
 import { generateOrderId } from '@server/lib/generate'
-import { betterAuthPlugin } from '@server/routers/better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { PayStatus, PayType } from '@server/constants/pay'
 import Decimal from 'decimal.js'
 import { and, count, eq, gte, sql } from 'drizzle-orm'
@@ -182,7 +182,8 @@ export const payRouter = new Elysia({ name: 'pay-router', prefix: '/pay' })
         amount: t.Number(),
         type: t.String(),
       }),
-      auth: { role: true, team: true },
+      auth: { role: true },
+      team: true,
     }
   )
   .get(
@@ -212,7 +213,8 @@ export const payRouter = new Elysia({ name: 'pay-router', prefix: '/pay' })
       return Number(order.status)
     },
     {
-      auth: { role: true, team: true },
+      auth: { role: true },
+      team: true,
       query: t.Object({ orderId: t.String() }),
     }
   )
