@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CircleQuestionMarkIcon, EditIcon, PlusIcon } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import { useNavigate } from 'react-router'
@@ -32,7 +32,12 @@ export const ModelTable: React.FC<ModelTableProps> = ({
   const canManage = mode === 'admin'
   const navigate = useNavigate()
 
-  const dataSource = modelsQuery.data || []
+  const dataSource = useMemo(() => {
+    return (modelsQuery.data || []).filter((model) => {
+      const keyword = debouncedSearchValue.toLowerCase()
+      return model.id.toLowerCase().includes(keyword)
+    })
+  }, [modelsQuery.data, debouncedSearchValue])
 
   return (
     <div className="flex flex-col gap-4 flex-1 min-w-0 min-h-0 h-full">
