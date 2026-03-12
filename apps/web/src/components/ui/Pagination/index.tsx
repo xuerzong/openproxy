@@ -118,6 +118,10 @@ export const Pagination: React.FC<PaginationProps> = ({
     return mergeProps({ className: s.Pagination }, restProps)
   }, [restProps])
 
+  if (currentPages.length < 2) {
+    return null
+  }
+
   return (
     <div {...mergedProps}>
       <Button
