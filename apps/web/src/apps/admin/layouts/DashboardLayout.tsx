@@ -5,6 +5,7 @@ import {
   GaugeIcon,
   StampIcon,
   StoreIcon,
+  UsersRoundIcon,
   UsersIcon,
 } from 'lucide-react'
 import { useNavigate } from 'react-router'
@@ -44,6 +45,14 @@ export const DashboardLayout = () => {
       label: t('menu.users', { defaultValue: 'Users' }),
       onClick() {
         navigate('/users')
+      },
+    },
+    {
+      key: '/teams',
+      icon: <UsersRoundIcon className="w-5 h-5" />,
+      label: t('menu.teams', { defaultValue: 'Teams' }),
+      onClick() {
+        navigate('/teams')
       },
     },
     {
