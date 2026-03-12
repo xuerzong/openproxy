@@ -1,5 +1,5 @@
 import { Elysia } from 'elysia'
-import { betterAuthPlugin } from '@server/routers/better-auth'
+import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { getAdminDashboardStats } from '@server/services/admin-dashboard'
 
 export const adminDashboardRouter = new Elysia({
