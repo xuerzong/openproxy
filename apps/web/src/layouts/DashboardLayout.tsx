@@ -52,7 +52,7 @@ export const DashboardLayout: React.FC<MainLayoutProps> = ({ menus }) => {
     <div className="flex min-h-screen">
       <Portal.Root className={cn('block md:hidden', { hidden: !collapsed })}>
         <div
-          className="fixed z-50 left-0 top-0 bg-background/50 backdrop-blur-md w-screen h-screen"
+          className="fixed z-50 left-0 top-0 bg-black/50 backdrop-blur-md w-screen h-screen"
           onClick={() => toggleCollapsed()}
         />
       </Portal.Root>
