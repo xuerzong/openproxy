@@ -115,7 +115,8 @@ export const modelsRouter = new Elysia()
   .get(
     'models',
     async ({ query }) => {
-      return omit(await getModelById(query.id), 'apiKeyHash')
+      const model = await getModelById(query.id)
+      return model ? omit(model, 'apiKeyHash') : model
     },
     { auth: { role: true }, query: GetModelDetailQuerySchema }
   )
