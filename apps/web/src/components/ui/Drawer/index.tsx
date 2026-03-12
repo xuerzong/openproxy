@@ -49,7 +49,7 @@ export const Drawer: React.FC<React.PropsWithChildren<DrawerProps>> = ({
           {...contentProps}
           style={{ zIndex: drawerZIndex, ...contentProps?.style }}
           className={cn(
-            'fixed bottom-0 left-[50%] translate-x-[-50%] p-6 bg-background border border-border rounded-t-lg min-w-md w-full min-h-0 max-h-[90vh] shadow-xl',
+            'fixed bottom-0 left-[50%] translate-x-[-50%] p-6 bg-background border border-border rounded-t-lg min-w-xs w-full min-h-0 max-h-[90vh] shadow-xl',
             'flex flex-col gap-4',
             contentProps?.className
           )}
