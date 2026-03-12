@@ -7,6 +7,7 @@ import { modelsRouter } from './models'
 import { constsRouter } from './consts'
 import { aiProvidersRouter } from './ai-providers'
 import { usagesRouter } from './usages'
+import { teamRouter } from './team'
 import {
   adminDashboardRouter,
   adminOrdersRouter,
@@ -26,6 +27,7 @@ export const apiRouter = new Elysia({
   .use(payRouter)
   .use(aiProvidersRouter)
   .use(usagesRouter)
+  .use(teamRouter)
   .use(adminDashboardRouter)
   .use(adminOrdersRouter)
   .use(adminTeamsRouter)

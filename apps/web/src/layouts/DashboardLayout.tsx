@@ -1,5 +1,6 @@
 import { Portal, Slot } from 'radix-ui'
 import React, { useEffect } from 'react'
+import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
 import { Outlet, useLocation } from 'react-router'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Logo } from '@/components/Logo'
@@ -13,6 +14,7 @@ type MenuData = {
   icon?: React.ReactNode
   label: string
   onClick?: () => void
+  matchPath?: (pathname: string) => boolean
 }
 
 interface MenuItemProps {
@@ -25,14 +27,21 @@ const MenuItem: React.FC<MenuItemProps> = ({ menu, isActive = false }) => {
     <div
       key={menu.key}
       className={cn(
-        'flex items-center gap-2 py-2  px-4 ring-1 ring-transparent rounded-md select-none cursor-pointer transition-colors z-10',
+        'relative flex items-center gap-2 py-2 px-4 ring-1 ring-transparent rounded-md select-none cursor-pointer transition-colors z-10 overflow-hidden',
         { 'bg-muted text-foreground ring-border': isActive },
         { 'hover:bg-muted': !isActive }
       )}
       onClick={menu.onClick}
     >
-      <Slot.Root className="w-5 h-5">{menu.icon}</Slot.Root>
-      <span>{menu.label}</span>
+      {isActive ? (
+        <motion.div
+          layoutId="dashboard-menu-active"
+          className="absolute inset-0 rounded-md bg-muted ring-1 ring-border"
+          transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+        />
+      ) : null}
+      <Slot.Root className="relative z-10 w-5 h-5">{menu.icon}</Slot.Root>
+      <span className="relative z-10">{menu.label}</span>
     </div>
   )
 }
@@ -44,6 +53,7 @@ interface MainLayoutProps {
 export const DashboardLayout: React.FC<MainLayoutProps> = ({ menus }) => {
   const collapsed = useAppStore((state) => state.collapsed)
   const pathname = useLocation().pathname
+  const menuGroupKey = menus.map((menu) => menu.key).join('|')
 
   useEffect(() => {
     changeCollapsed(false)
@@ -68,15 +78,28 @@ export const DashboardLayout: React.FC<MainLayoutProps> = ({ menus }) => {
           <Logo className="h-10 w-auto" />
         </div>
         {/* <TeamSwitcher /> */}
-        <div className="flex flex-col gap-1 flex-1">
-          {menus.map((menu) => (
-            <MenuItem
-              key={menu.key}
-              menu={menu}
-              isActive={menu.key === pathname}
-            />
-          ))}
-        </div>
+        <LayoutGroup>
+          <div className="relative flex flex-col gap-1 flex-1 overflow-hidden">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={menuGroupKey}
+                className="flex flex-col gap-1 flex-1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+              >
+                {menus.map((menu) => (
+                  <MenuItem
+                    key={menu.key}
+                    menu={menu}
+                    isActive={menu.matchPath ? menu.matchPath(pathname) : menu.key === pathname}
+                  />
+                ))}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </LayoutGroup>
 
         <div className="mt-auto"></div>
         <LanguageSwitcher />

@@ -19,3 +19,19 @@ export const authClient = createAuthClient({
   },
   plugins: [magicLinkClient(), phoneNumberClient()],
 })
+
+export const changeActiveTeam = async (teamId: string) => {
+  const response = await fetch('/api/auth/change-team', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ teamId }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to switch team: ${response.status}`)
+  }
+
+  return await response.json()
+}

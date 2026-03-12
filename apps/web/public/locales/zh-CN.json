@@ -107,6 +107,77 @@
   "settings": {
     "title": "设置"
   },
+  "teamSettings": {
+    "title": "团队设置",
+    "backToWorkspace": "返回工作区",
+    "messages": {
+      "updateSuccess": "团队信息更新成功",
+      "deleteSuccess": "团队删除成功"
+    },
+    "actions": {
+      "deleteTeam": "删除团队"
+    },
+    "general": {
+      "menu": "基础信息",
+      "basicInfo": "基础信息",
+      "basicInfoDescription": "更新当前团队名称，并查看当前可用的邀请码链接。",
+      "memberQuota": "成员配额",
+      "seats": "个席位",
+      "inviteEnabled": "可邀请加入",
+      "namePlaceholder": "请输入团队名称",
+      "inviteLink": "邀请链接"
+    },
+    "members": {
+      "menu": "用户管理",
+      "inviteTitle": "邀请成员",
+      "inviteDescription": "分享邀请链接让用户加入当前团队。当席位已满时，访问链接的用户会看到提示。",
+      "seatsUsed": "个席位已使用",
+      "limitReached": "当前团队已没有可用席位。在释放席位前，新的用户无法加入。",
+      "listTitle": "用户管理",
+      "manageDescription": "团队所有者可以修改成员角色并将成员移出团队。",
+      "readonlyDescription": "只有团队所有者可以修改角色或移除成员。",
+      "remove": "移除",
+      "confirmRemoveTitle": "确认移除此成员？",
+      "confirmRemoveDescription": "移除后，该成员会立即失去当前团队的访问权限。",
+      "roles": {
+        "owner": "所有者",
+        "member": "成员"
+      },
+      "messages": {
+        "lastOwner": "团队中至少需要保留一名所有者。",
+        "roleUpdated": "成员角色更新成功",
+        "selfRemoveBlocked": "不能在此页面移除自己。",
+        "memberRemoved": "成员移除成功"
+      }
+    },
+    "dangerZone": {
+      "title": "危险操作",
+      "description": "删除团队会移除所有成员的工作区，此操作无法撤销。"
+    },
+    "confirmDelete": {
+      "title": "确认删除当前团队？",
+      "description": "该操作会删除当前团队以及所有成员的团队级数据。"
+    },
+    "join": {
+      "switchSuccess": "已切换到被邀请的团队",
+      "loadingTitle": "正在加入团队...",
+      "loadingDescription": "正在验证邀请信息，请稍候。",
+      "successTitle": "邀请已接受",
+      "successDescription": "你已经成功加入被邀请的团队。",
+      "alreadyMemberTitle": "你已在该团队中",
+      "alreadyMemberDescription": "你的账号已经是该邀请团队的成员。",
+      "fullTitle": "没有空余席位",
+      "fullDescription": "该团队已达到成员上限，请联系团队所有者释放一个席位。",
+      "notFoundTitle": "未找到邀请",
+      "notFoundDescription": "该邀请链接无效或已过期。",
+      "forbiddenTitle": "无法加入团队",
+      "forbiddenDescription": "该团队当前不可加入。",
+      "errorTitle": "加入失败",
+      "errorDescription": "当前无法处理该邀请，请稍后再试。",
+      "switchTeam": "切换到该团队",
+      "backHome": "返回控制台"
+    }
+  },
   "orders": {
     "title": "订单管理",
     "table": {
