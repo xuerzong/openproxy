@@ -124,6 +124,10 @@
       "memberQuota": "Member Quota",
       "seats": "seats",
       "inviteEnabled": "Invite enabled",
+      "inviteDisabled": "Join disabled",
+      "allowJoin": "Allow users to join via invite link",
+      "allowJoinEnabled": "Users with a valid invite link can join this team.",
+      "allowJoinDisabled": "New users cannot join this team through invite links right now.",
       "namePlaceholder": "Please input team name",
       "inviteLink": "Invite Link"
     },
@@ -172,6 +176,10 @@
       "notFoundDescription": "This invitation link is invalid or has expired.",
       "forbiddenTitle": "Unable to join team",
       "forbiddenDescription": "This team is currently unavailable.",
+      "joinBlockedTitle": "Joining is currently unavailable",
+      "joinBlockedDescription": "This team is not accepting new members through invite links at the moment.",
+      "teamDisabledTitle": "Team unavailable",
+      "teamDisabledDescription": "This team has been disabled and is not accepting access right now.",
       "errorTitle": "Join failed",
       "errorDescription": "We could not process this invitation right now.",
       "switchTeam": "Switch to this team",
@@ -228,7 +236,16 @@
       "inviteCode": "Invite Code",
       "inviteCodePlaceholder": "Please input invite code",
       "apiKeyLimit": "API Key Limit",
-      "usersLimit": "User Limit"
+      "usersLimit": "User Limit",
+      "allowJoin": "Allow users to join via invite link",
+      "allowJoinEnabled": "Users can join this team with a valid invite link.",
+      "allowJoinDisabled": "Invite links stay visible, but new users cannot join this team.",
+      "joinDisabledReason": "Join blocked reason",
+      "joinDisabledReasonPlaceholder": "Explain why users cannot join this team right now."
+    },
+    "joinAccess": {
+      "allowed": "Allowed",
+      "blocked": "Blocked"
     },
     "status": {
       "active": "Active",
@@ -257,6 +274,7 @@
       "name": "Name",
       "inviteCode": "Invite Code",
       "status": "Status",
+      "joinAccess": "Join Access",
       "memberCount": "Members",
       "apiKeyLimit": "API Key Limit",
       "usersLimit": "User Limit",

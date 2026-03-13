@@ -9,6 +9,7 @@ import { CopyButton } from '@/components/CopyButton'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import { Input } from '@/components/ui/Input'
+import { Switch } from '@/components/ui/Switch'
 import { Tag } from '@/components/ui/Tag'
 import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -23,6 +24,7 @@ const Page = () => {
   const { refreshSession } = useAuth()
   const teamQuery = useTeamQuery()
   const [name, setName] = useState('')
+  const [allowJoin, setAllowJoin] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -40,6 +42,14 @@ const Page = () => {
     setName(team?.name || '')
   }, [team?.name])
 
+  useEffect(() => {
+    setAllowJoin(team?.allowJoin !== false)
+  }, [team?.allowJoin])
+
+  const hasChanges =
+    name.trim() !== (team?.name || '').trim() ||
+    allowJoin !== (team?.allowJoin !== false)
+
   const refreshTeamState = async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: ['team'] }),
@@ -56,6 +66,7 @@ const Page = () => {
     setSaving(true)
     const response = await request.team.put({
       name: name.trim(),
+      allowJoin,
     })
     setSaving(false)
 
@@ -155,11 +166,40 @@ const Page = () => {
                 {team?.usersLimit || 0}{' '}
                 {t('teamSettings.general.seats', { defaultValue: 'seats' })}
               </span>
-              <Tag color="green">
-                {t('teamSettings.general.inviteEnabled', {
-                  defaultValue: 'Invite enabled',
-                })}
+              <Tag color={allowJoin ? 'green' : 'yellow'}>
+                {allowJoin
+                  ? t('teamSettings.general.inviteEnabled', {
+                      defaultValue: 'Invite enabled',
+                    })
+                  : t('teamSettings.general.inviteDisabled', {
+                      defaultValue: 'Join disabled',
+                    })}
               </Tag>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1 md:col-span-2">
+            <label className="font-medium text-sm">
+              {t('teamSettings.general.allowJoin', {
+                defaultValue: 'Allow users to join via invite link',
+              })}
+            </label>
+            <div className="min-h-9 px-3 py-2 rounded-md border border-border flex items-center justify-between gap-3 bg-muted/20">
+              <div className="text-sm text-secondary">
+                {allowJoin
+                  ? t('teamSettings.general.allowJoinEnabled', {
+                      defaultValue:
+                        'Users with a valid invite link can join this team.',
+                    })
+                  : t('teamSettings.general.allowJoinDisabled', {
+                      defaultValue:
+                        'New users cannot join this team through invite links right now.',
+                    })}
+              </div>
+              <Switch
+                checked={allowJoin}
+                onCheckedChange={(checked) => setAllowJoin(Boolean(checked))}
+              />
             </div>
           </div>
 
@@ -180,7 +220,7 @@ const Page = () => {
               />
               <Button
                 loading={saving}
-                disabled={!name.trim() || name.trim() === (team?.name || '').trim()}
+                disabled={!name.trim() || !hasChanges}
                 onClick={onSave}
               >
                 {t('actions.save', { defaultValue: 'Save' })}

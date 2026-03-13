@@ -9,6 +9,8 @@ type TeamRole = (typeof TEAM_ROLES)[number]
 
 interface TeamMetadata {
   disabled?: boolean
+  allowJoin?: boolean
+  joinDisabledReason?: string
 }
 
 export class TeamServiceError extends Error {
@@ -45,11 +47,27 @@ const stringifyTeamMetadata = (metadata: TeamMetadata) => {
 const toAdminTeamView = (
   team: typeof dbSchema.teams.$inferSelect,
   memberCount = 0
-) => ({
-  ...team,
-  disabled: Boolean(parseTeamMetadata(team.metadata).disabled),
-  memberCount,
-})
+) => {
+  const metadata = parseTeamMetadata(team.metadata)
+
+  return {
+    ...team,
+    disabled: Boolean(metadata.disabled),
+    allowJoin: metadata.allowJoin !== false,
+    joinDisabledReason: metadata.joinDisabledReason || '',
+    memberCount,
+  }
+}
+
+const toCurrentTeamView = (team: typeof dbSchema.teams.$inferSelect) => {
+  const metadata = parseTeamMetadata(team.metadata)
+
+  return {
+    ...team,
+    allowJoin: metadata.allowJoin !== false,
+    joinDisabledReason: metadata.joinDisabledReason || '',
+  }
+}
 
 export const createTeam = async (userId: string) => {
   const teamId = await db.transaction(async (tx) => {
@@ -81,15 +99,26 @@ export const getTeams = (userId: string) => {
 }
 
 export const getTeamById = (teamUserId: string, teamId: string) => {
-  return db.query.teamUsers.findFirst({
-    where: and(
-      eq(dbSchema.teamUsers.teamId, teamId),
-      eq(dbSchema.teamUsers.id, teamUserId)
-    ),
-    with: {
-      team: true,
-    },
-  })
+  return db.query.teamUsers
+    .findFirst({
+      where: and(
+        eq(dbSchema.teamUsers.teamId, teamId),
+        eq(dbSchema.teamUsers.id, teamUserId)
+      ),
+      with: {
+        team: true,
+      },
+    })
+    .then((teamUser) => {
+      if (!teamUser) {
+        return teamUser
+      }
+
+      return {
+        ...teamUser,
+        team: toCurrentTeamView(teamUser.team),
+      }
+    })
 }
 
 export const getAdminTeams = async (
@@ -149,20 +178,38 @@ export const updateAdminTeam = async (params: {
   inviteCode: string
   apiKeyLimit: number
   usersLimit: number
+  allowJoin: boolean
+  joinDisabledReason?: string
 }) => {
-  const [team] = await db
+  const existingTeam = await db.query.teams.findFirst({
+    where: eq(dbSchema.teams.id, params.id),
+  })
+
+  if (!existingTeam) {
+    return null
+  }
+
+  const metadata = parseTeamMetadata(existingTeam.metadata)
+  const joinDisabledReason = params.joinDisabledReason?.trim() || ''
+
+  const [updatedTeam] = await db
     .update(dbSchema.teams)
     .set({
       name: params.name.trim(),
       inviteCode: params.inviteCode.trim(),
       apiKeyLimit: params.apiKeyLimit,
       usersLimit: params.usersLimit,
+      metadata: stringifyTeamMetadata({
+        ...metadata,
+        allowJoin: params.allowJoin,
+        joinDisabledReason: params.allowJoin ? undefined : joinDisabledReason,
+      }),
       updatedAt: new Date(),
     })
     .where(eq(dbSchema.teams.id, params.id))
     .returning()
 
-  return team ? toAdminTeamView(team) : team
+  return updatedTeam ? toAdminTeamView(updatedTeam) : updatedTeam
 }
 
 export const getAdminTeamMembers = async (teamId: string) => {
@@ -287,14 +334,29 @@ export const updateCurrentTeam = async (
   teamId: string,
   params: {
     name: string
+    allowJoin: boolean
   }
 ) => {
   await assertTeamOwner(userId, teamId)
+
+  const existingTeam = await db.query.teams.findFirst({
+    where: eq(dbSchema.teams.id, teamId),
+  })
+
+  if (!existingTeam) {
+    throw new TeamServiceError('TEAM_NOT_FOUND', 404)
+  }
+
+  const metadata = parseTeamMetadata(existingTeam.metadata)
 
   const [team] = await db
     .update(dbSchema.teams)
     .set({
       name: params.name.trim(),
+      metadata: stringifyTeamMetadata({
+        ...metadata,
+        allowJoin: params.allowJoin,
+      }),
       updatedAt: new Date(),
     })
     .where(eq(dbSchema.teams.id, teamId))
@@ -304,7 +366,7 @@ export const updateCurrentTeam = async (
     throw new TeamServiceError('TEAM_NOT_FOUND', 404)
   }
 
-  return team
+  return toCurrentTeamView(team)
 }
 
 export const updateCurrentTeamMemberRole = async (
@@ -424,7 +486,10 @@ export const deleteCurrentTeam = async (userId: string, teamId: string) => {
   }
 }
 
-export const joinTeamByInviteCode = async (userId: string, inviteCode: string) => {
+export const joinTeamByInviteCode = async (
+  userId: string,
+  inviteCode: string
+) => {
   const normalizedInviteCode = inviteCode.trim()
   const team = await db.query.teams.findFirst({
     where: eq(dbSchema.teams.inviteCode, normalizedInviteCode),
@@ -434,8 +499,17 @@ export const joinTeamByInviteCode = async (userId: string, inviteCode: string) =
     throw new TeamServiceError('TEAM_NOT_FOUND', 404)
   }
 
-  if (parseTeamMetadata(team.metadata).disabled) {
+  const metadata = parseTeamMetadata(team.metadata)
+
+  if (metadata.disabled) {
     throw new TeamServiceError('TEAM_DISABLED', 403)
+  }
+
+  if (metadata.allowJoin === false) {
+    throw new TeamServiceError(
+      metadata.joinDisabledReason?.trim() || 'TEAM_JOIN_NOT_ALLOWED',
+      403
+    )
   }
 
   const existingMembership = await db.query.teamUsers.findFirst({
