@@ -1,8 +1,8 @@
 import { AuthRequiredRoute } from '@/components/AuthRequiredRoute'
 import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayout'
 import {
-  ArrowLeftIcon,
   BoxIcon,
+  ChevronLeftIcon,
   GaugeIcon,
   KeyRoundIcon,
   SettingsIcon,
@@ -63,6 +63,7 @@ export const DashboardLayout = () => {
         navigate('/settings/general')
       },
       access: 'public',
+      showArrow: true,
       matchPath(pathname: string) {
         return pathname.startsWith('/settings')
       },
@@ -73,7 +74,7 @@ export const DashboardLayout = () => {
     () => [
       {
         key: '/settings-back',
-        icon: <ArrowLeftIcon className="w-5 h-5" />,
+        icon: <ChevronLeftIcon className="w-5 h-5" />,
         label: t('teamSettings.backToWorkspace', {
           defaultValue: 'Back to Workspace',
         }),
