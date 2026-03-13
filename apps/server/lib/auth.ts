@@ -12,6 +12,30 @@ import { teamPlugin } from '@server/lib/better-auth/team'
 import { createPhoneAuthConfig } from '@openproxy/phone-auth/server'
 import { createTeam, getTeams } from '@server/services/team'
 
+const trustedOriginsFromEnv = (process.env.BETTER_AUTH_TRUSTED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+
+const defaultTrustedOrigins = [
+  `https://${APP_DOMAIN}`,
+  `https://${APP_DOMAIN}:*`,
+  `http://${APP_DOMAIN}`,
+  `http://${APP_DOMAIN}:*`,
+  `https://*.${APP_DOMAIN}`,
+  `https://*.${APP_DOMAIN}:*`,
+  `http://*.${APP_DOMAIN}`,
+  `http://*.${APP_DOMAIN}:*`,
+  'http://localhost:*',
+  'https://localhost:*',
+  'http://127.0.0.1:*',
+  'https://127.0.0.1:*',
+]
+
+const trustedOrigins = Array.from(
+  new Set([...defaultTrustedOrigins, ...trustedOriginsFromEnv])
+)
+
 const githubProviderEnable = Boolean(
   process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
 )
@@ -97,13 +121,7 @@ export const auth = betterAuth({
     phoneAuth.phoneLoginPlugin,
     teamPlugin,
   ],
-  trustedOrigins: process.env.BETTER_AUTH_TRUSTED_ORIGINS
-    ? process.env.BETTER_AUTH_TRUSTED_ORIGINS.split(',')
-    : [
-        `https://app.${APP_DOMAIN}`,
-        `https://admin.${APP_DOMAIN}`,
-        'http://localhost:5173',
-      ],
+  trustedOrigins,
   socialProviders: {
     ...(githubProviderEnable && {
       github: {
