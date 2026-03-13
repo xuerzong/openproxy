@@ -1,8 +1,6 @@
 import { createAuthClient } from 'better-auth/react'
 import { magicLinkClient, phoneNumberClient } from 'better-auth/client/plugins'
 
-console.log(window.location.origin)
-
 export const authClient = createAuthClient({
   baseURL: window.location.origin,
   basePath: '/api/auth/',
@@ -21,17 +19,8 @@ export const authClient = createAuthClient({
 })
 
 export const changeActiveTeam = async (teamId: string) => {
-  const response = await fetch('/api/auth/change-team', {
+  return (await authClient.$fetch('/change-team', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ teamId }),
-  })
-
-  if (!response.ok) {
-    throw new Error(`Failed to switch team: ${response.status}`)
-  }
-
-  return await response.json()
+    body: { teamId },
+  })) as { success: boolean }
 }

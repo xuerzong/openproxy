@@ -76,7 +76,7 @@ const JoinTeamPageInner = () => {
     return () => {
       alive = false
     }
-  }, [inviteCode, request.team.join])
+  }, [inviteCode])
 
   const onSwitchTeam = async () => {
     if (!team?.id || switching) {
@@ -100,14 +100,18 @@ const JoinTeamPageInner = () => {
     { title: string; description: string; icon: ReactNode }
   > = {
     loading: {
-      title: t('teamSettings.join.loadingTitle', { defaultValue: 'Joining team...' }),
+      title: t('teamSettings.join.loadingTitle', {
+        defaultValue: 'Joining team...',
+      }),
       description: t('teamSettings.join.loadingDescription', {
         defaultValue: 'Please wait while we verify the invitation.',
       }),
       icon: <UsersIcon className="w-10 h-10" />,
     },
     success: {
-      title: t('teamSettings.join.successTitle', { defaultValue: 'Invitation accepted' }),
+      title: t('teamSettings.join.successTitle', {
+        defaultValue: 'Invitation accepted',
+      }),
       description: t('teamSettings.join.successDescription', {
         defaultValue: 'You have joined the invited team successfully.',
       }),
@@ -123,7 +127,9 @@ const JoinTeamPageInner = () => {
       icon: <CheckCircle2Icon className="w-10 h-10 text-success" />,
     },
     full: {
-      title: t('teamSettings.join.fullTitle', { defaultValue: 'No seats available' }),
+      title: t('teamSettings.join.fullTitle', {
+        defaultValue: 'No seats available',
+      }),
       description: t('teamSettings.join.fullDescription', {
         defaultValue:
           'The team has reached its member limit. Please contact the team owner to free up a seat.',
@@ -166,9 +172,13 @@ const JoinTeamPageInner = () => {
           {content.icon}
           <div>
             <div className="text-2xl font-semibold">{content.title}</div>
-            <div className="text-sm text-secondary mt-2">{content.description}</div>
+            <div className="text-sm text-secondary mt-2">
+              {content.description}
+            </div>
           </div>
-          {team?.name ? <div className="text-sm font-medium">{team.name}</div> : null}
+          {team?.name ? (
+            <div className="text-sm font-medium">{team.name}</div>
+          ) : null}
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -179,8 +189,13 @@ const JoinTeamPageInner = () => {
               })}
             </Button>
           )}
-          <Button variant="outline" onClick={() => navigate('/', { replace: true })}>
-            {t('teamSettings.join.backHome', { defaultValue: 'Back to dashboard' })}
+          <Button
+            variant="outline"
+            onClick={() => navigate('/', { replace: true })}
+          >
+            {t('teamSettings.join.backHome', {
+              defaultValue: 'Back to dashboard',
+            })}
           </Button>
         </div>
       </Card>
