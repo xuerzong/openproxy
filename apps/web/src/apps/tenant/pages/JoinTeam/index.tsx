@@ -19,6 +19,42 @@ type JoinState =
   | 'forbidden'
   | 'error'
 
+const getJoinForbiddenContent = (
+  reason: string | undefined,
+  t: (key: string, options?: Record<string, unknown>) => string
+) => {
+  if (reason === 'TEAM_DISABLED') {
+    return {
+      title: t('teamSettings.join.teamDisabledTitle', {
+        defaultValue: 'Team unavailable',
+      }),
+      description: t('teamSettings.join.teamDisabledDescription', {
+        defaultValue:
+          'This team has been disabled and is not accepting access right now.',
+      }),
+    }
+  }
+
+  if (reason && reason !== 'TEAM_JOIN_NOT_ALLOWED') {
+    return {
+      title: t('teamSettings.join.joinBlockedTitle', {
+        defaultValue: 'Joining is currently unavailable',
+      }),
+      description: reason,
+    }
+  }
+
+  return {
+    title: t('teamSettings.join.joinBlockedTitle', {
+      defaultValue: 'Joining is currently unavailable',
+    }),
+    description: t('teamSettings.join.joinBlockedDescription', {
+      defaultValue:
+        'This team is not accepting new members through invite links at the moment.',
+    }),
+  }
+}
+
 const JoinTeamPageInner = () => {
   const { t } = useTranslation('common')
   const request = useRequest()
@@ -28,6 +64,7 @@ const JoinTeamPageInner = () => {
   const [state, setState] = useState<JoinState>('loading')
   const [team, setTeam] = useState<any>(null)
   const [switching, setSwitching] = useState(false)
+  const [joinForbiddenReason, setJoinForbiddenReason] = useState('')
 
   useEffect(() => {
     let alive = true
@@ -42,6 +79,18 @@ const JoinTeamPageInner = () => {
 
       if (response.error) {
         const status = Number(response.error.status)
+        const errorValue = response.error.value as
+          | string
+          | { message?: string; code?: string; reason?: string }
+          | null
+
+        const errorReason =
+          typeof errorValue === 'string'
+            ? errorValue
+            : errorValue?.reason ||
+              errorValue?.message ||
+              errorValue?.code ||
+              ''
 
         if (status === 409) {
           setState('full')
@@ -54,6 +103,7 @@ const JoinTeamPageInner = () => {
         }
 
         if (status === 403) {
+          setJoinForbiddenReason(errorReason)
           setState('forbidden')
           return
         }
@@ -67,6 +117,7 @@ const JoinTeamPageInner = () => {
         return
       }
 
+      setJoinForbiddenReason('')
       setTeam(response.data.team)
       setState(response.data.alreadyMember ? 'already-member' : 'success')
     }
@@ -146,12 +197,7 @@ const JoinTeamPageInner = () => {
       icon: <TriangleAlertIcon className="w-10 h-10 text-danger" />,
     },
     forbidden: {
-      title: t('teamSettings.join.forbiddenTitle', {
-        defaultValue: 'Unable to join team',
-      }),
-      description: t('teamSettings.join.forbiddenDescription', {
-        defaultValue: 'This team is currently unavailable.',
-      }),
+      ...getJoinForbiddenContent(joinForbiddenReason, t),
       icon: <TriangleAlertIcon className="w-10 h-10 text-danger" />,
     },
     error: {

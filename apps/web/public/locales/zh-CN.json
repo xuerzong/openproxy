@@ -124,6 +124,10 @@
       "memberQuota": "成员配额",
       "seats": "个席位",
       "inviteEnabled": "可邀请加入",
+      "inviteDisabled": "已禁止加入",
+      "allowJoin": "允许用户通过邀请链接加入",
+      "allowJoinEnabled": "拥有有效邀请链接的用户可以加入该团队。",
+      "allowJoinDisabled": "当前禁止新用户通过邀请链接加入该团队。",
       "namePlaceholder": "请输入团队名称",
       "inviteLink": "邀请链接"
     },
@@ -172,6 +176,10 @@
       "notFoundDescription": "该邀请链接无效或已过期。",
       "forbiddenTitle": "无法加入团队",
       "forbiddenDescription": "该团队当前不可加入。",
+      "joinBlockedTitle": "当前无法加入团队",
+      "joinBlockedDescription": "该团队暂时不接受通过邀请链接加入的新成员。",
+      "teamDisabledTitle": "团队当前不可用",
+      "teamDisabledDescription": "该团队已被禁用，当前无法访问或加入。",
       "errorTitle": "加入失败",
       "errorDescription": "当前无法处理该邀请，请稍后再试。",
       "switchTeam": "切换到该团队",
@@ -228,7 +236,16 @@
       "inviteCode": "邀请码",
       "inviteCodePlaceholder": "请输入邀请码",
       "apiKeyLimit": "API Key 限额",
-      "usersLimit": "用户限额"
+      "usersLimit": "用户限额",
+      "allowJoin": "允许用户通过邀请链接加入",
+      "allowJoinEnabled": "用户可以通过有效的邀请码链接加入该团队。",
+      "allowJoinDisabled": "邀请链接仍然可见，但新的用户将无法加入该团队。",
+      "joinDisabledReason": "禁止加入原因",
+      "joinDisabledReasonPlaceholder": "说明当前为什么不允许用户加入该团队。"
+    },
+    "joinAccess": {
+      "allowed": "允许加入",
+      "blocked": "禁止加入"
     },
     "status": {
       "active": "正常",
@@ -257,6 +274,7 @@
       "name": "名称",
       "inviteCode": "邀请码",
       "status": "状态",
+      "joinAccess": "加入权限",
       "memberCount": "成员数",
       "apiKeyLimit": "API Key 限额",
       "usersLimit": "用户限额",

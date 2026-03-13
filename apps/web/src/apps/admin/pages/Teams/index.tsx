@@ -8,9 +8,10 @@ import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import { Form, FormField, useForm } from '@/components/ui/Form'
-import { Input } from '@/components/ui/Input'
+import { Input, Textarea } from '@/components/ui/Input'
 import { NumberInput } from '@/components/ui/NumberInput'
 import { Pagination } from '@/components/ui/Pagination'
+import { Switch } from '@/components/ui/Switch'
 import { Tag } from '@/components/ui/Tag'
 import { Table } from '@/components/ui/Table'
 import { useAdminTeamMembersQuery } from '@/apps/admin/hooks/queries/useAdminTeamMembersQuery'
@@ -36,6 +37,8 @@ const Page = () => {
       inviteCode: '',
       apiKeyLimit: 1,
       usersLimit: 1,
+      allowJoin: true,
+      joinDisabledReason: '',
     },
   })
   const teamsQuery = useAdminTeamsQuery({
@@ -73,6 +76,8 @@ const Page = () => {
       inviteCode: team.inviteCode,
       apiKeyLimit: team.apiKeyLimit,
       usersLimit: team.usersLimit,
+      allowJoin: team.allowJoin !== false,
+      joinDisabledReason: team.joinDisabledReason || '',
     })
   }
 
@@ -84,6 +89,8 @@ const Page = () => {
       inviteCode: team.inviteCode,
       apiKeyLimit: team.apiKeyLimit,
       usersLimit: team.usersLimit,
+      allowJoin: team.allowJoin !== false,
+      joinDisabledReason: team.joinDisabledReason || '',
     })
   }
 
@@ -255,6 +262,28 @@ const Page = () => {
                 ) : (
                   <Tag color="green">
                     {t('teams.status.active', { defaultValue: 'Active' })}
+                  </Tag>
+                ),
+            },
+            {
+              key: 'allowJoin',
+              label: t('teams.table.joinAccess', {
+                defaultValue: 'Join Access',
+              }),
+              width: 140,
+              align: 'center',
+              render: (value) =>
+                value ? (
+                  <Tag color="green">
+                    {t('teams.joinAccess.allowed', {
+                      defaultValue: 'Allowed',
+                    })}
+                  </Tag>
+                ) : (
+                  <Tag color="yellow">
+                    {t('teams.joinAccess.blocked', {
+                      defaultValue: 'Blocked',
+                    })}
                   </Tag>
                 ),
             },
@@ -451,6 +480,43 @@ const Page = () => {
                   })}
                 >
                   <NumberInput min={1} />
+                </FormField>
+
+                <FormField
+                  name="allowJoin"
+                  label={t('teams.form.allowJoin', {
+                    defaultValue: 'Allow users to join via invite link',
+                  })}
+                >
+                  <div className="flex items-center gap-3">
+                    <Switch />
+                    <span className="text-sm text-secondary">
+                      {teamForm.values.allowJoin
+                        ? t('teams.form.allowJoinEnabled', {
+                            defaultValue:
+                              'Users can join this team with a valid invite link.',
+                          })
+                        : t('teams.form.allowJoinDisabled', {
+                            defaultValue:
+                              'Invite links stay visible, but new users cannot join this team.',
+                          })}
+                    </span>
+                  </div>
+                </FormField>
+
+                <FormField
+                  name="joinDisabledReason"
+                  label={t('teams.form.joinDisabledReason', {
+                    defaultValue: 'Join blocked reason',
+                  })}
+                  hidden={teamForm.values.allowJoin}
+                >
+                  <Textarea
+                    placeholder={t('teams.form.joinDisabledReasonPlaceholder', {
+                      defaultValue:
+                        'Explain why users cannot join this team right now.',
+                    })}
+                  />
                 </FormField>
               </div>
             </Form>

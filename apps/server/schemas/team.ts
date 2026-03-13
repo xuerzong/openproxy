@@ -2,6 +2,7 @@ import { t } from 'elysia'
 
 export const UpdateCurrentTeamBodySchema = t.Object({
   name: t.String({ minLength: 1 }),
+  allowJoin: t.Boolean(),
 })
 
 export const TeamMemberIdSchema = t.Object({

@@ -36,6 +36,8 @@ export const UpdateAdminTeamBodySchema = t.Object({
   inviteCode: t.String({ minLength: 4, maxLength: 16 }),
   apiKeyLimit: t.Numeric({ minimum: 1 }),
   usersLimit: t.Numeric({ minimum: 1 }),
+  allowJoin: t.Boolean(),
+  joinDisabledReason: t.Optional(t.String()),
 })
 
 export const AdminTeamIdSchema = t.Object({
