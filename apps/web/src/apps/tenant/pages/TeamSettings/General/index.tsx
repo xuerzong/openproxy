@@ -234,10 +234,11 @@ const Page = () => {
                 defaultValue: 'Invite Link',
               })}
             </label>
-            <div className="min-h-9 px-3 py-2 rounded-md border border-border flex items-start gap-3 bg-muted/20 break-all">
-              <span className="flex-1 text-sm">{inviteLink || '-'}</span>
-              {inviteLink ? <CopyButton text={inviteLink} /> : null}
-            </div>
+            <Input
+              value={inviteLink || '-'}
+              readOnly
+              suffix={inviteLink ? <CopyButton text={inviteLink} /> : null}
+            />
           </div>
         </div>
       </Card>

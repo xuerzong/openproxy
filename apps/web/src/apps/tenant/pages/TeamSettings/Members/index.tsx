@@ -7,6 +7,8 @@ import { CopyButton } from '@/components/CopyButton'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogFooter } from '@/components/ui/Dialog'
+import { Input } from '@/components/ui/Input'
+import { Skeleton } from '@/components/ui/Skeleton'
 import { Select } from '@/components/ui/Select'
 import { Table } from '@/components/ui/Table'
 import { Tag } from '@/components/ui/Tag'
@@ -29,8 +31,11 @@ const Page = () => {
 
   const team = teamQuery.data?.team
   const members = teamMembersQuery.data || []
+  const loading = teamQuery.isLoading || teamMembersQuery.isLoading
   const currentUserId = session?.user.id
-  const currentMember = members.find((member) => member.userId === currentUserId)
+  const currentMember = members.find(
+    (member) => member.userId === currentUserId
+  )
   const canManageMembers = currentMember?.role === 'owner'
   const inviteLink = team?.inviteCode
     ? `${window.location.origin}/join/${team.inviteCode}`
@@ -53,7 +58,9 @@ const Page = () => {
       },
       {
         value: 'member',
-        label: t('teamSettings.members.roles.member', { defaultValue: 'Member' }),
+        label: t('teamSettings.members.roles.member', {
+          defaultValue: 'Member',
+        }),
       },
     ],
     [t]
@@ -101,7 +108,9 @@ const Page = () => {
     }
 
     setRemoving(true)
-    const response = await request.team.members({ id: removingMember.id }).delete()
+    const response = await request.team
+      .members({ id: removingMember.id })
+      .delete()
     setRemoving(false)
 
     if (response.error) {
@@ -150,18 +159,29 @@ const Page = () => {
               })}
             </div>
           </div>
-          <Tag color={memberLimitReached ? 'yellow' : 'green'}>
-            {members.length}/{team?.usersLimit || 0}{' '}
-            {t('teamSettings.members.seatsUsed', { defaultValue: 'seats used' })}
-          </Tag>
+          {loading ? (
+            <Skeleton className="h-6 w-28 rounded-full" />
+          ) : (
+            <Tag color={memberLimitReached ? 'yellow' : 'green'}>
+              {members.length}/{team?.usersLimit || 0}{' '}
+              {t('teamSettings.members.seatsUsed', {
+                defaultValue: 'seats used',
+              })}
+            </Tag>
+          )}
         </div>
 
-        <div className="min-h-9 px-3 py-2 rounded-md border border-border flex items-start gap-3 bg-muted/20 break-all">
-          <span className="flex-1 text-sm">{inviteLink || '-'}</span>
-          {inviteLink ? <CopyButton text={inviteLink} /> : null}
-        </div>
+        {loading ? (
+          <Skeleton className="h-10 w-full" />
+        ) : (
+          <Input
+            value={inviteLink || '-'}
+            readOnly
+            suffix={inviteLink ? <CopyButton text={inviteLink} /> : null}
+          />
+        )}
 
-        {memberLimitReached ? (
+        {!loading && memberLimitReached ? (
           <div className="text-sm text-yellow-700 dark:text-yellow-400">
             {t('teamSettings.members.limitReached', {
               defaultValue:
@@ -191,82 +211,120 @@ const Page = () => {
           </div>
         </div>
 
-        <FlexScrollViewer bordered>
-          <Table
-            rowKey={(record) => record.id}
-            data={members}
-            columns={[
-              {
-                key: 'name',
-                label: t('teams.members.name', { defaultValue: 'Name' }),
-                width: 220,
-                render: (_, record) => record.user?.name || '-',
-              },
-              {
-                key: 'email',
-                label: t('teams.members.email', { defaultValue: 'Email' }),
-                width: 260,
-                render: (_, record) => record.user?.email || '-',
-              },
-              {
-                key: 'role',
-                label: t('teams.members.role', { defaultValue: 'Role' }),
-                width: 180,
-                render: (value, record) =>
-                  canManageMembers ? (
-                    <Select
-                      value={value}
-                      options={roleOptions}
-                      onChange={(nextRole) => {
-                        if (nextRole !== value) {
-                          onUpdateRole(record.id, nextRole)
-                        }
-                      }}
-                      triggerClassName="w-36"
-                      disabled={updatingMemberId === record.id}
-                    />
-                  ) : (
-                    <Tag color={value === 'owner' ? 'green' : 'default'}>
-                      {value === 'owner'
-                        ? t('teamSettings.members.roles.owner', {
-                            defaultValue: 'Owner',
-                          })
-                        : t('teamSettings.members.roles.member', {
-                            defaultValue: 'Member',
-                          })}
-                    </Tag>
+        {loading ? (
+          <FlexScrollViewer bordered>
+            <div className="overflow-hidden min-w-250">
+              <div className="grid grid-cols-[220px_260px_180px_200px_140px] gap-0 border-b border-border bg-muted/30">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div key={index} className="px-4 py-3">
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                ))}
+              </div>
+              {Array.from({ length: 4 }).map((_, rowIndex) => (
+                <div
+                  key={rowIndex}
+                  className="grid grid-cols-[220px_260px_180px_200px_140px] gap-0 border-b border-border last:border-b-0"
+                >
+                  <div className="px-4 py-4">
+                    <Skeleton className="h-4 w-28" />
+                  </div>
+                  <div className="px-4 py-4">
+                    <Skeleton className="h-4 w-40" />
+                  </div>
+                  <div className="px-4 py-4">
+                    <Skeleton className="h-8 w-24 rounded-full" />
+                  </div>
+                  <div className="px-4 py-4">
+                    <Skeleton className="h-4 w-32" />
+                  </div>
+                  <div className="px-4 py-4 flex justify-center">
+                    <Skeleton className="h-8 w-16 rounded-md" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </FlexScrollViewer>
+        ) : (
+          <FlexScrollViewer bordered>
+            <Table
+              rowKey={(record) => record.id}
+              data={members}
+              columns={[
+                {
+                  key: 'name',
+                  label: t('teams.members.name', { defaultValue: 'Name' }),
+                  width: 220,
+                  render: (_, record) => record.user?.name || '-',
+                },
+                {
+                  key: 'email',
+                  label: t('teams.members.email', { defaultValue: 'Email' }),
+                  width: 260,
+                  render: (_, record) => record.user?.email || '-',
+                },
+                {
+                  key: 'role',
+                  label: t('teams.members.role', { defaultValue: 'Role' }),
+                  width: 180,
+                  render: (value, record) =>
+                    canManageMembers ? (
+                      <Select
+                        value={value}
+                        options={roleOptions}
+                        onChange={(nextRole) => {
+                          if (nextRole !== value) {
+                            onUpdateRole(record.id, nextRole)
+                          }
+                        }}
+                        triggerClassName="w-36"
+                        disabled={updatingMemberId === record.id}
+                      />
+                    ) : (
+                      <Tag color={value === 'owner' ? 'green' : 'default'}>
+                        {value === 'owner'
+                          ? t('teamSettings.members.roles.owner', {
+                              defaultValue: 'Owner',
+                            })
+                          : t('teamSettings.members.roles.member', {
+                              defaultValue: 'Member',
+                            })}
+                      </Tag>
+                    ),
+                },
+                {
+                  key: 'createdAt',
+                  label: t('teams.members.joinedAt', {
+                    defaultValue: 'Joined At',
+                  }),
+                  width: 200,
+                  render: (value) => dayjs(value).format('YYYY/MM/DD HH:mm:ss'),
+                },
+                {
+                  key: 'operation',
+                  label: t('common.operation', { defaultValue: 'Operation' }),
+                  width: 140,
+                  align: 'center',
+                  fixed: 'right',
+                  render: (_, record) => (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={
+                        !canManageMembers || record.userId === currentUserId
+                      }
+                      onClick={() => setRemovingMember(record)}
+                    >
+                      {t('teamSettings.members.remove', {
+                        defaultValue: 'Remove',
+                      })}
+                    </Button>
                   ),
-              },
-              {
-                key: 'createdAt',
-                label: t('teams.members.joinedAt', {
-                  defaultValue: 'Joined At',
-                }),
-                width: 200,
-                render: (value) => dayjs(value).format('YYYY/MM/DD HH:mm:ss'),
-              },
-              {
-                key: 'operation',
-                label: t('common.operation', { defaultValue: 'Operation' }),
-                width: 140,
-                align: 'center',
-                fixed: 'right',
-                render: (_, record) => (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={!canManageMembers || record.userId === currentUserId}
-                    onClick={() => setRemovingMember(record)}
-                  >
-                    {t('teamSettings.members.remove', {
-                      defaultValue: 'Remove',
-                    })}
-                  </Button>
-                ),
-              },
-            ]}
-          />
-        </FlexScrollViewer>
+                },
+              ]}
+            />
+          </FlexScrollViewer>
+        )}
       </Card>
 
       <Dialog
