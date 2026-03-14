@@ -199,8 +199,6 @@
   },
   "users": {
     "title": "用户列表",
-    "monthlyFreeAllowanceTitle": "赠送每月免费额度",
-    "monthlyFreeAllowance": "每月免费额度",
     "table": {
       "email": "邮箱",
       "emailVerified": "邮箱验证",

@@ -1,17 +1,13 @@
-import { GiftIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useUsersQuery } from '@/apps/admin/hooks/queries/useUsersQuery'
 import dayjs from '@/utils/dayjs'
 import { useRequest } from '@/contexts/ApiContext'
 import { toast } from 'sonner'
 import { useUsersCountQuery } from '@/apps/admin/hooks/queries/useUsersCountQuery'
-import { Button } from '@/components/ui/Button'
 import { Table } from '@/components/ui/Table'
 import { Pagination } from '@/components/ui/Pagination'
 import { Tag } from '@/components/ui/Tag'
 import { Switch } from '@/components/ui/Switch'
-import { MonthlyFreeAllowanceModal } from '@/components/MonthlyFreeAllowanceModal'
-import { useForm } from '@/components/ui/Form'
 import { PageContainer } from '@/components/PageContainer'
 import { useTranslation } from 'react-i18next'
 
@@ -21,11 +17,6 @@ const Page = () => {
   const usersQuery = useUsersQuery({ page })
   const usersCountQuery = useUsersCountQuery()
   const request = useRequest()
-  const [
-    updateMonthlyFreeAllowanceUserId,
-    setUpdateMonthlyFreeAllowanceUserId,
-  ] = useState('')
-  const [updateMonthlyFreeAllowanceForm] = useForm({})
 
   return (
     <PageContainer
@@ -110,31 +101,6 @@ const Page = () => {
               width: 160,
               render: (text) => dayjs(text).format('YYYY/MM/DD'),
             },
-
-            {
-              key: 'operation',
-              width: 80,
-              label: '',
-              align: 'center',
-              render: (_, record) => (
-                <div>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    onClick={() => {
-                      setUpdateMonthlyFreeAllowanceUserId(record.id)
-                      updateMonthlyFreeAllowanceForm.setValues({
-                        id: record.id,
-                        monthlyFreeAllowance:
-                          record.config?.monthlyFreeAllowance || 0,
-                      })
-                    }}
-                  >
-                    <GiftIcon />
-                  </Button>
-                </div>
-              ),
-            },
           ]}
           data={usersQuery.data || []}
         />
@@ -148,21 +114,6 @@ const Page = () => {
         locale={{
           next: t('common.next', { defaultValue: 'Next' }),
           prev: t('common.prev', { defaultValue: 'Prev' }),
-        }}
-      />
-
-      <MonthlyFreeAllowanceModal
-        form={updateMonthlyFreeAllowanceForm}
-        open={!!updateMonthlyFreeAllowanceUserId}
-        onOpenChange={(open) => {
-          if (!open) {
-            updateMonthlyFreeAllowanceForm.resetErrors()
-            updateMonthlyFreeAllowanceForm.resetValues()
-            setUpdateMonthlyFreeAllowanceUserId('')
-          }
-        }}
-        onSuccess={() => {
-          usersQuery.refetch()
         }}
       />
     </PageContainer>
