@@ -199,8 +199,6 @@
   },
   "users": {
     "title": "Users",
-    "monthlyFreeAllowanceTitle": "Grant monthly free allowance",
-    "monthlyFreeAllowance": "Monthly free allowance",
     "table": {
       "email": "Email",
       "emailVerified": "Email Verified",
