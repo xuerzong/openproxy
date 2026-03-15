@@ -34,6 +34,13 @@
     }
   },
   "adminDashboard": {
+    "chart": {
+      "title24hTokens": "24h Token Usage Trend",
+      "title24hRequestsByModelGroup": "24h Requests by Model Group",
+      "title24hRequestsByProvider": "24h Requests by Provider",
+      "totalTokens": "Total Tokens",
+      "requests": "Requests"
+    },
     "users": {
       "total": "Total Users",
       "todayNew": "New Users Today"

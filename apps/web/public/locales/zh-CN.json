@@ -34,6 +34,13 @@
     }
   },
   "adminDashboard": {
+    "chart": {
+      "title24hTokens": "24小时 Token 使用趋势",
+      "title24hRequestsByModelGroup": "24小时按模型组统计请求量",
+      "title24hRequestsByProvider": "24小时按供应商统计请求量",
+      "totalTokens": "Token 总量",
+      "requests": "请求量"
+    },
     "users": {
       "total": "用户总数",
       "todayNew": "今日新增用户"
