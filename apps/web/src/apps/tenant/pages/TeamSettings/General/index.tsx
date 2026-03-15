@@ -250,7 +250,7 @@ const Page = () => {
                 defaultValue: 'Member Quota',
               })}
             </label>
-            <div className="h-9 px-3 rounded-md border border-border flex items-center justify-between gap-2 bg-muted/40">
+            <div className="h-10 px-3 rounded-md border border-border flex items-center justify-between gap-2 bg-muted/40">
               <span>
                 {team?.usersLimit || 0}{' '}
                 {t('teamSettings.general.seats', { defaultValue: 'seats' })}
@@ -273,7 +273,7 @@ const Page = () => {
                 defaultValue: 'Allow users to join via invite link',
               })}
             </label>
-            <div className="min-h-9 px-3 py-2 rounded-md border border-border flex items-center justify-between gap-3 bg-muted/20">
+            <div className="min-h-10 px-3 py-2 rounded-md border border-border flex items-center justify-between gap-3 bg-muted/20">
               <div className="text-sm text-secondary">
                 {allowJoin
                   ? t('teamSettings.general.allowJoinEnabled', {
