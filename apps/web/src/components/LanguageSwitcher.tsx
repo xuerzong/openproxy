@@ -1,7 +1,7 @@
 import { ChevronRightIcon, LanguagesIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Button } from './ui/Button'
-import { DropdownMenu, type DropdownMenuItem } from './ui/DropdownMenu'
+import { Button } from '@openproxy/ui/Button'
+import { DropdownMenu, type DropdownMenuItem } from '@openproxy/ui/DropdownMenu'
 
 const SUPPORTED_LANGUAGES = ['zh-CN', 'en-US'] as const
 const LANGUAGE_FLAGS = {

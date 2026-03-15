@@ -1,5 +1,5 @@
 import { useRequest } from '@/contexts/ApiContext'
-import { Dialog, DialogFooter } from '../ui/Dialog'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 
@@ -25,6 +25,10 @@ export const AIProviderDeleteModal: React.FC<AIProviderDeleteModalProps> = ({
       onOpenChange={onOpenChange}
       footer={
         <DialogFooter
+          locale={{
+            cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+            confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+          }}
           okButtonProps={{
             variant: 'danger',
           }}

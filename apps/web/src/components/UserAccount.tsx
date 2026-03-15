@@ -1,7 +1,7 @@
 import { ChevronRight, LogOutIcon, SettingsIcon } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
-import { DropdownMenu } from './ui/DropdownMenu'
+import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { Card } from './Card'
 import { useTranslation } from 'react-i18next'
 

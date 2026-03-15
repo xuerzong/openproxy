@@ -9,9 +9,9 @@ import { ModelDeleteModal } from './ModelDeleteModel'
 import { ModelForm } from './ModelForm'
 import { AIProviderSelector } from '../AIProvider/AIProviderSelector'
 import { Card } from '../Card'
-import { Button } from '../ui/Button'
-import { useForm } from '../ui/Form'
-import { Tabs } from '../ui/Tabs'
+import { Button } from '@openproxy/ui/Button'
+import { useForm } from '@openproxy/ui/Form'
+import { Tabs } from '@openproxy/ui/Tabs'
 import { useTranslation } from 'react-i18next'
 
 type ModelFormData = any

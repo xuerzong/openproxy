@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { Dialog, DialogFooter } from '@/components/ui/Dialog'
-import { NumberInput } from '@/components/ui/NumberInput'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { NumberInput } from '@openproxy/ui/NumberInput'
 import { useRequest } from '@/contexts/ApiContext'
 
 interface TeamRechargeModalProps {
@@ -74,6 +74,10 @@ export const TeamRechargeModal: React.FC<TeamRechargeModalProps> = ({
       })}
       footer={
         <DialogFooter
+          locale={{
+            cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+            confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+          }}
           onCancel={() => onOpenChange(false)}
           onOk={onRechargeTeam}
           okText={t('teams.actions.recharge', {

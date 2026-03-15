@@ -1,5 +1,5 @@
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import { Loader } from '@/components/ui/Loader'
+import { Loader } from '@openproxy/ui/Loader'
 import { useState } from 'react'
 import { Outlet } from 'react-router'
 

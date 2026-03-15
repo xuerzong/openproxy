@@ -1,0 +1,51 @@
+{
+  "name": "@openproxy/ui",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./Button": "./src/Button/index.tsx",
+    "./Chart": "./src/Chart/index.tsx",
+    "./Checkbox": "./src/Checkbox/index.tsx",
+    "./CloseButton": "./src/CloseButton/index.tsx",
+    "./Dialog": "./src/Dialog/index.tsx",
+    "./Drawer": "./src/Drawer/index.tsx",
+    "./DropdownMenu": "./src/DropdownMenu/index.tsx",
+    "./Form": "./src/Form/index.tsx",
+    "./Input": "./src/Input/index.tsx",
+    "./Loader": "./src/Loader/index.tsx",
+    "./NumberInput": "./src/NumberInput/index.tsx",
+    "./Pagination": "./src/Pagination/index.tsx",
+    "./Radio": "./src/Radio/index.tsx",
+    "./Select": "./src/Select/index.tsx",
+    "./Skeleton": "./src/Skeleton/index.tsx",
+    "./Statistic": "./src/Statistic.tsx",
+    "./Switch": "./src/Switch/index.tsx",
+    "./Table": "./src/Table/index.tsx",
+    "./Tabs": "./src/Tabs/index.tsx",
+    "./Tag": "./src/Tag/index.tsx",
+    "./Tooltip": "./src/Tooltip.tsx"
+  },
+  "dependencies": {
+    "@number-flow/react": "^0.5.10",
+    "@openproxy/schema": "workspace:*",
+    "ahooks": "^3.9.6",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.562.0",
+    "radix-ui": "^1.4.3",
+    "react-textarea-autosize": "^8.5.9",
+    "recharts": "^3.6.0",
+    "tailwind-merge": "^3.4.0",
+    "vaul": "^1.1.2",
+    "zustand": "^5.0.11"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.5",
+    "typescript": "^5"
+  }
+}

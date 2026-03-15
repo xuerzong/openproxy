@@ -58,6 +58,7 @@
         "@number-flow/react": "^0.5.10",
         "@openproxy/phone-auth": "workspace:*",
         "@openproxy/schema": "workspace:*",
+        "@openproxy/ui": "workspace:*",
         "@sentry/react": "^10.32.1",
         "@tailwindcss/vite": "^4.1.18",
         "@tanstack/react-query": "^5.90.16",
@@ -141,6 +142,31 @@
       },
       "peerDependencies": {
         "typescript": "^5",
+      },
+    },
+    "packages/ui": {
+      "name": "@openproxy/ui",
+      "dependencies": {
+        "@number-flow/react": "^0.5.10",
+        "@openproxy/schema": "workspace:*",
+        "ahooks": "^3.9.6",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
+        "lucide-react": "^0.562.0",
+        "radix-ui": "^1.4.3",
+        "react-textarea-autosize": "^8.5.9",
+        "recharts": "^3.6.0",
+        "tailwind-merge": "^3.4.0",
+        "vaul": "^1.1.2",
+        "zustand": "^5.0.11",
+      },
+      "devDependencies": {
+        "@types/react": "^19.2.5",
+        "typescript": "^5",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
       },
     },
     "website": {
@@ -497,6 +523,8 @@
     "@openproxy/phone-auth": ["@openproxy/phone-auth@workspace:packages/phone-auth"],
 
     "@openproxy/schema": ["@openproxy/schema@workspace:packages/schema"],
+
+    "@openproxy/ui": ["@openproxy/ui@workspace:packages/ui"],
 
     "@opentelemetry/api": ["@opentelemetry/api@1.9.0", "https://registry.npmmirror.com/@opentelemetry/api/-/api-1.9.0.tgz", {}, "sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg=="],
 
@@ -2237,6 +2265,8 @@
     "@fastify/otel/minimatch": ["minimatch@10.2.4", "https://registry.npmmirror.com/minimatch/-/minimatch-10.2.4.tgz", { "dependencies": { "brace-expansion": "^5.0.2" } }, "sha512-oRjTw/97aTBN0RHbYCdtF1MQfvusSIBQM0IZEgzl6426+8jSC0nF1a/GmnVLpfB9yyr6g6FTqWqiZVbxrtaCIg=="],
 
     "@kitajs/ts-html-plugin/chalk": ["chalk@5.6.2", "https://registry.npmmirror.com/chalk/-/chalk-5.6.2.tgz", {}, "sha512-7NzBL0rN6fMUW+f7A6Io4h40qQlG+xGmtMxfbnH/K7TAtt8JQWVQK+6g0UXKMeVJoyV5EkkNsErQ8pVD3bLHbA=="],
+
+    "@openproxy/ui/lucide-react": ["lucide-react@0.562.0", "https://registry.npmmirror.com/lucide-react/-/lucide-react-0.562.0.tgz", { "peerDependencies": { "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0" } }, "sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw=="],
 
     "@opentelemetry/instrumentation-http/@opentelemetry/core": ["@opentelemetry/core@2.5.0", "https://registry.npmmirror.com/@opentelemetry/core/-/core-2.5.0.tgz", { "dependencies": { "@opentelemetry/semantic-conventions": "^1.29.0" }, "peerDependencies": { "@opentelemetry/api": ">=1.0.0 <1.10.0" } }, "sha512-ka4H8OM6+DlUhSAZpONu0cPBtPPTQKxbxVzC4CzVx5+K4JnroJVBtDzLAMx4/3CDTJXRvVFhpFjtl4SaiTNoyQ=="],
 

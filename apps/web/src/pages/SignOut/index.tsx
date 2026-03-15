@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router'
-import { Loader } from '@/components/ui/Loader'
+import { Loader } from '@openproxy/ui/Loader'
 import { useAuth } from '@/contexts/AuthContext'
 
 const Page = () => {

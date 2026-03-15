@@ -3,9 +3,9 @@ import dayjs from '@/utils/dayjs'
 import { useAdminOrdersQuery } from '@/apps/admin/hooks/queries/useAdminOrdersQuery'
 import { useAdminOrdersCountQuery } from '@/apps/admin/hooks/queries/useAdminOrdersCountQuery'
 import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
-import { Table } from '@/components/ui/Table'
-import { Pagination } from '@/components/ui/Pagination'
-import { Tag } from '@/components/ui/Tag'
+import { Table } from '@openproxy/ui/Table'
+import { Pagination } from '@openproxy/ui/Pagination'
+import { Tag } from '@openproxy/ui/Tag'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
@@ -72,6 +72,12 @@ const Page = () => {
               },
             },
           ]}
+          locale={{
+            noData: t('common.noData', { defaultValue: 'No data' }),
+            emptyListHint: t('common.emptyListHint', {
+              defaultValue: 'No records yet',
+            }),
+          }}
         />
       </FlexScrollViewer>
 

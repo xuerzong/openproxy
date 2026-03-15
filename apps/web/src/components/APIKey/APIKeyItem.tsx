@@ -6,7 +6,7 @@ import {
   TrashIcon,
   ZapIcon,
 } from 'lucide-react'
-import { DropdownMenu } from '../ui/DropdownMenu'
+import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { useTranslation } from 'react-i18next'
 
 interface APIKeyItemProps {

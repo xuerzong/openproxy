@@ -1,21 +1,21 @@
 import { useMemo, useState } from 'react'
 import { MoreVerticalIcon, PenSquareIcon, Trash2Icon } from 'lucide-react'
-import { type CheckboxGroupProps } from '@/components/ui/Checkbox'
+import { type CheckboxGroupProps } from '@openproxy/ui/Checkbox'
 import { useAIProvidersQuery } from '@/hooks/queries/useAIProvidersQuery'
-import { Button } from '../ui/Button'
-import { Form, FormField, useForm } from '../ui/Form'
-import { Input } from '../ui/Input'
-import { Dialog, DialogFooter } from '../ui/Dialog'
-import { NumberInput } from '../ui/NumberInput'
-import { Switch } from '../ui/Switch'
+import { Button } from '@openproxy/ui/Button'
+import { Form, FormField, useForm } from '@openproxy/ui/Form'
+import { Input } from '@openproxy/ui/Input'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { NumberInput } from '@openproxy/ui/NumberInput'
+import { Switch } from '@openproxy/ui/Switch'
 import { Card } from '../Card'
-import { Table } from '../ui/Table'
+import { Table } from '@openproxy/ui/Table'
 import { ModelIcon } from '../ModelIcon'
-import { DropdownMenu } from '../ui/DropdownMenu'
+import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { useRequest } from '@/contexts/ApiContext'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
-import { Select } from '../ui/Select'
+import { Select } from '@openproxy/ui/Select'
 
 interface AIProviderSelectorProps extends Omit<CheckboxGroupProps, 'options'> {
   id: string
@@ -193,6 +193,12 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
               },
             },
           ]}
+          locale={{
+            noData: t('common.noData', { defaultValue: 'No data' }),
+            emptyListHint: t('common.emptyListHint', {
+              defaultValue: 'No records yet',
+            }),
+          }}
         />
       </Card>
       <Dialog
@@ -210,6 +216,10 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
         }}
         footer={
           <DialogFooter
+            locale={{
+              cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+              confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+            }}
             onOk={() => {
               providerModelForm.onSubmit((values) => {
                 const api = editingProviderId
@@ -308,6 +318,10 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
             okText={t('actions.confirmDelete', {
               defaultValue: 'Confirm delete',
             })}
+            locale={{
+              cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+              confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+            }}
             okButtonProps={{
               variant: 'danger',
             }}

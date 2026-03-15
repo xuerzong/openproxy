@@ -6,11 +6,11 @@ import { MoreHorizontalIcon, PenSquareIcon, WalletIcon } from 'lucide-react'
 import { TeamRechargeModal } from './TeamRechargeModal'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
-import { Button } from '@/components/ui/Button'
-import { DropdownMenu } from '@/components/ui/DropdownMenu'
-import { Input } from '@/components/ui/Input'
-import { Pagination } from '@/components/ui/Pagination'
-import { Table } from '@/components/ui/Table'
+import { Button } from '@openproxy/ui/Button'
+import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
+import { Input } from '@openproxy/ui/Input'
+import { Pagination } from '@openproxy/ui/Pagination'
+import { Table } from '@openproxy/ui/Table'
 import { useAdminTeamsCountQuery } from '@/apps/admin/hooks/queries/useAdminTeamsCountQuery'
 import { useAdminTeamsQuery } from '@/apps/admin/hooks/queries/useAdminTeamsQuery'
 import dayjs from '@/utils/dayjs'
@@ -159,6 +159,12 @@ const Page = () => {
               },
             },
           ]}
+          locale={{
+            noData: t('common.noData', { defaultValue: 'No data' }),
+            emptyListHint: t('common.emptyListHint', {
+              defaultValue: 'No records yet',
+            }),
+          }}
         />
       </FlexScrollViewer>
 

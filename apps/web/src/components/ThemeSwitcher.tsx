@@ -4,8 +4,8 @@ import {
   SunIcon,
   TvMinimalIcon,
 } from 'lucide-react'
-import { Button } from './ui/Button'
-import { DropdownMenu, type DropdownMenuItem } from './ui/DropdownMenu'
+import { Button } from '@openproxy/ui/Button'
+import { DropdownMenu, type DropdownMenuItem } from '@openproxy/ui/DropdownMenu'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useTranslation } from 'react-i18next'
 

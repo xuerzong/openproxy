@@ -6,8 +6,8 @@ import NumberFlow from '@number-flow/react'
 import { useRequest } from '@/contexts/ApiContext'
 import { useOrderStatusQuery } from '@/apps/tenant/hooks/queries/useOrderStatus'
 import { useTranslation } from 'react-i18next'
-import { Button } from './ui/Button'
-import { Dialog } from './ui/Dialog'
+import { Button } from '@openproxy/ui/Button'
+import { Dialog } from '@openproxy/ui/Dialog'
 import { QRCode } from './QRCode'
 
 const amounts = [20, 50, 100, 200]

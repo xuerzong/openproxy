@@ -1,7 +1,7 @@
 import { cn } from '@/utils/cn'
 import { PageTitle } from './PageTitle'
 import { PanelLeftIcon } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@openproxy/ui/Button'
 import { toggleCollapsed } from '@/stores/app'
 
 interface PageContainerProps {

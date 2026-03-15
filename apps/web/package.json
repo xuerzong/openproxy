@@ -16,6 +16,7 @@
   "dependencies": {
     "@openproxy/phone-auth": "workspace:*",
     "@openproxy/schema": "workspace:*",
+    "@openproxy/ui": "workspace:*",
     "@elysiajs/eden": "^1.4.6",
     "@number-flow/react": "^0.5.10",
     "@sentry/react": "^10.32.1",

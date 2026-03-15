@@ -1,7 +1,7 @@
-import { Form, FormField, type FormInstance } from '../ui/Form'
-import { Input } from '../ui/Input'
+import { Form, FormField, type FormInstance } from '@openproxy/ui/Form'
+import { Input } from '@openproxy/ui/Input'
 import { useTranslation } from 'react-i18next'
-import { Select } from '../ui/Select'
+import { Select } from '@openproxy/ui/Select'
 import { ICON_SVG_MAP } from '@/constants/icons'
 import { ModelIcon } from '../ModelIcon'
 

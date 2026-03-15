@@ -4,10 +4,10 @@ import dayjs from '@/utils/dayjs'
 import { useRequest } from '@/contexts/ApiContext'
 import { toast } from 'sonner'
 import { useUsersCountQuery } from '@/apps/admin/hooks/queries/useUsersCountQuery'
-import { Table } from '@/components/ui/Table'
-import { Pagination } from '@/components/ui/Pagination'
-import { Tag } from '@/components/ui/Tag'
-import { Switch } from '@/components/ui/Switch'
+import { Table } from '@openproxy/ui/Table'
+import { Pagination } from '@openproxy/ui/Pagination'
+import { Tag } from '@openproxy/ui/Tag'
+import { Switch } from '@openproxy/ui/Switch'
 import { PageContainer } from '@/components/PageContainer'
 import { useTranslation } from 'react-i18next'
 
@@ -103,6 +103,12 @@ const Page = () => {
             },
           ]}
           data={usersQuery.data || []}
+          locale={{
+            noData: t('common.noData', { defaultValue: 'No data' }),
+            emptyListHint: t('common.emptyListHint', {
+              defaultValue: 'No records yet',
+            }),
+          }}
         />
       </div>
 

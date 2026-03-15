@@ -1,8 +1,8 @@
 import { useRequest } from '@/contexts/ApiContext'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Dialog, DialogFooter } from '../ui/Dialog'
-import { Input } from '../ui/Input'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { Input } from '@openproxy/ui/Input'
 import { useTranslation } from 'react-i18next'
 
 interface ModelDeleteModal {
@@ -33,6 +33,10 @@ export const ModelDeleteModal: React.FC<ModelDeleteModal> = ({
       contentProps={{ className: 'z-1000' }}
       footer={
         <DialogFooter
+          locale={{
+            cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+            confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+          }}
           onCancel={() => {
             onOpenChange?.(false)
           }}

@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
+import { Input } from '@openproxy/ui/Input'
+import { Button } from '@openproxy/ui/Button'
 import { useEffect, useState } from 'react'
 import { authClient } from '@/utils/better-auth'
 import { toast } from 'sonner'

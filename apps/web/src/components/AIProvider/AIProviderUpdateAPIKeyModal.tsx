@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Dialog, DialogFooter } from '../ui/Dialog'
-import { Input } from '../ui/Input'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { Input } from '@openproxy/ui/Input'
 import { useRequest } from '@/contexts/ApiContext'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
@@ -30,6 +30,10 @@ export const AIProviderUpdateAPIKeyModal: React.FC<
       title={t('apiKeys.updateApiKey', { defaultValue: 'Update API Key' })}
       footer={
         <DialogFooter
+          locale={{
+            cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+            confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+          }}
           onOk={() => {
             request.aiProviders.updateAPIKey.put({ id, apiKey }).then((res) => {
               if (res.error) {

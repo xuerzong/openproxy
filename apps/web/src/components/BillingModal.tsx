@@ -1,5 +1,5 @@
 import { BillingForm } from './BillingForm'
-import { Dialog } from './ui/Dialog'
+import { Dialog } from '@openproxy/ui/Dialog'
 import { useTranslation } from 'react-i18next'
 
 interface BillingModalProps {

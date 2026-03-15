@@ -3,13 +3,13 @@ import { CircleQuestionMarkIcon, EditIcon, PlusIcon } from 'lucide-react'
 import { useDebounce } from 'use-debounce'
 import { useNavigate } from 'react-router'
 import { useModelsQuery } from '@/hooks/queries/useModelsQuery'
-import { Table } from '@/components/ui/Table'
+import { Table } from '@openproxy/ui/Table'
 import { CopyButton } from '@/components/CopyButton'
 import { ModelIcon } from '@/components/ModelIcon'
-import { Button } from '@/components/ui/Button'
-import { Input } from '../ui/Input'
-import { Select } from '../ui/Select'
-import { Tooltip } from '../ui/Tooltip'
+import { Button } from '@openproxy/ui/Button'
+import { Input } from '@openproxy/ui/Input'
+import { Select } from '@openproxy/ui/Select'
+import { Tooltip } from '@openproxy/ui/Tooltip'
 import { FlexScrollViewer } from '../FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
 
@@ -211,6 +211,12 @@ export const ModelTable: React.FC<ModelTableProps> = ({
               },
             ]}
             data={dataSource}
+            locale={{
+              noData: t('common.noData', { defaultValue: 'No data' }),
+              emptyListHint: t('common.emptyListHint', {
+                defaultValue: 'No records yet',
+              }),
+            }}
           />
         )}
       </FlexScrollViewer>

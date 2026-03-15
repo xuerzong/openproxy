@@ -1,6 +1,6 @@
 import { Navigate } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
-import { Loader } from './ui/Loader'
+import { Loader } from '@openproxy/ui/Loader'
 import NotFound from '@/pages/NotFound'
 
 export const AdminRequiredRoute: React.FC<React.PropsWithChildren> = ({

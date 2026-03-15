@@ -11,13 +11,13 @@ import { AIProviderForm } from '@/components/AIProvider/AIProviderForm'
 import { Card } from '@/components/Card'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { PageContainer } from '@/components/PageContainer'
-import { Button } from '@/components/ui/Button'
-import { Dialog, DialogFooter } from '@/components/ui/Dialog'
-import { useForm } from '@/components/ui/Form'
-import { Table } from '@/components/ui/Table'
+import { Button } from '@openproxy/ui/Button'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { useForm } from '@openproxy/ui/Form'
+import { Table } from '@openproxy/ui/Table'
 import { useAIProvidersQuery } from '@/hooks/queries/useAIProvidersQuery'
 import { useRequest } from '@/contexts/ApiContext'
-import { DropdownMenu } from '@/components/ui/DropdownMenu'
+import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { AIProviderUpdateAPIKeyModal } from '@/components/AIProvider/AIProviderUpdateAPIKeyModal'
 import { AIProviderDeleteModal } from '@/components/AIProvider/AIProviderDeleteModal'
 import { useTranslation } from 'react-i18next'
@@ -160,6 +160,12 @@ const Page = () => {
               },
             },
           ]}
+          locale={{
+            noData: t('common.noData', { defaultValue: 'No data' }),
+            emptyListHint: t('common.emptyListHint', {
+              defaultValue: 'No records yet',
+            }),
+          }}
         />
       </FlexScrollViewer>
 
@@ -176,7 +182,14 @@ const Page = () => {
           }
         }}
         footer={
-          <DialogFooter onOk={onAIProviderOk} onCancel={onAIProviderCancel} />
+          <DialogFooter
+            onOk={onAIProviderOk}
+            onCancel={onAIProviderCancel}
+            locale={{
+              cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+              confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+            }}
+          />
         }
       >
         <AIProviderForm form={aiProviderForm} isEdit={isEdit} />

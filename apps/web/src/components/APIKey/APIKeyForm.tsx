@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { BoxesIcon } from 'lucide-react'
 import { ModelTable } from '../Model/ModelTable'
-import { Drawer } from '../ui/Drawer'
-import { Form, FormField, type FormInstance } from '../ui/Form'
-import { Input } from '../ui/Input'
-import { NumberInput } from '../ui/NumberInput'
-import { Button } from '../ui/Button'
+import { Drawer } from '@openproxy/ui/Drawer'
+import { Form, FormField, type FormInstance } from '@openproxy/ui/Form'
+import { Input } from '@openproxy/ui/Input'
+import { NumberInput } from '@openproxy/ui/NumberInput'
+import { Button } from '@openproxy/ui/Button'
 import { useTranslation } from 'react-i18next'
 
 interface APIKeyFormProps {

@@ -5,15 +5,15 @@ import { toast } from 'sonner'
 import { ChevronLeftIcon, RefreshCcwIcon, Trash2Icon } from 'lucide-react'
 import { TeamRechargeModal } from '../TeamRechargeModal'
 import { PageContainer } from '@/components/PageContainer'
-import { Button } from '@/components/ui/Button'
-import { Dialog, DialogFooter } from '@/components/ui/Dialog'
-import { Form, FormField, useForm } from '@/components/ui/Form'
-import { Input, Textarea } from '@/components/ui/Input'
-import { Loader } from '@/components/ui/Loader'
-import { NumberInput } from '@/components/ui/NumberInput'
-import { Switch } from '@/components/ui/Switch'
-import { Tag } from '@/components/ui/Tag'
-import { Table } from '@/components/ui/Table'
+import { Button } from '@openproxy/ui/Button'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { Form, FormField, useForm } from '@openproxy/ui/Form'
+import { Input, Textarea } from '@openproxy/ui/Input'
+import { Loader } from '@openproxy/ui/Loader'
+import { NumberInput } from '@openproxy/ui/NumberInput'
+import { Switch } from '@openproxy/ui/Switch'
+import { Tag } from '@openproxy/ui/Tag'
+import { Table } from '@openproxy/ui/Table'
 import { useAdminTeamMembersQuery } from '@/apps/admin/hooks/queries/useAdminTeamMembersQuery'
 import { useAdminTeamQuery } from '@/apps/admin/hooks/queries/useAdminTeamQuery'
 import { useRequest } from '@/contexts/ApiContext'
@@ -32,6 +32,8 @@ const Page = () => {
   >(null)
   const teamQuery = useAdminTeamQuery({ teamId })
   const teamMembersQuery = useAdminTeamMembersQuery({ teamId })
+  const team =
+    teamQuery.data && typeof teamQuery.data !== 'string' ? teamQuery.data : null
   const [teamForm] = useForm({
     defaultValues: {
       id: '',
@@ -57,12 +59,12 @@ const Page = () => {
   }
 
   useEffect(() => {
-    if (!teamQuery.data) {
+    if (!team) {
       return
     }
 
-    syncTeamForm(teamQuery.data)
-  }, [teamQuery.data])
+    syncTeamForm(team)
+  }, [team])
 
   const refreshTeam = () => {
     teamQuery.refetch()
@@ -98,12 +100,12 @@ const Page = () => {
   }
 
   const onResetInviteCode = async () => {
-    if (!teamQuery.data) {
+    if (!team) {
       return
     }
 
     const response = await request.admin.teams.resetInviteCode.post({
-      id: teamQuery.data.id,
+      id: team.id,
     })
 
     if (response.error) {
@@ -126,12 +128,12 @@ const Page = () => {
   }
 
   const onSetTeamDisabled = async (disabled: boolean) => {
-    if (!teamQuery.data) {
+    if (!team) {
       return
     }
 
     const response = await request.admin.teams.status.put({
-      id: teamQuery.data.id,
+      id: team.id,
       disabled,
     })
 
@@ -163,13 +165,11 @@ const Page = () => {
   }
 
   const onDeleteTeam = async () => {
-    if (!teamQuery.data) {
+    if (!team) {
       return
     }
 
-    const response = await request.admin
-      .teams({ id: teamQuery.data.id })
-      .delete()
+    const response = await request.admin.teams({ id: team.id }).delete()
 
     if (response.error) {
       toast.error(
@@ -197,11 +197,9 @@ const Page = () => {
     )
   }
 
-  if (!teamQuery.data) {
+  if (!team) {
     return <NotFound />
   }
-
-  const team = teamQuery.data
 
   return (
     <PageContainer
@@ -410,6 +408,12 @@ const Page = () => {
                     dayjs(record.createdAt).format('YYYY/MM/DD HH:mm:ss'),
                 },
               ]}
+              locale={{
+                noData: t('common.noData', { defaultValue: 'No data' }),
+                emptyListHint: t('common.emptyListHint', {
+                  defaultValue: 'No records yet',
+                }),
+              }}
             />
           </div>
         </div>
@@ -474,6 +478,10 @@ const Page = () => {
         }}
         footer={
           <DialogFooter
+            locale={{
+              cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+              confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+            }}
             onCancel={() => {
               setConfirmAction(null)
             }}

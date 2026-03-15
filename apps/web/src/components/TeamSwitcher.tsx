@@ -1,11 +1,6 @@
-import {
-  ChevronsUpDownIcon,
-  LogOutIcon,
-  PlusIcon,
-  SettingsIcon,
-} from 'lucide-react'
+import { ChevronsUpDownIcon, PlusIcon, SettingsIcon } from 'lucide-react'
 import { Card } from './Card'
-import { DropdownMenu } from './ui/DropdownMenu'
+import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 

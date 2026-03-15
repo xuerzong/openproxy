@@ -8,12 +8,12 @@ import { Card } from '@/components/Card'
 import { CopyButton } from '@/components/CopyButton'
 import { useTeamMembersQuery } from '@/apps/tenant/hooks/queries/useTeamMembersQuery'
 import { useTeamsQuery } from '@/apps/tenant/hooks/queries/useTeamsQuery'
-import { Button } from '@/components/ui/Button'
-import { Dialog, DialogFooter } from '@/components/ui/Dialog'
-import { Input } from '@/components/ui/Input'
-import { Switch } from '@/components/ui/Switch'
-import { Tag } from '@/components/ui/Tag'
-import { Tooltip } from '@/components/ui/Tooltip'
+import { Button } from '@openproxy/ui/Button'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { Input } from '@openproxy/ui/Input'
+import { Switch } from '@openproxy/ui/Switch'
+import { Tag } from '@openproxy/ui/Tag'
+import { Tooltip } from '@openproxy/ui/Tooltip'
 import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
@@ -396,6 +396,10 @@ const Page = () => {
             okText={t('teamSettings.actions.deleteTeam', {
               defaultValue: 'Delete Team',
             })}
+            locale={{
+              cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+              confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+            }}
             okButtonProps={{
               variant: 'danger',
               loading: deleting,

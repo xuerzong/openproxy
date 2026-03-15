@@ -6,13 +6,13 @@ import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/Card'
 import { CopyButton } from '@/components/CopyButton'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
-import { Button } from '@/components/ui/Button'
-import { Dialog, DialogFooter } from '@/components/ui/Dialog'
-import { Input } from '@/components/ui/Input'
-import { Skeleton } from '@/components/ui/Skeleton'
-import { Select } from '@/components/ui/Select'
-import { Table } from '@/components/ui/Table'
-import { Tag } from '@/components/ui/Tag'
+import { Button } from '@openproxy/ui/Button'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
+import { Input } from '@openproxy/ui/Input'
+import { Skeleton } from '@openproxy/ui/Skeleton'
+import { Select } from '@openproxy/ui/Select'
+import { Table } from '@openproxy/ui/Table'
+import { Tag } from '@openproxy/ui/Tag'
 import { useTeamMembersQuery } from '@/apps/tenant/hooks/queries/useTeamMembersQuery'
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useRequest } from '@/contexts/ApiContext'
@@ -327,6 +327,12 @@ const Page = () => {
                   ),
                 },
               ]}
+              locale={{
+                noData: t('common.noData', { defaultValue: 'No data' }),
+                emptyListHint: t('common.emptyListHint', {
+                  defaultValue: 'No records yet',
+                }),
+              }}
             />
           </FlexScrollViewer>
         )}
@@ -351,6 +357,10 @@ const Page = () => {
             okText={t('actions.delete', {
               defaultValue: 'Delete',
             })}
+            locale={{
+              cancelText: t('actions.cancel', { defaultValue: 'Cancel' }),
+              confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
+            }}
             okButtonProps={{
               variant: 'danger',
               loading: removing,

@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
-import { Loader } from './ui/Loader'
+import { Loader } from '@openproxy/ui/Loader'
 
 export const AuthRequiredRoute: React.FC<React.PropsWithChildren> = ({
   children,

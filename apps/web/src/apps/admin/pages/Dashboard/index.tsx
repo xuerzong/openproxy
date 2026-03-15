@@ -4,15 +4,15 @@ import { PageContainer } from '@/components/PageContainer'
 import { useAdminDashboardUsagesByModelGroupQuery } from '@/apps/admin/hooks/queries/useAdminDashboardUsagesByModelGroupQuery'
 import { useAdminDashboardUsagesByProviderQuery } from '@/apps/admin/hooks/queries/useAdminDashboardUsagesByProviderQuery'
 import { useAdminDashboardUsagesGroupedQuery } from '@/apps/admin/hooks/queries/useAdminDashboardUsagesGroupedQuery'
-import { Statistic } from '@/components/ui/Statistic'
+import { Statistic } from '@openproxy/ui/Statistic'
 import { useAdminDashboardStatsQuery } from '@/apps/admin/hooks/queries/useAdminDashboardStatsQuery'
 import dayjs from '@/utils/dayjs'
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/Chart'
-import type { ChartConfig } from '@/components/ui/Chart'
+} from '@openproxy/ui/Chart'
+import type { ChartConfig } from '@openproxy/ui/Chart'
 import {
   Area,
   AreaChart,

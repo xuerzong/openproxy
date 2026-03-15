@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Loader } from '@/components/ui/Loader'
+import { Loader } from '@openproxy/ui/Loader'
 import { useTeamsQuery } from '@/apps/tenant/hooks/queries/useTeamsQuery'
 import NotFound from '@/pages/NotFound'
 import { authClient } from '@/utils/better-auth'

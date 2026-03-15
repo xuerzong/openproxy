@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { ModelIcon } from '@/components/ModelIcon'
 import { Card } from '@/components/Card'
-import { Statistic } from '@/components/ui/Statistic'
+import { Statistic } from '@openproxy/ui/Statistic'
 import { useUsagesQuery } from '@/apps/tenant/hooks/queries/useUsagesQuery'
 import dayjs from '@/utils/dayjs'
 import { useUsagesTotalQuery } from '@/apps/tenant/hooks/queries/useUsagesCountQuery'
 import { BillingModal } from '@/components/BillingModal'
-import { Table } from '@/components/ui/Table'
-import { Pagination } from '@/components/ui/Pagination'
-import { Button } from '@/components/ui/Button'
+import { Table } from '@openproxy/ui/Table'
+import { Pagination } from '@openproxy/ui/Pagination'
+import { Button } from '@openproxy/ui/Button'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
@@ -17,8 +17,8 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/Chart'
-import type { ChartConfig } from '@/components/ui/Chart'
+} from '@openproxy/ui/Chart'
+import type { ChartConfig } from '@openproxy/ui/Chart'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { useTranslation } from 'react-i18next'
 
@@ -215,6 +215,12 @@ const Page = () => {
             },
           ]}
           data={usagesQuery.data || []}
+          locale={{
+            noData: t('common.noData', { defaultValue: 'No data' }),
+            emptyListHint: t('common.emptyListHint', {
+              defaultValue: 'No records yet',
+            }),
+          }}
         />
       </FlexScrollViewer>
 
