@@ -26,6 +26,7 @@ const Page = () => {
   const [name, setName] = useState('')
   const [allowJoin, setAllowJoin] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [updatingAllowJoin, setUpdatingAllowJoin] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
@@ -46,9 +47,7 @@ const Page = () => {
     setAllowJoin(team?.allowJoin !== false)
   }, [team?.allowJoin])
 
-  const hasChanges =
-    name.trim() !== (team?.name || '').trim() ||
-    allowJoin !== (team?.allowJoin !== false)
+  const hasNameChanges = name.trim() !== (team?.name || '').trim()
 
   const refreshTeamState = async () => {
     await Promise.all([
@@ -71,6 +70,47 @@ const Page = () => {
     setSaving(false)
 
     if (response.error) {
+      toast.error(
+        t('common.operationFailedWithStatus', {
+          defaultValue: `Operation failed: ${response.error.status}`,
+          status: response.error.status,
+        })
+      )
+      return
+    }
+
+    toast.success(
+      t('teamSettings.messages.updateSuccess', {
+        defaultValue: 'Team information updated successfully',
+      })
+    )
+    await refreshTeamState()
+  }
+
+  const onChangeAllowJoin = async (checked: boolean) => {
+    if (!team || updatingAllowJoin) {
+      return
+    }
+
+    const nextAllowJoin = Boolean(checked)
+    const previousAllowJoin = allowJoin
+
+    if (nextAllowJoin === previousAllowJoin) {
+      return
+    }
+
+    setAllowJoin(nextAllowJoin)
+    setUpdatingAllowJoin(true)
+
+    const response = await request.team.put({
+      name: team.name,
+      allowJoin: nextAllowJoin,
+    })
+
+    setUpdatingAllowJoin(false)
+
+    if (response.error) {
+      setAllowJoin(previousAllowJoin)
       toast.error(
         t('common.operationFailedWithStatus', {
           defaultValue: `Operation failed: ${response.error.status}`,
@@ -198,7 +238,8 @@ const Page = () => {
               </div>
               <Switch
                 checked={allowJoin}
-                onCheckedChange={(checked) => setAllowJoin(Boolean(checked))}
+                disabled={!team || updatingAllowJoin}
+                onCheckedChange={onChangeAllowJoin}
               />
             </div>
           </div>
@@ -220,7 +261,7 @@ const Page = () => {
               />
               <Button
                 loading={saving}
-                disabled={!name.trim() || !hasChanges}
+                disabled={!name.trim() || !hasNameChanges}
                 onClick={onSave}
               >
                 {t('actions.save', { defaultValue: 'Save' })}
