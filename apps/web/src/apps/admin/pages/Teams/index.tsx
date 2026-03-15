@@ -2,12 +2,19 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDebounce } from 'use-debounce'
 import { toast } from 'sonner'
-import { RefreshCcwIcon, Trash2Icon } from 'lucide-react'
+import {
+  MoreHorizontalIcon,
+  PenSquareIcon,
+  RefreshCcwIcon,
+  Trash2Icon,
+  WalletIcon,
+} from 'lucide-react'
 import { TeamRechargeModal } from './TeamRechargeModal'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogFooter } from '@/components/ui/Dialog'
+import { DropdownMenu } from '@/components/ui/DropdownMenu'
 import { Form, FormField, useForm } from '@/components/ui/Form'
 import { Input, Textarea } from '@/components/ui/Input'
 import { NumberInput } from '@/components/ui/NumberInput'
@@ -255,44 +262,6 @@ const Page = () => {
               width: 160,
             },
             {
-              key: 'disabled',
-              label: t('teams.table.status', { defaultValue: 'Status' }),
-              width: 120,
-              align: 'center',
-              render: (value) =>
-                value ? (
-                  <Tag color="yellow">
-                    {t('teams.status.disabled', { defaultValue: 'Disabled' })}
-                  </Tag>
-                ) : (
-                  <Tag color="green">
-                    {t('teams.status.active', { defaultValue: 'Active' })}
-                  </Tag>
-                ),
-            },
-            {
-              key: 'allowJoin',
-              label: t('teams.table.joinAccess', {
-                defaultValue: 'Join Access',
-              }),
-              width: 140,
-              align: 'center',
-              render: (value) =>
-                value ? (
-                  <Tag color="green">
-                    {t('teams.joinAccess.allowed', {
-                      defaultValue: 'Allowed',
-                    })}
-                  </Tag>
-                ) : (
-                  <Tag color="yellow">
-                    {t('teams.joinAccess.blocked', {
-                      defaultValue: 'Blocked',
-                    })}
-                  </Tag>
-                ),
-            },
-            {
               key: 'memberCount',
               label: t('teams.table.memberCount', { defaultValue: 'Members' }),
               width: 120,
@@ -329,34 +298,46 @@ const Page = () => {
             {
               key: 'operation',
               label: t('common.operation', { defaultValue: 'Operation' }),
-              width: 220,
+              width: 100,
               align: 'center',
               fixed: 'right',
-              render: (_, record) => (
-                <div className="flex items-center justify-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      onOpenTeamDialog(record)
-                    }}
-                  >
-                    {t('teams.actions.manage', { defaultValue: 'Manage' })}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setSelectedTeam(record)
-                      setRechargeOpen(true)
-                    }}
-                  >
-                    {t('teams.actions.recharge', {
-                      defaultValue: 'Recharge Team',
-                    })}
-                  </Button>
-                </div>
-              ),
+              render: (_, record) => {
+                return (
+                  <div className="flex justify-center">
+                    <DropdownMenu
+                      menus={[
+                        {
+                          type: 'item',
+                          key: 'manage',
+                          label: t('teams.actions.manage', {
+                            defaultValue: 'Manage',
+                          }),
+                          icon: <PenSquareIcon />,
+                          onClick() {
+                            onOpenTeamDialog(record)
+                          },
+                        },
+                        {
+                          type: 'item',
+                          key: 'recharge',
+                          label: t('teams.actions.recharge', {
+                            defaultValue: 'Recharge',
+                          }),
+                          icon: <WalletIcon />,
+                          onClick() {
+                            setSelectedTeam(record)
+                            setRechargeOpen(true)
+                          },
+                        },
+                      ]}
+                    >
+                      <Button variant="ghost" size="icon-xs">
+                        <MoreHorizontalIcon />
+                      </Button>
+                    </DropdownMenu>
+                  </div>
+                )
+              },
             },
           ]}
         />
@@ -393,7 +374,7 @@ const Page = () => {
         }
       >
         {selectedTeam && (
-          <div className="flex flex-col gap-6">
+          <div className="flex max-h-[70vh] flex-col gap-6 overflow-y-auto pr-1">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <div className="text-muted-foreground">

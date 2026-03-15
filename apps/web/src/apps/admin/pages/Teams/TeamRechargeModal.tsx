@@ -77,7 +77,7 @@ export const TeamRechargeModal: React.FC<TeamRechargeModalProps> = ({
           onCancel={() => onOpenChange(false)}
           onOk={onRechargeTeam}
           okText={t('teams.actions.recharge', {
-            defaultValue: 'Recharge Team',
+            defaultValue: 'Recharge',
           })}
           okButtonProps={{
             loading,
