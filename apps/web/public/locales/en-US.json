@@ -224,7 +224,7 @@
     "searchPlaceholder": "Search teams by name...",
     "actions": {
       "manage": "Manage",
-      "recharge": "Recharge Team",
+      "recharge": "Recharge",
       "resetInviteCode": "Reset Invite Code",
       "enable": "Enable Team",
       "disable": "Disable Team",

@@ -224,7 +224,7 @@
     "searchPlaceholder": "按团队名称搜索...",
     "actions": {
       "manage": "管理",
-      "recharge": "给团队充值",
+      "recharge": "充值",
       "resetInviteCode": "重置邀请码",
       "enable": "启用团队",
       "disable": "禁用团队",

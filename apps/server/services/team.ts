@@ -71,6 +71,17 @@ const toCurrentTeamView = (team: typeof dbSchema.teams.$inferSelect) => {
   }
 }
 
+const toAdminTeamViewWithCount = async (
+  team: typeof dbSchema.teams.$inferSelect
+) => {
+  const memberCountResult = await db
+    .select({ count: count() })
+    .from(dbSchema.teamUsers)
+    .where(eq(dbSchema.teamUsers.teamId, team.id))
+
+  return toAdminTeamView(team, memberCountResult[0]?.count || 0)
+}
+
 export const createTeam = async (userId: string) => {
   const teamId = await db.transaction(async (tx) => {
     const teamRows = await tx
@@ -211,7 +222,7 @@ export const updateAdminTeam = async (params: {
     .where(eq(dbSchema.teams.id, params.id))
     .returning()
 
-  return updatedTeam ? toAdminTeamView(updatedTeam) : updatedTeam
+  return updatedTeam ? await toAdminTeamViewWithCount(updatedTeam) : updatedTeam
 }
 
 export const getAdminTeamMembers = async (teamId: string) => {
@@ -234,7 +245,7 @@ export const resetAdminTeamInviteCode = async (id: string) => {
     .where(eq(dbSchema.teams.id, id))
     .returning()
 
-  return team ? toAdminTeamView(team) : team
+  return team ? await toAdminTeamViewWithCount(team) : team
 }
 
 export const setAdminTeamDisabled = async (id: string, disabled: boolean) => {
@@ -259,7 +270,7 @@ export const setAdminTeamDisabled = async (id: string, disabled: boolean) => {
     .where(eq(dbSchema.teams.id, id))
     .returning()
 
-  return updatedTeam ? toAdminTeamView(updatedTeam) : updatedTeam
+  return updatedTeam ? await toAdminTeamViewWithCount(updatedTeam) : updatedTeam
 }
 
 export const rechargeAdminTeam = async (id: string, amount: number) => {
