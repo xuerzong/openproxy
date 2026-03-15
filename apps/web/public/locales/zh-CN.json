@@ -112,7 +112,9 @@
     "backToWorkspace": "返回工作区",
     "messages": {
       "updateSuccess": "团队信息更新成功",
-      "deleteSuccess": "团队删除成功"
+      "deleteSuccess": "团队删除成功",
+      "deleteRequiresOwner": "只有团队所有者可以删除当前团队。",
+      "deleteRequiresAnotherTeam": "删除当前团队前，账号下必须至少保留一个团队。"
     },
     "actions": {
       "deleteTeam": "删除团队"

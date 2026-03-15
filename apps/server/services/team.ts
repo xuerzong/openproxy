@@ -465,6 +465,10 @@ export const deleteCurrentTeam = async (userId: string, teamId: string) => {
     where: eq(dbSchema.teamUsers.userId, userId),
   })
 
+  if (memberships.length <= 1) {
+    throw new TeamServiceError('LAST_TEAM', 409)
+  }
+
   const [deletedTeam] = await db
     .delete(dbSchema.teams)
     .where(eq(dbSchema.teams.id, teamId))
@@ -474,10 +478,10 @@ export const deleteCurrentTeam = async (userId: string, teamId: string) => {
     throw new TeamServiceError('TEAM_NOT_FOUND', 404)
   }
 
-  let nextTeamId = memberships.find((item) => item.teamId !== teamId)?.teamId
+  const nextTeamId = memberships.find((item) => item.teamId !== teamId)?.teamId
 
   if (!nextTeamId) {
-    nextTeamId = await createTeam(userId)
+    throw new TeamServiceError('LAST_TEAM', 409)
   }
 
   return {
