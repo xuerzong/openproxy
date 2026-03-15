@@ -6,11 +6,14 @@ import { AlertTriangleIcon, Trash2Icon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/Card'
 import { CopyButton } from '@/components/CopyButton'
+import { useTeamMembersQuery } from '@/apps/tenant/hooks/queries/useTeamMembersQuery'
+import { useTeamsQuery } from '@/apps/tenant/hooks/queries/useTeamsQuery'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogFooter } from '@/components/ui/Dialog'
 import { Input } from '@/components/ui/Input'
 import { Switch } from '@/components/ui/Switch'
 import { Tag } from '@/components/ui/Tag'
+import { Tooltip } from '@/components/ui/Tooltip'
 import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
@@ -21,8 +24,10 @@ const Page = () => {
   const request = useRequest()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { refreshSession } = useAuth()
+  const { refreshSession, session } = useAuth()
   const teamQuery = useTeamQuery()
+  const teamMembersQuery = useTeamMembersQuery()
+  const teamsQuery = useTeamsQuery()
   const [name, setName] = useState('')
   const [allowJoin, setAllowJoin] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -31,6 +36,28 @@ const Page = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   const team = teamQuery.data?.team
+  const members = teamMembersQuery.data || []
+  const teams = teamsQuery.data || []
+  const currentUserId = session?.user.id
+  const currentMember = members.find(
+    (member) => member.userId === currentUserId
+  )
+  const isOwner = currentMember?.role === 'owner'
+  const hasAnotherTeam = teams.length > 1
+  const deleteGuardReady = !teamMembersQuery.isLoading && !teamsQuery.isLoading
+  const canDeleteTeam = Boolean(deleteGuardReady && isOwner && hasAnotherTeam)
+  const deleteBlockedReason = !deleteGuardReady
+    ? ''
+    : !isOwner
+      ? t('teamSettings.messages.deleteRequiresOwner', {
+          defaultValue: 'Only team owners can delete the current team.',
+        })
+      : !hasAnotherTeam
+        ? t('teamSettings.messages.deleteRequiresAnotherTeam', {
+            defaultValue:
+              'You must keep at least one team in your account before deleting this one.',
+          })
+        : ''
   const inviteLink = useMemo(() => {
     if (!team?.inviteCode) {
       return ''
@@ -129,20 +156,42 @@ const Page = () => {
   }
 
   const onDelete = async () => {
-    if (deleting) {
+    if (deleting || !canDeleteTeam) {
+      if (!canDeleteTeam && deleteBlockedReason) {
+        toast.error(deleteBlockedReason)
+      }
       return
     }
 
     setDeleting(true)
     const response = await request.team.delete()
 
+    const errorValue = response.error?.value as
+      | string
+      | { message?: string; code?: string; reason?: string }
+      | null
+
+    const errorReason =
+      typeof errorValue === 'string'
+        ? errorValue
+        : errorValue?.reason || errorValue?.message || errorValue?.code || ''
+
     if (response.error) {
       setDeleting(false)
       toast.error(
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${response.error.status}`,
-          status: response.error.status,
-        })
+        errorReason === 'ONLY_OWNER'
+          ? t('teamSettings.messages.deleteRequiresOwner', {
+              defaultValue: 'Only team owners can delete the current team.',
+            })
+          : errorReason === 'LAST_TEAM'
+            ? t('teamSettings.messages.deleteRequiresAnotherTeam', {
+                defaultValue:
+                  'You must keep at least one team in your account before deleting this one.',
+              })
+            : t('common.operationFailedWithStatus', {
+                defaultValue: `Operation failed: ${response.error.status}`,
+                status: response.error.status,
+              })
       )
       return
     }
@@ -303,12 +352,32 @@ const Page = () => {
         </div>
 
         <div>
-          <Button variant="danger" onClick={() => setDeleteDialogOpen(true)}>
-            <Trash2Icon className="w-4 h-4" />
-            {t('teamSettings.actions.deleteTeam', {
-              defaultValue: 'Delete Team',
-            })}
-          </Button>
+          {canDeleteTeam ? (
+            <Button variant="danger" onClick={() => setDeleteDialogOpen(true)}>
+              <Trash2Icon className="w-4 h-4" />
+              {t('teamSettings.actions.deleteTeam', {
+                defaultValue: 'Delete Team',
+              })}
+            </Button>
+          ) : !deleteBlockedReason ? (
+            <Button variant="danger" disabled>
+              <Trash2Icon className="w-4 h-4" />
+              {t('teamSettings.actions.deleteTeam', {
+                defaultValue: 'Delete Team',
+              })}
+            </Button>
+          ) : (
+            <Tooltip content={deleteBlockedReason}>
+              <span className="inline-flex">
+                <Button variant="danger" disabled>
+                  <Trash2Icon className="w-4 h-4" />
+                  {t('teamSettings.actions.deleteTeam', {
+                    defaultValue: 'Delete Team',
+                  })}
+                </Button>
+              </span>
+            </Tooltip>
+          )}
         </div>
       </Card>
 
@@ -330,6 +399,7 @@ const Page = () => {
             okButtonProps={{
               variant: 'danger',
               loading: deleting,
+              disabled: !canDeleteTeam,
             }}
             onCancel={() => setDeleteDialogOpen(false)}
             onOk={onDelete}

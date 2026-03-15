@@ -112,7 +112,9 @@
     "backToWorkspace": "Back to Workspace",
     "messages": {
       "updateSuccess": "Team information updated successfully",
-      "deleteSuccess": "Team deleted successfully"
+      "deleteSuccess": "Team deleted successfully",
+      "deleteRequiresOwner": "Only team owners can delete the current team.",
+      "deleteRequiresAnotherTeam": "You must keep at least one team in your account before deleting this one."
     },
     "actions": {
       "deleteTeam": "Delete Team"
