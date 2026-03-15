@@ -9,6 +9,7 @@ import {
 } from '@server/schemas'
 import {
   deleteAdminTeam,
+  getAdminTeamById,
   getAdminTeamMembers,
   getAdminTeams,
   getAdminTeamsCount,
@@ -43,6 +44,23 @@ export const adminTeamsRouter = new Elysia({
     '/teams/:id/members',
     async ({ params }) => {
       return await getAdminTeamMembers(params.id)
+    },
+    {
+      auth: { role: 'admin' },
+      params: AdminTeamIdSchema,
+    }
+  )
+  .get(
+    '/teams/:id',
+    async ({ params, set }) => {
+      const team = await getAdminTeamById(params.id)
+
+      if (!team) {
+        set.status = 404
+        return 'Team not found'
+      }
+
+      return team
     },
     {
       auth: { role: 'admin' },

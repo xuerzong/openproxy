@@ -69,6 +69,7 @@
     "operationFailedWithStatus": "Operation failed: {{status}}",
     "operationFailedWithMessage": "Operation failed: {{message}}",
     "updateFailed": "Update failed",
+    "back": "Back",
     "copySuccess": "Copied",
     "custom": "Custom",
     "expired": "Expired",

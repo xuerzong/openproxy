@@ -185,6 +185,14 @@ export const getAdminTeamsCount = async (keyword?: string) => {
   return result[0]?.count || 0
 }
 
+export const getAdminTeamById = async (id: string) => {
+  const team = await db.query.teams.findFirst({
+    where: eq(dbSchema.teams.id, id),
+  })
+
+  return team ? await toAdminTeamViewWithCount(team) : team
+}
+
 export const updateAdminTeam = async (params: {
   id: string
   name: string

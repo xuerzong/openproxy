@@ -60,6 +60,10 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/Teams')),
       },
       {
+        path: 'teams/:id',
+        Component: lazy(() => import('./pages/Teams/Detail')),
+      },
+      {
         path: 'ai-providers',
         Component: lazy(() => import('./pages/AIProviders')),
       },

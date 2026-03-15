@@ -69,6 +69,7 @@
     "operationFailedWithStatus": "操作失败: {{status}}",
     "operationFailedWithMessage": "操作失败: {{message}}",
     "updateFailed": "更新失败",
+    "back": "返回",
     "copySuccess": "复制成功",
     "custom": "自定义",
     "expired": "已过期",
