@@ -140,7 +140,6 @@
       "listTitle": "用户管理",
       "manageDescription": "团队所有者可以修改成员角色并将成员移出团队。",
       "readonlyDescription": "只有团队所有者可以修改角色或移除成员。",
-      "remove": "移除",
       "confirmRemoveTitle": "确认移除此成员？",
       "confirmRemoveDescription": "移除后，该成员会立即失去当前团队的访问权限。",
       "roles": {

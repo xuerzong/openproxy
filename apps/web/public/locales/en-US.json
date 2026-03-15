@@ -140,7 +140,6 @@
       "listTitle": "User Management",
       "manageDescription": "Owners can change member roles and remove members from the team.",
       "readonlyDescription": "Only team owners can change roles or remove members.",
-      "remove": "Remove",
       "confirmRemoveTitle": "Remove this member?",
       "confirmRemoveDescription": "The member will immediately lose access to the current team after removal.",
       "roles": {

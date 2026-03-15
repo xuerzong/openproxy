@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { TrashIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/Card'
@@ -308,16 +309,20 @@ const Page = () => {
                   fixed: 'right',
                   render: (_, record) => (
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="danger"
+                      size="icon-xs"
                       disabled={
                         !canManageMembers || record.userId === currentUserId
                       }
+                      aria-label={t('actions.delete', {
+                        defaultValue: 'Delete',
+                      })}
+                      title={t('actions.delete', {
+                        defaultValue: 'Delete',
+                      })}
                       onClick={() => setRemovingMember(record)}
                     >
-                      {t('teamSettings.members.remove', {
-                        defaultValue: 'Remove',
-                      })}
+                      <TrashIcon />
                     </Button>
                   ),
                 },
@@ -343,8 +348,8 @@ const Page = () => {
         }}
         footer={
           <DialogFooter
-            okText={t('teamSettings.members.remove', {
-              defaultValue: 'Remove',
+            okText={t('actions.delete', {
+              defaultValue: 'Delete',
             })}
             okButtonProps={{
               variant: 'danger',
