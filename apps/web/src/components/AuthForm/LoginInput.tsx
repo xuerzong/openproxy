@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@openproxy/ui/utils/cn'
 import type { InputHTMLAttributes } from 'react'
 
 interface LoginInputProps extends InputHTMLAttributes<HTMLInputElement> {

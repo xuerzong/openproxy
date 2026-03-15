@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@openproxy/ui/utils/cn'
 import { BoxIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 

@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@openproxy/ui/utils/cn'
 import type { ButtonHTMLAttributes } from 'react'
 import { useTranslation } from 'react-i18next'
 

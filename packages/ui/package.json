@@ -24,7 +24,10 @@
     "./Table": "./src/Table/index.tsx",
     "./Tabs": "./src/Tabs/index.tsx",
     "./Tag": "./src/Tag/index.tsx",
-    "./Tooltip": "./src/Tooltip.tsx"
+    "./Tooltip": "./src/Tooltip.tsx",
+    "./styles.css": "./src/styles.css",
+    "./utils/cn": "./src/utils/cn.ts",
+    "./utils/props": "./src/utils/props.ts"
   },
   "dependencies": {
     "@number-flow/react": "^0.5.10",

@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@openproxy/ui/utils/cn'
 import type { HTMLAttributes } from 'react'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {}

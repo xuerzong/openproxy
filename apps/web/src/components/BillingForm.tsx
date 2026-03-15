@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
-import { cn } from '@/utils/cn'
+import { cn } from '@openproxy/ui/utils/cn'
 import { CheckIcon } from 'lucide-react'
 import NumberFlow from '@number-flow/react'
 import { useRequest } from '@/contexts/ApiContext'

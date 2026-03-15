@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@openproxy/ui/utils/cn'
 import { PageTitle } from './PageTitle'
 import { PanelLeftIcon } from 'lucide-react'
 import { Button } from '@openproxy/ui/Button'

@@ -7,7 +7,7 @@ import { Logo } from '@/components/Logo'
 import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { UserAccount } from '@/components/UserAccount'
 import { useMenuTransition } from '@/hooks/useMenuTransition'
-import { cn } from '@/utils/cn'
+import { cn } from '@openproxy/ui/utils/cn'
 import { changeCollapsed, toggleCollapsed, useAppStore } from '@/stores/app'
 
 type MenuData = {
