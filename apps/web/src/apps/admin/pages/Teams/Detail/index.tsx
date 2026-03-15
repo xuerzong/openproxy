@@ -16,8 +16,8 @@ import { Tag } from '@openproxy/ui/Tag'
 import { Table } from '@openproxy/ui/Table'
 import { useAdminTeamMembersQuery } from '@/apps/admin/hooks/queries/useAdminTeamMembersQuery'
 import { useAdminTeamQuery } from '@/apps/admin/hooks/queries/useAdminTeamQuery'
+import { NotFoundView } from '@/components/NotFoundView'
 import { useRequest } from '@/contexts/ApiContext'
-import NotFound from '@/pages/NotFound'
 import dayjs from '@/utils/dayjs'
 
 const Page = () => {
@@ -198,7 +198,7 @@ const Page = () => {
   }
 
   if (!team) {
-    return <NotFound />
+    return <NotFoundView />
   }
 
   return (

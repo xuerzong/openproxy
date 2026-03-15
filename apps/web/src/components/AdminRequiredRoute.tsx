@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router'
 import { useAuth } from '@/contexts/AuthContext'
 import { Loader } from '@openproxy/ui/Loader'
-import NotFound from '@/pages/NotFound'
+import { NotFoundView } from '@/components/NotFoundView'
 
 export const AdminRequiredRoute: React.FC<React.PropsWithChildren> = ({
   children,
@@ -21,7 +21,7 @@ export const AdminRequiredRoute: React.FC<React.PropsWithChildren> = ({
   }
 
   if (!isAdmin) {
-    return <NotFound />
+    return <NotFoundView />
   }
 
   return <>{children}</>

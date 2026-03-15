@@ -2,10 +2,10 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { toast } from 'sonner'
 import { ModelEditor } from '@/components/Model/ModelEditor'
+import { NotFoundView } from '@/components/NotFoundView'
 import { PageContainer } from '@/components/PageContainer'
 import { Loader } from '@openproxy/ui/Loader'
 import { useRequest } from '@/contexts/ApiContext'
-import NotFound from '@/pages/NotFound'
 import { useTranslation } from 'react-i18next'
 
 const Page = () => {
@@ -50,7 +50,7 @@ const Page = () => {
   }
 
   if (!model) {
-    return <NotFound />
+    return <NotFoundView />
   }
 
   return (

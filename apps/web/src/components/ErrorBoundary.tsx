@@ -1,6 +1,6 @@
-import NotFound from '@/pages/NotFound'
 import React from 'react'
-import { useRouteError, Outlet } from 'react-router'
+import { useRouteError } from 'react-router'
+import { NotFoundView } from '@/components/NotFoundView'
 
 export class RouterError extends Error {
   code: number = 200
@@ -10,12 +10,10 @@ export class RouterError extends Error {
   }
 }
 
-export const ErrorBoundary: React.FC<React.PropsWithChildren> = ({
-  children,
-}) => {
+export const ErrorBoundary: React.FC<React.PropsWithChildren> = ({}) => {
   const error = useRouteError()
   if (error instanceof RouterError) {
-    return <NotFound />
+    return <NotFoundView />
   }
-  return <NotFound />
+  return <NotFoundView />
 }

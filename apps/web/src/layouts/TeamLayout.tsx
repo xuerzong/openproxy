@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Loader } from '@openproxy/ui/Loader'
 import { useTeamsQuery } from '@/apps/tenant/hooks/queries/useTeamsQuery'
-import NotFound from '@/pages/NotFound'
+import { NotFoundView } from '@/components/NotFoundView'
 import { authClient } from '@/utils/better-auth'
 
 export const TeamLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
@@ -38,7 +38,7 @@ export const TeamLayout: React.FC<React.PropsWithChildren> = ({ children }) => {
   }
 
   if (!teams || teams.length === 0) {
-    return <NotFound />
+    return <NotFoundView />
   }
 
   return children
