@@ -224,6 +224,7 @@
     "searchPlaceholder": "按团队名称搜索...",
     "actions": {
       "manage": "管理",
+      "recharge": "给团队充值",
       "resetInviteCode": "重置邀请码",
       "enable": "启用团队",
       "disable": "禁用团队",
@@ -231,10 +232,16 @@
     },
     "messages": {
       "updateSuccess": "团队更新成功",
+      "rechargeSuccess": "团队充值成功",
       "inviteCodeReset": "邀请码重置成功",
       "enabledSuccess": "团队已启用",
       "disabledSuccess": "团队已禁用",
       "deleteSuccess": "团队删除成功"
+    },
+    "recharge": {
+      "title": "直接充值",
+      "description": "在管理后台直接给当前团队余额充值。",
+      "amount": "充值金额"
     },
     "form": {
       "name": "团队名称",

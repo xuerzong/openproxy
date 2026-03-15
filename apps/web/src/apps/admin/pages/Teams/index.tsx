@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useDebounce } from 'use-debounce'
 import { toast } from 'sonner'
 import { RefreshCcwIcon, Trash2Icon } from 'lucide-react'
+import { TeamRechargeModal } from './TeamRechargeModal'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { Button } from '@/components/ui/Button'
@@ -26,6 +27,8 @@ const Page = () => {
   const [page, setPage] = useState(1)
   const [keyword, setKeyword] = useState('')
   const [selectedTeam, setSelectedTeam] = useState<any>(null)
+  const [teamDialogOpen, setTeamDialogOpen] = useState(false)
+  const [rechargeOpen, setRechargeOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<
     null | 'delete' | 'disable' | 'enable'
   >(null)
@@ -57,6 +60,7 @@ const Page = () => {
   }, [debouncedKeyword])
 
   const closeTeamDialog = () => {
+    setTeamDialogOpen(false)
     setSelectedTeam(null)
     setConfirmAction(null)
     teamForm.resetErrors()
@@ -70,6 +74,7 @@ const Page = () => {
 
   const onOpenTeamDialog = (team: any) => {
     setSelectedTeam(team)
+    setTeamDialogOpen(true)
     teamForm.setValues({
       id: team.id,
       name: team.name,
@@ -324,19 +329,33 @@ const Page = () => {
             {
               key: 'operation',
               label: t('common.operation', { defaultValue: 'Operation' }),
-              width: 120,
+              width: 220,
               align: 'center',
               fixed: 'right',
               render: (_, record) => (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    onOpenTeamDialog(record)
-                  }}
-                >
-                  {t('teams.actions.manage', { defaultValue: 'Manage' })}
-                </Button>
+                <div className="flex items-center justify-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      onOpenTeamDialog(record)
+                    }}
+                  >
+                    {t('teams.actions.manage', { defaultValue: 'Manage' })}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedTeam(record)
+                      setRechargeOpen(true)
+                    }}
+                  >
+                    {t('teams.actions.recharge', {
+                      defaultValue: 'Recharge Team',
+                    })}
+                  </Button>
+                </div>
               ),
             },
           ]}
@@ -359,7 +378,7 @@ const Page = () => {
         description={t('teams.detailDescription', {
           defaultValue: 'Review team information and update limits.',
         })}
-        open={Boolean(selectedTeam)}
+        open={teamDialogOpen && Boolean(selectedTeam)}
         onOpenChange={(open) => {
           if (!open) {
             closeTeamDialog()
@@ -675,6 +694,16 @@ const Page = () => {
                   'Enabling the team will restore team-scoped access for its members.',
               })}
       </Dialog>
+
+      <TeamRechargeModal
+        open={rechargeOpen && Boolean(selectedTeam)}
+        onOpenChange={setRechargeOpen}
+        team={selectedTeam}
+        onSuccess={(team) => {
+          syncSelectedTeam(team)
+          refreshTeams()
+        }}
+      />
     </PageContainer>
   )
 }
