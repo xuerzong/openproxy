@@ -1,6 +1,12 @@
 import { Elysia } from 'elysia'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
-import { getAdminDashboardStats } from '@server/services/admin-dashboard'
+import { UsageGroupedQuerySchema } from '@server/schemas'
+import {
+  getAdminDashboardStats,
+  getAdminDashboardUsageByModelGroup,
+  getAdminDashboardUsageByProvider,
+  getAdminDashboardUsageGrouped,
+} from '@server/services/admin-dashboard'
 
 export const adminDashboardRouter = new Elysia({
   prefix: '/admin',
@@ -13,5 +19,38 @@ export const adminDashboardRouter = new Elysia({
     },
     {
       auth: { role: 'admin' },
+    }
+  )
+  .get(
+    '/dashboard/usagesGrouped',
+    async ({ query }) => {
+      return await getAdminDashboardUsageGrouped(
+        query.rangeHours,
+        query.bucketCount
+      )
+    },
+    {
+      auth: { role: 'admin' },
+      query: UsageGroupedQuerySchema,
+    }
+  )
+  .get(
+    '/dashboard/usagesByModelGroup',
+    async ({ query }) => {
+      return await getAdminDashboardUsageByModelGroup(query.rangeHours)
+    },
+    {
+      auth: { role: 'admin' },
+      query: UsageGroupedQuerySchema,
+    }
+  )
+  .get(
+    '/dashboard/usagesByProvider',
+    async ({ query }) => {
+      return await getAdminDashboardUsageByProvider(query.rangeHours)
+    },
+    {
+      auth: { role: 'admin' },
+      query: UsageGroupedQuerySchema,
     }
   )
