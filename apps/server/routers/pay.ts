@@ -3,12 +3,13 @@ import { generateOrderId } from '@server/lib/generate'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { PayStatus, PayType } from '@server/constants/pay'
 import Decimal from 'decimal.js'
-import { and, count, eq, gte, sql } from 'drizzle-orm'
+import { and, count, eq, gte } from 'drizzle-orm'
 import { pascalCase } from 'string-ts'
 import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import { CLIENT_ORIGIN } from '@server/constants'
 import { ZpayzPaymentProvider } from '@openproxy/payment-provider'
+import { createTeamOrder, settleTeamOrder } from '@server/services/order'
 
 const ZPAYZ_CID = process.env.ZPAYZ_CID?.trim()
 const ZPAYZ_PID = process.env.ZPAYZ_PID?.trim()
@@ -54,7 +55,6 @@ export const payRouter = new Elysia({ name: 'pay-router', prefix: '/pay' })
         })
       }
 
-      const amount = new Decimal(params.money || '0').toString()
       const orderId = params.out_trade_no || ''
 
       const completeOrderId = await db.transaction(async (tx) => {
@@ -63,34 +63,15 @@ export const payRouter = new Elysia({ name: 'pay-router', prefix: '/pay' })
             ? PayStatus.SUCCESS
             : PayStatus.FAIL
 
-        const orderRows = await tx
-          .update(dbSchema.orders)
-          .set({
-            status: orderStatus,
-          })
-          .where(
-            and(
-              eq(dbSchema.orders.orderId, orderId),
-              eq(dbSchema.orders.status, PayStatus.PENDING)
-            )
-          )
-          .returning({
-            teamId: dbSchema.orders.teamId,
-          })
+        const order = await settleTeamOrder(tx, {
+          orderId,
+          status: orderStatus,
+          tradeNo: params.trade_no,
+        })
 
-        const teamId = orderRows?.[0]?.teamId
-
-        if (!teamId) {
+        if (!order) {
           return { success: false }
         }
-
-        await tx
-          .update(dbSchema.teams)
-          .set({
-            amount: sql`${dbSchema.teams.amount} + ${amount}`,
-            updatedAt: sql`now()`,
-          })
-          .where(eq(dbSchema.teams.id, teamId))
 
         return orderId
       })
@@ -153,19 +134,13 @@ export const payRouter = new Elysia({ name: 'pay-router', prefix: '/pay' })
       const amount = new Decimal(body.amount).toFixed(2)
       const type = body.type
 
-      const orderId = generateOrderId()
-
-      await db
-        .insert(dbSchema.orders)
-        .values({
-          teamId: teamId,
-          userId: teamUserId,
-          amount,
-          status: PayStatus.PENDING,
-          orderId,
-          type: PayType[pascalCase(body.type) as 'Alipay'],
-        })
-        .returning()
+      const { orderId } = await createTeamOrder(db, {
+        teamId,
+        userId: teamUserId,
+        amount,
+        status: PayStatus.PENDING,
+        type: PayType[pascalCase(body.type) as 'Alipay'],
+      })
 
       const redirectUrl = paymentProvider.createQrCodeUrl({
         amount,

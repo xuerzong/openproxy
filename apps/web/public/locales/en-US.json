@@ -224,6 +224,7 @@
     "searchPlaceholder": "Search teams by name...",
     "actions": {
       "manage": "Manage",
+      "recharge": "Recharge Team",
       "resetInviteCode": "Reset Invite Code",
       "enable": "Enable Team",
       "disable": "Disable Team",
@@ -231,10 +232,16 @@
     },
     "messages": {
       "updateSuccess": "Team updated successfully",
+      "rechargeSuccess": "Team recharged successfully",
       "inviteCodeReset": "Invite code reset successfully",
       "enabledSuccess": "Team enabled successfully",
       "disabledSuccess": "Team disabled successfully",
       "deleteSuccess": "Team deleted successfully"
+    },
+    "recharge": {
+      "title": "Direct Recharge",
+      "description": "Recharge the team balance directly from the admin panel.",
+      "amount": "Recharge Amount"
     },
     "form": {
       "name": "Team Name",

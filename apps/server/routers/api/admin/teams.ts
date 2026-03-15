@@ -3,6 +3,7 @@ import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
   AdminTeamIdSchema,
   AdminTeamsQuerySchema,
+  RechargeAdminTeamBodySchema,
   UpdateAdminTeamBodySchema,
   UpdateAdminTeamStatusBodySchema,
 } from '@server/schemas'
@@ -11,6 +12,7 @@ import {
   getAdminTeamMembers,
   getAdminTeams,
   getAdminTeamsCount,
+  rechargeAdminTeam,
   resetAdminTeamInviteCode,
   setAdminTeamDisabled,
   updateAdminTeam,
@@ -96,6 +98,23 @@ export const adminTeamsRouter = new Elysia({
     {
       auth: { role: 'admin' },
       body: UpdateAdminTeamStatusBodySchema,
+    }
+  )
+  .post(
+    '/teams/recharge',
+    async ({ body, set }) => {
+      const team = await rechargeAdminTeam(body.id, body.amount)
+
+      if (!team) {
+        set.status = 404
+        return 'Team not found'
+      }
+
+      return team
+    },
+    {
+      auth: { role: 'admin' },
+      body: RechargeAdminTeamBodySchema,
     }
   )
   .delete(

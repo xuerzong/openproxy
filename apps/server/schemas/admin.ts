@@ -48,3 +48,8 @@ export const UpdateAdminTeamStatusBodySchema = t.Object({
   id: t.String(),
   disabled: t.Boolean(),
 })
+
+export const RechargeAdminTeamBodySchema = t.Object({
+  id: t.String(),
+  amount: t.Number({ minimum: 0.01 }),
+})

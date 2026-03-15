@@ -2,6 +2,8 @@ import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import { and, count, desc, eq, ilike } from 'drizzle-orm'
 import { generateInviteCode } from '@server/lib/generate'
+import { PayStatus, PayType } from '@server/constants/pay'
+import { createTeamOrder, settleTeamOrder } from '@server/services/order'
 
 const TEAM_ROLES = ['owner', 'member'] as const
 
@@ -258,6 +260,59 @@ export const setAdminTeamDisabled = async (id: string, disabled: boolean) => {
     .returning()
 
   return updatedTeam ? toAdminTeamView(updatedTeam) : updatedTeam
+}
+
+export const rechargeAdminTeam = async (id: string, amount: number) => {
+  return await db.transaction(async (tx) => {
+    const team = await tx.query.teams.findFirst({
+      where: eq(dbSchema.teams.id, id),
+    })
+
+    if (!team) {
+      return null
+    }
+
+    const teamMember = await tx.query.teamUsers.findFirst({
+      where: eq(dbSchema.teamUsers.teamId, id),
+      orderBy: desc(dbSchema.teamUsers.createdAt),
+    })
+
+    if (!teamMember) {
+      return null
+    }
+
+    const { orderId } = await createTeamOrder(tx, {
+      teamId: id,
+      userId: teamMember.id,
+      amount,
+      status: PayStatus.PENDING,
+      type: PayType.WechatPay,
+    })
+
+    const order = await settleTeamOrder(tx, {
+      orderId,
+      status: PayStatus.SUCCESS,
+    })
+
+    if (!order) {
+      return null
+    }
+
+    const updatedTeam = await tx.query.teams.findFirst({
+      where: eq(dbSchema.teams.id, id),
+    })
+
+    if (!updatedTeam) {
+      return null
+    }
+
+    const memberCountResult = await tx
+      .select({ count: count() })
+      .from(dbSchema.teamUsers)
+      .where(eq(dbSchema.teamUsers.teamId, id))
+
+    return toAdminTeamView(updatedTeam, memberCountResult[0]?.count || 0)
+  })
 }
 
 export const deleteAdminTeam = async (id: string) => {

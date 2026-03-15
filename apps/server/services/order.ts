@@ -3,6 +3,85 @@ import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import Decimal from 'decimal.js'
 import { generateOrderId } from '@server/lib/generate'
+import { PayStatus, PayType } from '@server/constants/pay'
+
+type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
+type DbExecutor = typeof db | DbTransaction
+
+export async function createTeamOrder(
+  database: DbExecutor,
+  params: {
+    teamId: string
+    userId: string
+    amount: number | string
+    type: number
+    status?: number
+    tradeNo?: string
+    orderId?: string
+  }
+) {
+  const amount = new Decimal(params.amount).toFixed(2)
+  const orderId = params.orderId || generateOrderId()
+
+  await database.insert(dbSchema.orders).values({
+    teamId: params.teamId,
+    userId: params.userId,
+    amount,
+    status: params.status ?? PayStatus.PENDING,
+    orderId,
+    tradeNo: params.tradeNo?.trim() || '',
+    type: params.type,
+  })
+
+  return {
+    orderId,
+    amount,
+  }
+}
+
+export async function settleTeamOrder(
+  database: DbExecutor,
+  params: {
+    orderId: string
+    status: number
+    tradeNo?: string
+  }
+) {
+  const [order] = await database
+    .update(dbSchema.orders)
+    .set({
+      status: params.status,
+      tradeNo: params.tradeNo?.trim() || '',
+    })
+    .where(
+      and(
+        eq(dbSchema.orders.orderId, params.orderId),
+        eq(dbSchema.orders.status, PayStatus.PENDING)
+      )
+    )
+    .returning({
+      orderId: dbSchema.orders.orderId,
+      teamId: dbSchema.orders.teamId,
+      amount: dbSchema.orders.amount,
+      status: dbSchema.orders.status,
+    })
+
+  if (!order) {
+    return null
+  }
+
+  if (params.status === PayStatus.SUCCESS) {
+    await database
+      .update(dbSchema.teams)
+      .set({
+        amount: sql`${dbSchema.teams.amount} + ${order.amount}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(dbSchema.teams.id, order.teamId))
+  }
+
+  return order
+}
 
 export async function rechargeUser(email: string, amount: number) {
   const decimalAmount = new Decimal(amount)
@@ -24,9 +103,9 @@ export async function rechargeUser(email: string, amount: number) {
         teamId: '', // TODO
         userId: targetUser.id,
         amount: decimalAmount.toString(),
-        status: 1,
+        status: PayStatus.SUCCESS,
         orderId: generateOrderId(),
-        type: 2,
+        type: PayType.WechatPay,
       })
       .returning()
 

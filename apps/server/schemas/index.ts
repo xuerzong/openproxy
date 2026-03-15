@@ -24,6 +24,7 @@ export {
   UpdateAdminTeamBodySchema,
   AdminTeamIdSchema,
   UpdateAdminTeamStatusBodySchema,
+  RechargeAdminTeamBodySchema,
 } from './admin'
 
 export {
