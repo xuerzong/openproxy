@@ -16,7 +16,8 @@
     "recharge": "充值",
     "chart": {
       "title24h": "24小时请求趋势",
-      "requests": "请求数"
+      "requests": "请求数",
+      "totalTokens": "Token 总量"
     },
     "table": {
       "time": "时间",

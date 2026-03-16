@@ -116,6 +116,7 @@ const Page = () => {
   const chartData = useMemo(() => {
     return (usageGroupedQuery.data || []).map((item) => ({
       bucketLabel: dayjs(item.bucketAt).format(bucketLabelFormat),
+      requests: item.requests,
       totalTokens: item.tokensPrompt + item.tokensCompletion,
     }))
   }, [usageGroupedQuery.data, bucketLabelFormat])
@@ -351,7 +352,17 @@ const Page = () => {
                 axisLine={false}
                 minTickGap={24}
               />
+              <ChartLegend content={<ChartLegendContent />} />
               <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+              <Area
+                dataKey="requests"
+                type="monotone"
+                radius={0}
+                stroke="#10b981"
+                strokeWidth={2}
+                fill="#10b981"
+                fillOpacity={0.12}
+              />
               <Area
                 dataKey="totalTokens"
                 type="monotone"

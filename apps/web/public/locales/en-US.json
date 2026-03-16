@@ -16,7 +16,8 @@
     "recharge": "Recharge",
     "chart": {
       "title24h": "24h Request Trend",
-      "requests": "Requests"
+      "requests": "Requests",
+      "totalTokens": "Total Tokens"
     },
     "table": {
       "time": "Time",

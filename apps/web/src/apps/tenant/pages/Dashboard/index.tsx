@@ -15,6 +15,8 @@ import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useUsagesGroupedQuery } from '@/apps/tenant/hooks/queries/useUsagesGroupedQuery'
 import {
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@openproxy/ui/Chart'
@@ -46,6 +48,7 @@ const Page = () => {
     return (usagesGroupedQuery.data || []).map((item) => ({
       bucketLabel: dayjs(item.bucketAt).format('MM/DD HH:mm'),
       requests: item.requests,
+      totalTokens: item.tokensPrompt + item.tokensCompletion,
     }))
   }, [usagesGroupedQuery.data])
 
@@ -53,6 +56,10 @@ const Page = () => {
     requests: {
       label: translateDashboard('chart.requests', 'Requests'),
       color: 'var(--primary)',
+    },
+    totalTokens: {
+      label: translateDashboard('chart.totalTokens', 'Total Tokens'),
+      color: '#10b981',
     },
   }
 
@@ -105,6 +112,7 @@ const Page = () => {
                 axisLine={false}
                 minTickGap={24}
               />
+              <ChartLegend content={<ChartLegendContent />} />
               <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
               <Area
                 dataKey="requests"
@@ -114,6 +122,15 @@ const Page = () => {
                 strokeWidth={2}
                 fill="var(--color-primary)"
                 fillOpacity={0.2}
+              />
+              <Area
+                dataKey="totalTokens"
+                type="monotone"
+                radius={0}
+                stroke="#10b981"
+                strokeWidth={2}
+                fill="#10b981"
+                fillOpacity={0.12}
               />
             </AreaChart>
           </ChartContainer>
