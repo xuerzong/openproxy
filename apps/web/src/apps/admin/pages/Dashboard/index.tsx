@@ -43,13 +43,13 @@ const formatBucketLabel = (value: string | Date) =>
   dayjs(value).format('MM/DD HH:mm')
 
 const DASHBOARD_TIME_RANGE_OPTIONS = [
-  { key: '24h', label: '24h', rangeHours: 24, bucketHours: 2 },
-  { key: '7day', label: '7day', rangeHours: 24 * 7, bucketHours: 12 },
-  { key: '15day', label: '15day', rangeHours: 24 * 15, bucketHours: 24 },
-  { key: '30day', label: '30day', rangeHours: 24 * 30, bucketHours: 24 },
-  { key: '3month', label: '3month', rangeHours: 24 * 90, bucketHours: 24 * 3 },
-  { key: '6month', label: '6month', rangeHours: 24 * 180, bucketHours: 24 * 7 },
-  { key: '1year', label: '1year', rangeHours: 24 * 365, bucketHours: 24 * 14 },
+  { key: '24h', rangeHours: 24, bucketHours: 2 },
+  { key: '7day', rangeHours: 24 * 7, bucketHours: 12 },
+  { key: '15day', rangeHours: 24 * 15, bucketHours: 24 },
+  { key: '30day', rangeHours: 24 * 30, bucketHours: 24 },
+  { key: '3month', rangeHours: 24 * 90, bucketHours: 24 * 3 },
+  { key: '6month', rangeHours: 24 * 180, bucketHours: 24 * 7 },
+  { key: '1year', rangeHours: 24 * 365, bucketHours: 24 * 14 },
 ] as const
 
 const toSeriesKey = (prefix: string, index: number) => `${prefix}-${index}`
@@ -93,8 +93,16 @@ const Page = () => {
   const stats = statsQuery.data
 
   const formatNumber = (value?: number) => Number(value || 0).toLocaleString()
+  const selectedRangeLabel = t(
+    `adminDashboard.timeRange.${selectedRange.key}`,
+    {
+      defaultValue: selectedRange.key,
+    }
+  )
   const timeRangeOptions = DASHBOARD_TIME_RANGE_OPTIONS.map((item) => ({
-    label: item.label,
+    label: t(`adminDashboard.timeRange.${item.key}`, {
+      defaultValue: item.key,
+    }),
     value: item.key,
   }))
 
@@ -330,7 +338,8 @@ const Page = () => {
         <Card>
           <div className="mb-4 text-base font-semibold">
             {t('adminDashboard.chart.title24hTokens', {
-              defaultValue: `${selectedRange.label} Token Usage Trend`,
+              range: selectedRangeLabel,
+              defaultValue: '{{range}} Token Usage Trend',
             })}
           </div>
           <ChartContainer config={chartConfig} className="h-72 w-full">
@@ -359,7 +368,8 @@ const Page = () => {
         <Card>
           <div className="mb-4 text-base font-semibold">
             {t('adminDashboard.chart.title24hRequestsByModelGroup', {
-              defaultValue: `${selectedRange.label} Requests by Model Group`,
+              range: selectedRangeLabel,
+              defaultValue: '{{range}} Requests by Model Group',
             })}
           </div>
           <ChartContainer
@@ -399,7 +409,8 @@ const Page = () => {
         <Card>
           <div className="mb-4 text-base font-semibold">
             {t('adminDashboard.chart.title24hRequestsByProvider', {
-              defaultValue: `${selectedRange.label} Requests by Provider`,
+              range: selectedRangeLabel,
+              defaultValue: '{{range}} Requests by Provider',
             })}
           </div>
           <ChartContainer

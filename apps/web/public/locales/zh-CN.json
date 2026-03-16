@@ -34,10 +34,19 @@
     }
   },
   "adminDashboard": {
+    "timeRange": {
+      "24h": "24小时",
+      "7day": "7天",
+      "15day": "15天",
+      "30day": "30天",
+      "3month": "3个月",
+      "6month": "6个月",
+      "1year": "1年"
+    },
     "chart": {
-      "title24hTokens": "24小时 Token 使用趋势",
-      "title24hRequestsByModelGroup": "24小时按模型组统计请求量",
-      "title24hRequestsByProvider": "24小时按供应商统计请求量",
+      "title24hTokens": "{{range}} Token 使用趋势",
+      "title24hRequestsByModelGroup": "{{range}} 按模型组统计请求量",
+      "title24hRequestsByProvider": "{{range}} 按供应商统计请求量",
       "totalTokens": "Token 总量",
       "requests": "请求量"
     },

@@ -34,10 +34,19 @@
     }
   },
   "adminDashboard": {
+    "timeRange": {
+      "24h": "24h",
+      "7day": "7 days",
+      "15day": "15 days",
+      "30day": "30 days",
+      "3month": "3 months",
+      "6month": "6 months",
+      "1year": "1 year"
+    },
     "chart": {
-      "title24hTokens": "24h Token Usage Trend",
-      "title24hRequestsByModelGroup": "24h Requests by Model Group",
-      "title24hRequestsByProvider": "24h Requests by Provider",
+      "title24hTokens": "{{range}} Token Usage Trend",
+      "title24hRequestsByModelGroup": "{{range}} Requests by Model Group",
+      "title24hRequestsByProvider": "{{range}} Requests by Provider",
       "totalTokens": "Total Tokens",
       "requests": "Requests"
     },
