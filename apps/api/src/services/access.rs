@@ -27,8 +27,7 @@ pub async fn validate_model_access(
                 ak.expires_at as api_key_expires_at,
                 ak.team_id
             FROM api_keys ak
-            WHERE ak.api_key_hash = $1 
-              AND ak.status = 0
+            WHERE ak.api_key_hash = $1
         ),
         model_info AS (
             SELECT 
@@ -164,7 +163,11 @@ pub async fn validate_model_access(
     }
 
     if providers.is_empty() {
-        return Err((500u16, "NO_PROVIDER_AVAILABLE", "No AI provider available for this model"));
+        return Err((
+            500u16,
+            "NO_PROVIDER_AVAILABLE",
+            "No AI provider available for this model",
+        ));
     }
 
     Ok(ModelAccessResult {

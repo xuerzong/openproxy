@@ -123,24 +123,21 @@ pub async fn chat_handler(
                     } else {
                         // Last provider failed; forward the upstream error body and status directly
                         let error_bytes = upstream_res.bytes().await.unwrap_or_default();
-                        let error_resp = if let Ok(v) =
-                            serde_json::from_slice::<Value>(&error_bytes)
-                        {
-                            (status, Json(v)).into_response()
-                        } else {
-                            let raw_err = String::from_utf8_lossy(&error_bytes);
-                            ApiResponse::<()>::error(&raw_err, "UPSTREAM_ERROR")
-                                .to_res(status)
-                        };
+                        let error_resp =
+                            if let Ok(v) = serde_json::from_slice::<Value>(&error_bytes) {
+                                (status, Json(v)).into_response()
+                            } else {
+                                let raw_err = String::from_utf8_lossy(&error_bytes);
+                                ApiResponse::<()>::error(&raw_err, "UPSTREAM_ERROR").to_res(status)
+                            };
                         return Err(error_resp);
                     }
                 }
 
                 // Successful response: branch into streaming or buffered JSON handling
                 let content_type = upstream_res.headers().get("content-type").cloned();
-                let is_event_stream = content_type.is_some_and(|ct| {
-                    ct.to_str().unwrap_or("").contains("text/event-stream")
-                });
+                let is_event_stream = content_type
+                    .is_some_and(|ct| ct.to_str().unwrap_or("").contains("text/event-stream"));
 
                 let mut provider_ctx = usage_ctx.clone();
                 provider_ctx.ai_provider_id = provider.ai_provider_id.clone();
@@ -251,8 +248,7 @@ fn handle_stream(
     style: UsageStyle,
 ) -> Sse<impl Stream<Item = Result<Event, io::Error>>> {
     let body_reader = tokio_util::io::StreamReader::new(
-        res.bytes_stream()
-            .map(|res| res.map_err(io::Error::other)),
+        res.bytes_stream().map(|res| res.map_err(io::Error::other)),
     );
 
     let mut lines = FramedRead::new(body_reader, LinesCodec::new());
