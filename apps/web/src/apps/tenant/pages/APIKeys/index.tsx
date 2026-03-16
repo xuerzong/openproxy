@@ -130,7 +130,14 @@ const Page = () => {
         width={800}
         footer={
           <div className="flex items-center justify-end gap-4">
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setOpen(false)
+                apiKeyForm.resetValues()
+                apiKeyForm.resetErrors()
+              }}
+            >
               {t('actions.cancel', { defaultValue: 'Cancel' })}
             </Button>
             <Button
