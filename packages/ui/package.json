@@ -30,6 +30,7 @@
     "./utils/props": "./src/utils/props.ts"
   },
   "dependencies": {
+    "@base-ui/react": "^1.3.0",
     "@number-flow/react": "^0.5.10",
     "@openproxy/schema": "workspace:*",
     "ahooks": "^3.9.6",

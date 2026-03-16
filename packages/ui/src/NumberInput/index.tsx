@@ -1,233 +1,166 @@
-import { Slot } from 'radix-ui'
-import { useEffect, useRef, useState } from 'react'
+import { NumberField } from '@base-ui/react/number-field'
+import { type ComponentProps, useEffect, useState } from 'react'
 import { ChevronUpIcon, ChevronDownIcon } from 'lucide-react'
 import { cn } from '../utils/cn'
 
 import type { InputProps } from '../Input'
-import { Button } from '../Button'
+import { mergeProps } from '../utils/props'
 
-interface NumberInputProps {
-  min?: number
-  max?: number
-  disabled?: boolean
+type NumberFieldRootProps = Omit<
+  ComponentProps<typeof NumberField.Root>,
+  | 'children'
+  | 'className'
+  | 'value'
+  | 'defaultValue'
+  | 'format'
+  | 'onValueChange'
+  | 'onValueCommitted'
+>
+
+type NumberFieldRootClickEvent = Parameters<
+  NonNullable<ComponentProps<typeof NumberField.Root>['onClick']>
+>[0]
+
+interface NumberInputProps extends NumberFieldRootProps {
   value?: number
   onChange?: (value: number) => void
   size?: 'sm' | 'md'
   inputProps?: InputProps
   precision?: number
-  step?: number
-}
-
-const formatDisplayValue = (
-  value = '',
-  min = 0,
-  max?: number,
-  precision = 0
-) => {
-  if (!value) return ''
-  let nextValue = parseFloat(value || '0')
-  if (isNaN(nextValue)) {
-    return ''
-  }
-  nextValue = Math.max(nextValue, min)
-  if (max !== undefined) {
-    nextValue = Math.min(nextValue, max)
-  }
-  return precision > 0
-    ? nextValue.toFixed(precision)
-    : Math.round(nextValue).toString()
-}
-
-const formatNumberValue = (
-  value = '',
-  min = 0,
-  max?: number,
-  precision = 0
-): number => {
-  if (!value) return 0
-  let nextValue = parseFloat(value || '0')
-  if (isNaN(nextValue)) {
-    return 0
-  }
-  nextValue = Math.max(nextValue, min)
-  if (max !== undefined) {
-    nextValue = Math.min(nextValue, max)
-  }
-  return precision > 0
-    ? parseFloat(nextValue.toFixed(precision))
-    : Math.round(nextValue)
+  status?: 'default' | 'danger'
 }
 
 export const NumberInput: React.FC<NumberInputProps> = ({
   disabled = false,
   min = 0,
   max,
+  readOnly = false,
+  required = false,
+  id,
+  name,
   value: propsValue,
   onChange,
   size,
   inputProps,
   precision = 0,
   step = 1,
+  status = 'default',
+  ...restProps
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null)
   const [hasFocused, setHasFocused] = useState(false)
-  const [displayValue, setDisplayValue] = useState(
-    propsValue !== undefined
-      ? formatDisplayValue(propsValue.toString(), min, max, precision)
-      : ''
+  const [fieldKey, setFieldKey] = useState(0)
+  const resolvedStep =
+    typeof step === 'number'
+      ? step > 0
+        ? step
+        : 1 / Math.pow(10, precision)
+      : step
+  const mergedInputProps = mergeProps(
+    {
+      className: cn(
+        'h-full w-full border-none bg-transparent px-4 outline-none tabular-nums',
+        size === 'sm' ? 'text-xs' : 'text-sm'
+      ),
+    },
+    {
+      ...(inputProps || {}),
+      suffix: undefined,
+      status: undefined,
+      disabled: undefined,
+      readOnly: undefined,
+      required: undefined,
+      name: undefined,
+      value: undefined,
+      defaultValue: undefined,
+      onChange: undefined,
+      type: undefined,
+    }
   )
-  const blurTimer = useRef<any>(null)
-
-  // Sync with external value
-  useEffect(() => {
-    if (!hasFocused && propsValue !== undefined) {
-      setDisplayValue(
-        formatDisplayValue(propsValue.toString(), min, max, precision)
-      )
-    }
-  }, [propsValue, hasFocused, min, max, precision])
-
-  const doFormat = (val: string) => {
-    const displayFormatted = formatDisplayValue(val, min, max, precision)
-    const numberFormatted = formatNumberValue(val, min, max, precision)
-    setDisplayValue(displayFormatted)
-    onChange?.(numberFormatted)
-  }
-
-  const onAdd = () => {
-    const stepValue = step > 0 ? step : 1 / Math.pow(10, precision)
-    doFormat((Number(displayValue || 0) + stepValue).toString())
-    clearTimeout(blurTimer.current)
-    inputRef.current?.focus()
-  }
-
-  const onDec = () => {
-    const stepValue = step > 0 ? step : 1 / Math.pow(10, precision)
-    doFormat((Number(displayValue || 0) - stepValue).toString())
-    clearTimeout(blurTimer.current)
-    inputRef.current?.focus()
-  }
-
-  const handleChange = (newValue: string) => {
-    // Allow intermediate states during typing (like "8.", "8.0")
-    if (precision > 0) {
-      // Allow empty, digits, and one decimal point with optional digits after
-      const isValidIntermediate = /^\d*\.?\d*$/.test(newValue)
-      if (isValidIntermediate) {
-        setDisplayValue(newValue)
-        // Only notify parent on valid complete numbers
-        if (newValue !== '' && newValue !== '.' && !newValue.endsWith('.')) {
-          onChange?.(formatNumberValue(newValue, min, max, precision))
-        }
-        return
-      }
-    } else {
-      // For integer mode, only allow digits
-      if (/^\d*$/.test(newValue)) {
-        setDisplayValue(newValue)
-        onChange?.(formatNumberValue(newValue, min, max, precision))
-        return
-      }
-    }
-  }
-
-  const handleBlur = () => {
-    blurTimer.current = setTimeout(() => {
-      setHasFocused(false)
-      // Format on blur
-      doFormat(displayValue)
-    }, 50)
-  }
 
   useEffect(() => {
-    const keyEvent = (e: KeyboardEvent) => {
-      if (e.code === 'ArrowUp') {
-        onAdd()
-      }
+    if (!hasFocused) {
+      setFieldKey((prev) => prev + 1)
+    }
+  }, [propsValue, hasFocused, min, max, precision, resolvedStep])
 
-      if (e.code === 'ArrowDown') {
-        onDec()
-      }
-    }
-    if (hasFocused) {
-      document.addEventListener('keydown', keyEvent)
-    }
+  const emitChange = (nextValue: number | null) => {
+    onChange?.(nextValue ?? 0)
+  }
 
-    return () => {
-      return document.removeEventListener('keydown', keyEvent)
-    }
-  }, [hasFocused, onAdd, onDec])
+  const handleValueChange = (nextValue: number | null) => {
+    emitChange(nextValue)
+  }
+
+  const handleValueCommitted = (nextValue: number | null) => {
+    emitChange(nextValue)
+  }
+
+  const mergedRootProps = mergeProps(restProps, {
+    id,
+    name,
+    min,
+    max,
+    disabled,
+    readOnly,
+    required,
+    step: resolvedStep,
+    defaultValue: propsValue,
+    format: {
+      useGrouping: false,
+      minimumFractionDigits: precision,
+      maximumFractionDigits: precision,
+    },
+    onValueChange: handleValueChange,
+    onValueCommitted: handleValueCommitted,
+    className: cn(
+      'relative w-full border ring-2 ring-transparent outline-none rounded-md transition-colors duration-300',
+      'overflow-hidden',
+      size === 'sm' ? 'h-8' : 'h-10',
+      status === 'danger'
+        ? hasFocused
+          ? 'border-danger ring-danger/20'
+          : 'border-danger hover:border-danger hover:ring-transparent'
+        : hasFocused
+          ? 'border-primary ring-primary/20'
+          : 'border-border hover:border-primary hover:ring-transparent',
+      'data-[disabled]:bg-muted data-[disabled]:text-foreground/75'
+    ),
+    'data-size': size,
+    onClick: (e: NumberFieldRootClickEvent) => {
+      e.preventDefault()
+      e.stopPropagation()
+    },
+  })
 
   return (
-    <div
-      className={cn(
-        'relative w-full h-10 px-4 text-sm border ring-2 outline-none rounded-md',
-        'hover:border-primary hover:ring-transparent',
-        'disabled:hover:border-border! disabled:bg-muted disabled:text-foreground/75',
-        'overflow-hidden',
-        hasFocused
-          ? 'border-primary ring-primary/20'
-          : 'border-border ring-transparent'
-      )}
-      data-size={size}
-      onClick={(e) => {
-        e.preventDefault()
-        e.stopPropagation()
-      }}
-    >
-      <div
-        className="absolute right-0 top-[50%] -translate-y-[50%] h-full border-l border-border flex flex-col select-none"
-        onClick={(e) => {
-          e.preventDefault()
-          e.stopPropagation()
-        }}
-      >
-        <Button
-          size="icon-xs"
-          variant="ghost"
-          className="flex-1"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            onAdd()
+    <NumberField.Root key={fieldKey} {...mergedRootProps}>
+      <NumberField.Group className="flex h-full w-full items-stretch">
+        <NumberField.Input
+          {...mergedInputProps}
+          onFocus={(e) => {
+            setHasFocused(!disabled)
+            inputProps?.onFocus?.(e)
           }}
-        >
-          <ChevronUpIcon />
-        </Button>
-
-        <Button
-          size="icon-xs"
-          variant="ghost"
-          className="flex-1"
-          onClick={(e) => {
-            e.preventDefault()
-            e.stopPropagation()
-            onDec()
+          onBlur={(e) => {
+            setHasFocused(false)
+            inputProps?.onBlur?.(e)
           }}
-        >
-          <ChevronDownIcon />
-        </Button>
-      </div>
-      <Slot.Root {...inputProps}>
-        <input
-          className="h-full w-full outline-none border-none"
-          ref={inputRef}
-          onFocus={() => {
-            setHasFocused(!disabled && true)
-          }}
-          onBlur={handleBlur}
-          value={displayValue}
-          onChange={(e) => {
-            handleChange(e.target.value)
-          }}
-          onKeyDown={(e) => {
-            if (e.code === 'ArrowDown' || e.code === 'ArrowUp') {
-              e.preventDefault()
-            }
-          }}
-          disabled={disabled}
         />
-      </Slot.Root>
-    </div>
+        <div
+          className="flex h-full w-8 shrink-0 flex-col border-l border-border select-none"
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          }}
+        >
+          <NumberField.Increment className="flex flex-1 items-center justify-center bg-background outline-none transition-colors duration-300 hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted">
+            <ChevronUpIcon className="h-4 w-4" />
+          </NumberField.Increment>
+          <NumberField.Decrement className="flex flex-1 items-center justify-center border-t border-border bg-background outline-none transition-colors duration-300 hover:bg-muted disabled:cursor-not-allowed disabled:bg-muted">
+            <ChevronDownIcon className="h-4 w-4" />
+          </NumberField.Decrement>
+        </div>
+      </NumberField.Group>
+    </NumberField.Root>
   )
 }
