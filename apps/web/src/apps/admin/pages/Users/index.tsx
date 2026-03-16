@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useUsersQuery } from '@/apps/admin/hooks/queries/useUsersQuery'
 import dayjs from '@/utils/dayjs'
 import { useRequest } from '@/contexts/ApiContext'
-import { toast } from 'sonner'
 import { useUsersCountQuery } from '@/apps/admin/hooks/queries/useUsersCountQuery'
 import { Table } from '@openproxy/ui/Table'
 import { Pagination } from '@openproxy/ui/Pagination'
@@ -10,6 +9,7 @@ import { Tag } from '@openproxy/ui/Tag'
 import { Switch } from '@openproxy/ui/Switch'
 import { PageContainer } from '@/components/PageContainer'
 import { useTranslation } from 'react-i18next'
+import { toastApiPromise, toastPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -57,25 +57,43 @@ const Page = () => {
                       <Switch
                         checked={text}
                         onCheckedChange={(checked) => {
-                          request.changeUserEmailVerified
-                            .put({ emailVerified: checked, userId: record.id })
-                            .then(() => {
-                              usersQuery.refetch()
-                              toast.success(
-                                t('users.messages.emailVerifyUpdated', {
-                                  defaultValue:
-                                    'Email verification status updated',
-                                })
-                              )
-                            })
-                            .catch((e) => {
-                              toast.error(
-                                e.message ||
-                                  t('common.updateFailed', {
-                                    defaultValue: 'Update failed',
-                                  })
-                              )
-                            })
+                          void toastPromise(
+                            request.changeUserEmailVerified
+                              .put({
+                                emailVerified: checked,
+                                userId: record.id,
+                              })
+                              .then((response: any) => {
+                                if (response?.error) {
+                                  throw new Error(
+                                    t('common.operationFailedWithStatus', {
+                                      defaultValue: `Operation failed: ${response.error.status}`,
+                                      status: response.error.status,
+                                    })
+                                  )
+                                }
+
+                                return response
+                              }),
+                            {
+                              loading: t('common.processing', {
+                                defaultValue: 'Processing...',
+                              }),
+                              success: t('users.messages.emailVerifyUpdated', {
+                                defaultValue:
+                                  'Email verification status updated',
+                              }),
+                              error: (error) =>
+                                error instanceof Error && error.message
+                                  ? error.message
+                                  : t('common.updateFailed', {
+                                      defaultValue: 'Update failed',
+                                    }),
+                              onSuccess: () => {
+                                void usersQuery.refetch()
+                              },
+                            }
+                          )
                         }}
                       />
                       <Tag color="yellow">

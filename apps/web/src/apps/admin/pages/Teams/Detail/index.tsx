@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'sonner'
 import { ChevronLeftIcon, RefreshCcwIcon, Trash2Icon } from 'lucide-react'
 import { TeamRechargeModal } from '../TeamRechargeModal'
 import { PageContainer } from '@/components/PageContainer'
@@ -19,6 +18,7 @@ import { useAdminTeamQuery } from '@/apps/admin/hooks/queries/useAdminTeamQuery'
 import { NotFoundView } from '@/components/NotFoundView'
 import { useRequest } from '@/contexts/ApiContext'
 import dayjs from '@/utils/dayjs'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -77,25 +77,23 @@ const Page = () => {
 
   const onUpdateTeam = () => {
     teamForm.onSubmit(async (values) => {
-      const response = await request.admin.teams.put(values)
-
-      if (response.error) {
-        toast.error(
-          t('common.operationFailedWithStatus', {
-            defaultValue: `Operation failed: ${response.error.status}`,
-            status: response.error.status,
-          })
-        )
-        return
-      }
-
-      toast.success(
-        t('teams.messages.updateSuccess', {
+      void toastApiPromise(request.admin.teams.put(values), {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teams.messages.updateSuccess', {
           defaultValue: 'Team updated successfully',
-        })
-      )
-      syncTeam(response.data)
-      refreshTeam()
+        }),
+        error: (error) =>
+          t('common.operationFailedWithStatus', {
+            defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+            status: getToastRequestStatus(error),
+          }),
+        onSuccess: (data) => {
+          syncTeam(data)
+          refreshTeam()
+        },
+      })
     })
   }
 
@@ -104,27 +102,28 @@ const Page = () => {
       return
     }
 
-    const response = await request.admin.teams.resetInviteCode.post({
-      id: team.id,
-    })
-
-    if (response.error) {
-      toast.error(
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${response.error.status}`,
-          status: response.error.status,
-        })
-      )
-      return
-    }
-
-    toast.success(
-      t('teams.messages.inviteCodeReset', {
-        defaultValue: 'Invite code reset successfully',
-      })
+    void toastApiPromise(
+      request.admin.teams.resetInviteCode.post({
+        id: team.id,
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teams.messages.inviteCodeReset', {
+          defaultValue: 'Invite code reset successfully',
+        }),
+        error: (error) =>
+          t('common.operationFailedWithStatus', {
+            defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+            status: getToastRequestStatus(error),
+          }),
+        onSuccess: (data) => {
+          syncTeam(data)
+          refreshTeam()
+        },
+      }
     )
-    syncTeam(response.data)
-    refreshTeam()
   }
 
   const onSetTeamDisabled = async (disabled: boolean) => {
@@ -132,36 +131,37 @@ const Page = () => {
       return
     }
 
-    const response = await request.admin.teams.status.put({
-      id: team.id,
-      disabled,
-    })
-
-    if (response.error) {
-      toast.error(
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${response.error.status}`,
-          status: response.error.status,
-        })
-      )
-      return
-    }
-
-    toast.success(
-      t(
-        disabled
-          ? 'teams.messages.disabledSuccess'
-          : 'teams.messages.enabledSuccess',
-        {
-          defaultValue: disabled
-            ? 'Team disabled successfully'
-            : 'Team enabled successfully',
-        }
-      )
+    void toastApiPromise(
+      request.admin.teams.status.put({
+        id: team.id,
+        disabled,
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t(
+          disabled
+            ? 'teams.messages.disabledSuccess'
+            : 'teams.messages.enabledSuccess',
+          {
+            defaultValue: disabled
+              ? 'Team disabled successfully'
+              : 'Team enabled successfully',
+          }
+        ),
+        error: (error) =>
+          t('common.operationFailedWithStatus', {
+            defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+            status: getToastRequestStatus(error),
+          }),
+        onSuccess: (data) => {
+          syncTeam(data)
+          refreshTeam()
+          setConfirmAction(null)
+        },
+      }
     )
-    syncTeam(response.data)
-    refreshTeam()
-    setConfirmAction(null)
   }
 
   const onDeleteTeam = async () => {
@@ -169,24 +169,22 @@ const Page = () => {
       return
     }
 
-    const response = await request.admin.teams({ id: team.id }).delete()
-
-    if (response.error) {
-      toast.error(
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${response.error.status}`,
-          status: response.error.status,
-        })
-      )
-      return
-    }
-
-    toast.success(
-      t('teams.messages.deleteSuccess', {
+    void toastApiPromise(request.admin.teams({ id: team.id }).delete(), {
+      loading: t('common.processing', {
+        defaultValue: 'Processing...',
+      }),
+      success: t('teams.messages.deleteSuccess', {
         defaultValue: 'Team deleted successfully',
-      })
-    )
-    navigate('/teams')
+      }),
+      error: (error) =>
+        t('common.operationFailedWithStatus', {
+          defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+          status: getToastRequestStatus(error),
+        }),
+      onSuccess: () => {
+        navigate('/teams')
+      },
+    })
   }
 
   if (teamQuery.isLoading) {

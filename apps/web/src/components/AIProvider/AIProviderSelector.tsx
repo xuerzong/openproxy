@@ -13,9 +13,9 @@ import { Table } from '@openproxy/ui/Table'
 import { ModelIcon } from '../ModelIcon'
 import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { useRequest } from '@/contexts/ApiContext'
-import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { Select } from '@openproxy/ui/Select'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 interface AIProviderSelectorProps extends Omit<CheckboxGroupProps, 'options'> {
   id: string
@@ -108,8 +108,8 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                     disabled={switchingProviderId === record.id}
                     onCheckedChange={(checked) => {
                       setSwitchingProviderId(record.id)
-                      request.models.updateProvider
-                        .post({
+                      void toastApiPromise(
+                        request.models.updateProvider.post({
                           aiProviderId: record.aiProviderId,
                           provider: {
                             id: record.id,
@@ -117,27 +117,26 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                             weight: record.weight || 0,
                             status: checked ? 1 : 0,
                           },
-                        })
-                        .then((res) => {
-                          if (res.error) {
-                            toast.error(
-                              t('common.operationFailedWithStatus', {
-                                defaultValue: `Operation failed: ${res.error.status}`,
-                                status: res.error.status,
-                              })
-                            )
-                            return
-                          }
-                          toast.success(
-                            t('common.operationSuccess', {
-                              defaultValue: 'Success',
-                            })
-                          )
-                          onSuccess?.()
-                        })
-                        .finally(() => {
-                          setSwitchingProviderId('')
-                        })
+                        }),
+                        {
+                          loading: t('common.processing', {
+                            defaultValue: 'Processing...',
+                          }),
+                          success: t('common.operationSuccess', {
+                            defaultValue: 'Success',
+                          }),
+                          error: (error) =>
+                            t('common.operationFailedWithStatus', {
+                              defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                              status: getToastRequestStatus(error),
+                            }),
+                          onSuccess: () => {
+                            onSuccess?.()
+                          },
+                        }
+                      ).finally(() => {
+                        setSwitchingProviderId('')
+                      })
                     }}
                   />
                 )
@@ -242,21 +241,22 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                       },
                     })
 
-                api.then((res) => {
-                  if (res.error) {
-                    toast.error(
-                      t('common.operationFailedWithStatus', {
-                        defaultValue: `Operation failed: ${res.error.status}`,
-                        status: res.error.status,
-                      })
-                    )
-                    return
-                  }
-                  toast.success(
-                    t('common.operationSuccess', { defaultValue: 'Success' })
-                  )
-                  onSuccess?.()
-                  handleProviderClose()
+                void toastApiPromise(api, {
+                  loading: t('common.processing', {
+                    defaultValue: 'Processing...',
+                  }),
+                  success: t('common.operationSuccess', {
+                    defaultValue: 'Success',
+                  }),
+                  error: (error) =>
+                    t('common.operationFailedWithStatus', {
+                      defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                      status: getToastRequestStatus(error),
+                    }),
+                  onSuccess: () => {
+                    onSuccess?.()
+                    handleProviderClose()
+                  },
                 })
               })
             }}
@@ -326,26 +326,28 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
               variant: 'danger',
             }}
             onOk={() => {
-              request.models.delProvider
-                .post({
+              void toastApiPromise(
+                request.models.delProvider.post({
                   provider: { id: deleteProviderId },
-                })
-                .then((res) => {
-                  if (res.error) {
-                    toast.error(
-                      t('common.operationFailedWithStatus', {
-                        defaultValue: `Operation failed: ${res.error.status}`,
-                        status: res.error.status,
-                      })
-                    )
-                    return
-                  }
-                  toast.success(
-                    t('common.operationSuccess', { defaultValue: 'Success' })
-                  )
-                  onSuccess?.()
-                  setDeleteProviderId('')
-                })
+                }),
+                {
+                  loading: t('common.processing', {
+                    defaultValue: 'Processing...',
+                  }),
+                  success: t('common.operationSuccess', {
+                    defaultValue: 'Success',
+                  }),
+                  error: (error) =>
+                    t('common.operationFailedWithStatus', {
+                      defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                      status: getToastRequestStatus(error),
+                    }),
+                  onSuccess: () => {
+                    onSuccess?.()
+                    setDeleteProviderId('')
+                  },
+                }
+              )
             }}
             onCancel={() => {
               setDeleteProviderId('')

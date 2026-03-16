@@ -9,6 +9,11 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@openproxy/ui/Button'
 import { Dialog } from '@openproxy/ui/Dialog'
 import { QRCode } from './QRCode'
+import {
+  getToastRequestStatus,
+  getToastRequestValue,
+  toastApiPromise,
+} from '@/utils/toast'
 
 const amounts = [20, 50, 100, 200]
 
@@ -205,26 +210,38 @@ export const BillingForm: React.FC<BillingFormProps> = ({ onFinish }) => {
 
   const onSubmit = async () => {
     setLoading(true)
-    await request.pay.qrCodeUrl
-      .post({
+
+    void toastApiPromise(
+      request.pay.qrCodeUrl.post({
         amount,
         type: 'alipay',
-      })
-      .then((res) => {
-        if (res.error) {
-          const message = (res.error.value as any)?.message
-          toast.error(
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('billing.qrCodeReady', {
+          defaultValue: 'Payment QR code generated',
+        }),
+        error: (error) => {
+          const message = (getToastRequestValue(error) as { message?: string })
+            ?.message
+
+          return (
             message ||
-              t('common.operationFailedWithStatus', {
-                defaultValue: `Operation failed: ${res.error.status}`,
-                status: res.error.status,
-              })
+            t('common.operationFailedWithStatus', {
+              defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+              status: getToastRequestStatus(error),
+            })
           )
-          return
-        }
-        setQrCodeUrl(res.data)
-      })
-    setLoading(false)
+        },
+        onSuccess: (data) => {
+          setQrCodeUrl(data || '')
+        },
+      }
+    ).finally(() => {
+      setLoading(false)
+    })
   }
 
   return (

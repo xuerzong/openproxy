@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router'
-import { toast } from 'sonner'
 import { CheckCircle2Icon, TriangleAlertIcon, UsersIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { AuthRequiredRoute } from '@/components/AuthRequiredRoute'
@@ -9,6 +8,7 @@ import { Button } from '@openproxy/ui/Button'
 import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
+import { toastPromise } from '@/utils/toast'
 
 type JoinState =
   | 'loading'
@@ -135,15 +135,29 @@ const JoinTeamPageInner = () => {
     }
 
     setSwitching(true)
-    await changeActiveTeam(team.id)
-    await refreshSession()
-    setSwitching(false)
-    toast.success(
-      t('teamSettings.join.switchSuccess', {
-        defaultValue: 'Switched to the invited team',
-      })
-    )
-    navigate('/', { replace: true })
+
+    void toastPromise(
+      changeActiveTeam(team.id).then(async () => {
+        await refreshSession()
+        return team.id
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teamSettings.join.switchSuccess', {
+          defaultValue: 'Switched to the invited team',
+        }),
+        error: t('common.operationFailed', {
+          defaultValue: 'Operation failed',
+        }),
+        onSuccess: () => {
+          navigate('/', { replace: true })
+        },
+      }
+    ).finally(() => {
+      setSwitching(false)
+    })
   }
 
   const stateContent: Record<

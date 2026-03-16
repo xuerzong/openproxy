@@ -14,6 +14,7 @@ import { useForm } from '@openproxy/ui/Form'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -157,24 +158,26 @@ const Page = () => {
                           ? dayjs(values.expiresAt).toDate()
                           : null,
                       })
-                  resp.then((res) => {
-                    if (res.error) {
-                      return toast.error(
-                        t('common.operationFailedWithStatus', {
-                          defaultValue: `Operation failed: ${res.error.status}`,
-                          status: res.error.status,
-                        })
-                      )
-                    }
 
-                    if (res.data && !values.id) {
-                      setNewApiKey(res.data as string)
-                    }
-                    apiKeysQuery.refetch()
-                    toast.success(
-                      t('common.operationSuccess', { defaultValue: 'Success' })
-                    )
-                    setOpen(false)
+                  void toastApiPromise(resp, {
+                    loading: t('common.processing', {
+                      defaultValue: 'Processing...',
+                    }),
+                    success: t('common.operationSuccess', {
+                      defaultValue: 'Success',
+                    }),
+                    error: (error) =>
+                      t('common.operationFailedWithStatus', {
+                        defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                        status: getToastRequestStatus(error),
+                      }),
+                    onSuccess: (data) => {
+                      if (data && !values.id) {
+                        setNewApiKey(data as string)
+                      }
+                      void apiKeysQuery.refetch()
+                      setOpen(false)
+                    },
                   })
                 })
               }}
@@ -208,20 +211,24 @@ const Page = () => {
               variant: 'danger',
             }}
             onOk={() => {
-              request
-                .apiKeys({ id: deleteId })
-                .delete()
-                .then(() => {
+              void toastApiPromise(request.apiKeys({ id: deleteId }).delete(), {
+                loading: t('common.processing', {
+                  defaultValue: 'Processing...',
+                }),
+                success: t('apiKeys.deleteSuccess', {
+                  defaultValue: 'API key deleted successfully',
+                }),
+                error: (error) =>
+                  t('common.operationFailedWithStatus', {
+                    defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                    status: getToastRequestStatus(error),
+                  }),
+                onSuccess: () => {
                   setDeleteId('')
-                  apiKeysQuery.refetch()
-                  toast.success(
-                    t('apiKeys.deleteSuccess', {
-                      defaultValue: 'API key deleted successfully',
-                    })
-                  )
-                  setDeleteId('')
+                  void apiKeysQuery.refetch()
                   setOpen(false)
-                })
+                },
+              })
             }}
             cancelText={t('actions.cancel', { defaultValue: 'Cancel' })}
             onCancel={() => {

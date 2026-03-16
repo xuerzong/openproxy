@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { toast } from 'sonner'
 import {
   MoreHorizontalIcon,
   PenSquareIcon,
@@ -22,6 +21,7 @@ import { AIProviderUpdateAPIKeyModal } from '@/components/AIProvider/AIProviderU
 import { AIProviderDeleteModal } from '@/components/AIProvider/AIProviderDeleteModal'
 import { useTranslation } from 'react-i18next'
 import { ModelIcon } from '@/components/ModelIcon'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -48,23 +48,26 @@ const Page = () => {
 
   const onAIProviderOk = () => {
     aiProviderForm.onSubmit((values) => {
-      const response = isEdit
-        ? request.aiProviders.put(values)
-        : request.aiProviders.post(values)
-      response.then((res) => {
-        if (res.error) {
-          toast.error(
+      void toastApiPromise(
+        isEdit
+          ? request.aiProviders.put(values)
+          : request.aiProviders.post(values),
+        {
+          loading: t('common.processing', {
+            defaultValue: 'Processing...',
+          }),
+          success: t('common.operationSuccess', { defaultValue: 'Success' }),
+          error: (error) =>
             t('common.operationFailedWithStatus', {
-              defaultValue: `Operation failed: ${res.error.status}`,
-              status: res.error.status,
-            })
-          )
-          return
+              defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+              status: getToastRequestStatus(error),
+            }),
+          onSuccess: () => {
+            void aiProvidersQuery.refetch()
+            onAIProviderCancel()
+          },
         }
-        toast.success(t('common.operationSuccess', { defaultValue: 'Success' }))
-        aiProvidersQuery.refetch()
-        onAIProviderCancel()
-      })
+      )
     })
   }
 

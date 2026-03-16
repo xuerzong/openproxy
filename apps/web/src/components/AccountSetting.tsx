@@ -3,9 +3,9 @@ import { Input } from '@openproxy/ui/Input'
 import { Button } from '@openproxy/ui/Button'
 import { useEffect, useState } from 'react'
 import { authClient } from '@/utils/better-auth'
-import { toast } from 'sonner'
 import { Card } from './Card'
 import { useTranslation } from 'react-i18next'
+import { toastPromise } from '@/utils/toast'
 
 export const AccountSetting = () => {
   const { t } = useTranslation('common')
@@ -51,21 +51,37 @@ export const AccountSetting = () => {
               <Button
                 disabled={sessionUserName === name}
                 onClick={() => {
-                  authClient.updateUser({ name }).then((res) => {
-                    if (res.error) {
-                      toast.error(
-                        t('common.operationFailedWithStatus', {
-                          defaultValue: `Operation failed: ${res.error.status}`,
-                          status: res.error.status,
-                        })
-                      )
-                      return
+                  void toastPromise(
+                    authClient.updateUser({ name }).then((res) => {
+                      if (res.error) {
+                        throw new Error(
+                          t('common.operationFailedWithStatus', {
+                            defaultValue: `Operation failed: ${res.error.status}`,
+                            status: res.error.status,
+                          })
+                        )
+                      }
+
+                      return res
+                    }),
+                    {
+                      loading: t('common.processing', {
+                        defaultValue: 'Processing...',
+                      }),
+                      success: t('common.operationSuccess', {
+                        defaultValue: 'Success',
+                      }),
+                      error: (error) =>
+                        error instanceof Error
+                          ? error.message
+                          : t('common.operationFailed', {
+                              defaultValue: 'Operation failed',
+                            }),
+                      onSuccess: () => {
+                        void refreshSession()
+                      },
                     }
-                    toast.success(
-                      t('common.operationSuccess', { defaultValue: 'Success' })
-                    )
-                    refreshSession()
-                  })
+                  )
                 }}
               >
                 {t('account.saveName', { defaultValue: 'Save Name' })}

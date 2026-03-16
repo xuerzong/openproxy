@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
-import { toast } from 'sonner'
 import { ModelEditor } from '@/components/Model/ModelEditor'
 import { NotFoundView } from '@/components/NotFoundView'
 import { PageContainer } from '@/components/PageContainer'
 import { Loader } from '@openproxy/ui/Loader'
 import { useRequest } from '@/contexts/ApiContext'
 import { useTranslation } from 'react-i18next'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -18,24 +18,25 @@ const Page = () => {
 
   const fetchModel = async (refresh = false) => {
     setLoading(!refresh)
-    await request.models
-      .get({ query: { id: modelId } })
-      .then((res) => {
-        if (res.error) {
-          toast.error(
-            t('common.operationFailedWithStatus', {
-              defaultValue: `Operation failed: ${res.error.status}`,
-              status: res.error.status,
-            })
-          )
-          setModel(null)
-          return
-        }
-        setModel(res.data || null)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    await toastApiPromise(request.models.get({ query: { id: modelId } }), {
+      loading: t('common.loading', {
+        defaultValue: 'Loading...',
+      }),
+      success: null,
+      error: (error) =>
+        t('common.operationFailedWithStatus', {
+          defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+          status: getToastRequestStatus(error),
+        }),
+      onSuccess: (data) => {
+        setModel(data || null)
+      },
+      onError: () => {
+        setModel(null)
+      },
+    }).finally(() => {
+      setLoading(false)
+    })
   }
   useEffect(() => {
     fetchModel()

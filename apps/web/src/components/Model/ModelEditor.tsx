@@ -2,7 +2,6 @@ import { ModelFormSchema } from '@openproxy/schema/model'
 import { Settings2Icon, SettingsIcon, StoreIcon } from 'lucide-react'
 import { useRequest } from '@/contexts/ApiContext'
 import { useNavigate, useSearchParams } from 'react-router'
-import { toast } from 'sonner'
 import { useMemo, useState } from 'react'
 import useUpdateEffect from '@/hooks/useUpdateEffect'
 import { ModelDeleteModal } from './ModelDeleteModel'
@@ -13,6 +12,11 @@ import { Button } from '@openproxy/ui/Button'
 import { useForm } from '@openproxy/ui/Form'
 import { Tabs } from '@openproxy/ui/Tabs'
 import { useTranslation } from 'react-i18next'
+import {
+  getToastRequestStatus,
+  toastPromise,
+  ToastRequestError,
+} from '@/utils/toast'
 
 type ModelFormData = any
 
@@ -107,6 +111,8 @@ export const ModelEditor = ({
                 loading={submitLoading}
                 onClick={() => {
                   form.onSubmit(async (values: any) => {
+                    setSubmitLoading(true)
+
                     const requestBody = {
                       id: values.id,
                       name: values.name,
@@ -137,38 +143,45 @@ export const ModelEditor = ({
                       ? request.models.put(requestBody)
                       : request.models.post(requestBody)
 
-                    return resp
-                      .then(({ data, error }) => {
+                    await toastPromise(
+                      resp.then(({ data, error }) => {
                         if (error) {
-                          toast.error(
-                            t('common.operationFailedWithStatus', {
-                              defaultValue: `Operation failed: ${error.status}`,
-                              status: error.status,
-                            })
-                          )
-                          return
+                          throw new ToastRequestError(error)
                         }
-                        toast.success(
-                          t('common.operationSuccess', {
-                            defaultValue: 'Success',
-                          })
-                        )
 
-                        // Create a model
-                        if (!isEdit) {
-                          if (Array.isArray(data) && data[0]) {
+                        return data
+                      }),
+                      {
+                        loading: t('common.processing', {
+                          defaultValue: 'Processing...',
+                        }),
+                        success: t('common.operationSuccess', {
+                          defaultValue: 'Success',
+                        }),
+                        error: (error) => {
+                          if (error instanceof ToastRequestError) {
+                            return t('common.operationFailedWithStatus', {
+                              defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                              status: getToastRequestStatus(error),
+                            })
+                          }
+
+                          return t('common.operationFailedWithMessage', {
+                            defaultValue: `Operation failed: ${(error as Error).message}`,
+                            message:
+                              error instanceof Error
+                                ? error.message
+                                : 'Unknown error',
+                          })
+                        },
+                        onSuccess: (data) => {
+                          if (!isEdit && Array.isArray(data) && data[0]) {
                             navigate(`/models/${data[0].id}`, { replace: true })
                           }
-                        }
-                      })
-                      .catch((error) => {
-                        toast.error(
-                          t('common.operationFailedWithMessage', {
-                            defaultValue: `Operation failed: ${error.message}`,
-                            message: error.message,
-                          })
-                        )
-                      })
+                        },
+                      }
+                    )
+                      .catch(() => undefined)
                       .finally(() => {
                         setSubmitLoading(false)
                       })

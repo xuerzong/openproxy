@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { TrashIcon } from 'lucide-react'
-import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/Card'
 import { CopyButton } from '@/components/CopyButton'
@@ -18,6 +17,7 @@ import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import dayjs from '@/utils/dayjs'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -73,34 +73,38 @@ const Page = () => {
     }
 
     setUpdatingMemberId(memberId)
-    const response = await request.team.members.role.put({
-      id: memberId,
-      role,
+
+    void toastApiPromise(
+      request.team.members.role.put({
+        id: memberId,
+        role,
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teamSettings.members.messages.roleUpdated', {
+          defaultValue: 'Member role updated successfully',
+        }),
+        error: (error) => {
+          const status = Number(getToastRequestStatus(error))
+
+          return status === 409
+            ? t('teamSettings.members.messages.lastOwner', {
+                defaultValue: 'At least one owner must remain in the team.',
+              })
+            : t('common.operationFailedWithStatus', {
+                defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                status: getToastRequestStatus(error),
+              })
+        },
+        onSuccess: () => {
+          void refreshTeamMembers()
+        },
+      }
+    ).finally(() => {
+      setUpdatingMemberId(null)
     })
-    setUpdatingMemberId(null)
-
-    if (response.error) {
-      const status = Number(response.error.status)
-
-      toast.error(
-        status === 409
-          ? t('teamSettings.members.messages.lastOwner', {
-              defaultValue: 'At least one owner must remain in the team.',
-            })
-          : t('common.operationFailedWithStatus', {
-              defaultValue: `Operation failed: ${response.error.status}`,
-              status: response.error.status,
-            })
-      )
-      return
-    }
-
-    toast.success(
-      t('teamSettings.members.messages.roleUpdated', {
-        defaultValue: 'Member role updated successfully',
-      })
-    )
-    await refreshTeamMembers()
   }
 
   const onRemoveMember = async () => {
@@ -109,38 +113,40 @@ const Page = () => {
     }
 
     setRemoving(true)
-    const response = await request.team
-      .members({ id: removingMember.id })
-      .delete()
-    setRemoving(false)
 
-    if (response.error) {
-      const status = Number(response.error.status)
+    void toastApiPromise(
+      request.team.members({ id: removingMember.id }).delete(),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teamSettings.members.messages.memberRemoved', {
+          defaultValue: 'Member removed successfully',
+        }),
+        error: (error) => {
+          const status = Number(getToastRequestStatus(error))
 
-      toast.error(
-        status === 409
-          ? t('teamSettings.members.messages.lastOwner', {
-              defaultValue: 'At least one owner must remain in the team.',
-            })
-          : status === 400
-            ? t('teamSettings.members.messages.selfRemoveBlocked', {
-                defaultValue: 'You cannot remove yourself from this page.',
+          return status === 409
+            ? t('teamSettings.members.messages.lastOwner', {
+                defaultValue: 'At least one owner must remain in the team.',
               })
-            : t('common.operationFailedWithStatus', {
-                defaultValue: `Operation failed: ${response.error.status}`,
-                status: response.error.status,
-              })
-      )
-      return
-    }
-
-    setRemovingMember(null)
-    toast.success(
-      t('teamSettings.members.messages.memberRemoved', {
-        defaultValue: 'Member removed successfully',
-      })
-    )
-    await refreshTeamMembers()
+            : status === 400
+              ? t('teamSettings.members.messages.selfRemoveBlocked', {
+                  defaultValue: 'You cannot remove yourself from this page.',
+                })
+              : t('common.operationFailedWithStatus', {
+                  defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                  status: getToastRequestStatus(error),
+                })
+        },
+        onSuccess: () => {
+          setRemovingMember(null)
+          void refreshTeamMembers()
+        },
+      }
+    ).finally(() => {
+      setRemoving(false)
+    })
   }
 
   return (

@@ -1,7 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router'
 import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { toast } from 'sonner'
 import { LoginButton } from './LoginButton'
 import { LoginInput } from './LoginInput'
 import { TermsAndPrivacy } from './TermsAndPrivacy'
@@ -11,6 +10,7 @@ import {
   PhoneNumberRegExp,
 } from '@/constants/regexp'
 import { useTranslation } from 'react-i18next'
+import { toastPromise } from '@/utils/toast'
 
 export const PasswordLoginForm = () => {
   const { t } = useTranslation('common')
@@ -74,20 +74,36 @@ export const PasswordLoginForm = () => {
 
     setSubmitLoading(true)
 
-    const success = await signIn(values.account, values.password)
+    void toastPromise(
+      signIn(values.account, values.password).then((success) => {
+        if (!success) {
+          throw new Error(
+            t('auth.loginFailed', {
+              defaultValue: 'Incorrect password or email',
+            })
+          )
+        }
 
-    setSubmitLoading(false)
-    if (!success) {
-      toast.error(
-        t('auth.loginFailed', {
-          defaultValue: 'Incorrect password or email',
-        })
-      )
-      return
-    }
-
-    toast.success(t('auth.loginSuccess', { defaultValue: 'Login successful' }))
-      navigate(redirect, { replace: true })
+        return success
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('auth.loginSuccess', { defaultValue: 'Login successful' }),
+        error: (error) =>
+          error instanceof Error
+            ? error.message
+            : t('auth.loginFailed', {
+                defaultValue: 'Incorrect password or email',
+              }),
+        onSuccess: () => {
+          navigate(redirect, { replace: true })
+        },
+      }
+    ).finally(() => {
+      setSubmitLoading(false)
+    })
   }
   return (
     <div className="gap-2">

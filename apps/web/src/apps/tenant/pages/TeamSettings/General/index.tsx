@@ -18,6 +18,13 @@ import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
+import {
+  getToastRequestStatus,
+  getToastRequestValue,
+  toastApiPromise,
+  toastPromise,
+  ToastRequestError,
+} from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -90,28 +97,31 @@ const Page = () => {
     }
 
     setSaving(true)
-    const response = await request.team.put({
-      name: name.trim(),
-      allowJoin,
+
+    void toastApiPromise(
+      request.team.put({
+        name: name.trim(),
+        allowJoin,
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teamSettings.messages.updateSuccess', {
+          defaultValue: 'Team information updated successfully',
+        }),
+        error: (error) =>
+          t('common.operationFailedWithStatus', {
+            defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+            status: getToastRequestStatus(error),
+          }),
+        onSuccess: () => {
+          void refreshTeamState()
+        },
+      }
+    ).finally(() => {
+      setSaving(false)
     })
-    setSaving(false)
-
-    if (response.error) {
-      toast.error(
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${response.error.status}`,
-          status: response.error.status,
-        })
-      )
-      return
-    }
-
-    toast.success(
-      t('teamSettings.messages.updateSuccess', {
-        defaultValue: 'Team information updated successfully',
-      })
-    )
-    await refreshTeamState()
   }
 
   const onChangeAllowJoin = async (checked: boolean) => {
@@ -129,30 +139,33 @@ const Page = () => {
     setAllowJoin(nextAllowJoin)
     setUpdatingAllowJoin(true)
 
-    const response = await request.team.put({
-      name: team.name,
-      allowJoin: nextAllowJoin,
+    void toastApiPromise(
+      request.team.put({
+        name: team.name,
+        allowJoin: nextAllowJoin,
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teamSettings.messages.updateSuccess', {
+          defaultValue: 'Team information updated successfully',
+        }),
+        error: (error) => {
+          setAllowJoin(previousAllowJoin)
+
+          return t('common.operationFailedWithStatus', {
+            defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+            status: getToastRequestStatus(error),
+          })
+        },
+        onSuccess: () => {
+          void refreshTeamState()
+        },
+      }
+    ).finally(() => {
+      setUpdatingAllowJoin(false)
     })
-
-    setUpdatingAllowJoin(false)
-
-    if (response.error) {
-      setAllowJoin(previousAllowJoin)
-      toast.error(
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${response.error.status}`,
-          status: response.error.status,
-        })
-      )
-      return
-    }
-
-    toast.success(
-      t('teamSettings.messages.updateSuccess', {
-        defaultValue: 'Team information updated successfully',
-      })
-    )
-    await refreshTeamState()
   }
 
   const onDelete = async () => {
@@ -164,59 +177,79 @@ const Page = () => {
     }
 
     setDeleting(true)
-    const response = await request.team.delete()
 
-    const errorValue = response.error?.value as
-      | string
-      | { message?: string; code?: string; reason?: string }
-      | null
+    void toastPromise(
+      request.team.delete().then((response) => {
+        if (response.error) {
+          throw new ToastRequestError(response.error)
+        }
 
-    const errorReason =
-      typeof errorValue === 'string'
-        ? errorValue
-        : errorValue?.reason || errorValue?.message || errorValue?.code || ''
-
-    if (response.error) {
-      setDeleting(false)
-      toast.error(
-        errorReason === 'ONLY_OWNER'
-          ? t('teamSettings.messages.deleteRequiresOwner', {
-              defaultValue: 'Only team owners can delete the current team.',
+        if (typeof response.data === 'string') {
+          throw new Error(
+            t('common.operationFailed', {
+              defaultValue: 'Operation failed',
             })
-          : errorReason === 'LAST_TEAM'
-            ? t('teamSettings.messages.deleteRequiresAnotherTeam', {
-                defaultValue:
-                  'You must keep at least one team in your account before deleting this one.',
-              })
-            : t('common.operationFailedWithStatus', {
-                defaultValue: `Operation failed: ${response.error.status}`,
-                status: response.error.status,
-              })
-      )
-      return
-    }
+          )
+        }
 
-    if (typeof response.data === 'string') {
+        return response.data
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teamSettings.messages.deleteSuccess', {
+          defaultValue: 'Team deleted successfully',
+        }),
+        error: (error) => {
+          if (!(error instanceof ToastRequestError)) {
+            return error instanceof Error
+              ? error.message
+              : t('common.operationFailed', {
+                  defaultValue: 'Operation failed',
+                })
+          }
+
+          const errorValue = getToastRequestValue(error) as
+            | string
+            | { message?: string; code?: string; reason?: string }
+            | null
+
+          const errorReason =
+            typeof errorValue === 'string'
+              ? errorValue
+              : errorValue?.reason ||
+                errorValue?.message ||
+                errorValue?.code ||
+                ''
+
+          return errorReason === 'ONLY_OWNER'
+            ? t('teamSettings.messages.deleteRequiresOwner', {
+                defaultValue: 'Only team owners can delete the current team.',
+              })
+            : errorReason === 'LAST_TEAM'
+              ? t('teamSettings.messages.deleteRequiresAnotherTeam', {
+                  defaultValue:
+                    'You must keep at least one team in your account before deleting this one.',
+                })
+              : t('common.operationFailedWithStatus', {
+                  defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                  status: getToastRequestStatus(error),
+                })
+        },
+        onSuccess: (data) => {
+          void changeActiveTeam(data.nextTeamId)
+            .then(() => refreshSession())
+            .then(() => refreshTeamState())
+            .then(() => {
+              setDeleteDialogOpen(false)
+              navigate('/', { replace: true })
+            })
+        },
+      }
+    ).finally(() => {
       setDeleting(false)
-      toast.error(
-        t('common.operationFailed', {
-          defaultValue: 'Operation failed',
-        })
-      )
-      return
-    }
-
-    await changeActiveTeam(response.data.nextTeamId)
-    await refreshSession()
-    await refreshTeamState()
-    setDeleting(false)
-    setDeleteDialogOpen(false)
-    toast.success(
-      t('teamSettings.messages.deleteSuccess', {
-        defaultValue: 'Team deleted successfully',
-      })
-    )
-    navigate('/', { replace: true })
+    })
   }
 
   return (

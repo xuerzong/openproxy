@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { NumberInput } from '@openproxy/ui/NumberInput'
 import { useRequest } from '@/contexts/ApiContext'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 interface TeamRechargeModalProps {
   open: boolean
@@ -36,29 +36,35 @@ export const TeamRechargeModal: React.FC<TeamRechargeModalProps> = ({
     }
 
     setLoading(true)
-    const response = await request.admin.teams.recharge.post({
-      id: team.id,
-      amount,
+
+    void toastApiPromise(
+      request.admin.teams.recharge.post({
+        id: team.id,
+        amount,
+      }),
+      {
+        loading: t('common.processing', {
+          defaultValue: 'Processing...',
+        }),
+        success: t('teams.messages.rechargeSuccess', {
+          defaultValue: 'Team recharged successfully',
+        }),
+        error: (error) =>
+          t('common.operationFailedWithStatus', {
+            defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+            status: getToastRequestStatus(error),
+          }),
+        onSuccess: (data) => {
+          onSuccess?.(data)
+          onOpenChange(false)
+        },
+        onError: () => {
+          setLoading(false)
+        },
+      }
+    ).finally(() => {
+      setLoading(false)
     })
-    setLoading(false)
-
-    if (response.error) {
-      toast.error(
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${response.error.status}`,
-          status: response.error.status,
-        })
-      )
-      return
-    }
-
-    toast.success(
-      t('teams.messages.rechargeSuccess', {
-        defaultValue: 'Team recharged successfully',
-      })
-    )
-    onSuccess?.(response.data)
-    onOpenChange(false)
   }
 
   return (

@@ -1,7 +1,7 @@
 import { useRequest } from '@/contexts/ApiContext'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
-import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 interface AIProviderDeleteModalProps {
   id: string
@@ -35,28 +35,25 @@ export const AIProviderDeleteModal: React.FC<AIProviderDeleteModalProps> = ({
           okText={t('actions.confirmDelete', {
             defaultValue: 'Confirm delete',
           })}
-          onOk={() =>
-            request
-              .aiProviders({ id })
-              .delete()
-              .then((res) => {
-                if (res.error) {
-                  toast.error(
-                    t('common.operationFailedWithStatus', {
-                      defaultValue: `Operation failed: ${res.error.status}`,
-                      status: res.error.status,
-                    })
-                  )
-                  return
-                }
-                toast.success(
-                  t('common.operationSuccess', { defaultValue: 'Success' })
-                )
+          onOk={() => {
+            void toastApiPromise(request.aiProviders({ id }).delete(), {
+              loading: t('common.processing', {
+                defaultValue: 'Processing...',
+              }),
+              success: t('common.operationSuccess', {
+                defaultValue: 'Success',
+              }),
+              error: (error) =>
+                t('common.operationFailedWithStatus', {
+                  defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                  status: getToastRequestStatus(error),
+                }),
+              onSuccess: () => {
                 onSuccess?.()
                 onOpenChange(false)
-                return
-              })
-          }
+              },
+            })
+          }}
         />
       }
     >

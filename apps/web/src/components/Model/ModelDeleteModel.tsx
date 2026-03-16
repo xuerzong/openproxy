@@ -1,9 +1,9 @@
 import { useRequest } from '@/contexts/ApiContext'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
 import { useTranslation } from 'react-i18next'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 interface ModelDeleteModal {
   id?: string | null
@@ -50,28 +50,26 @@ export const ModelDeleteModal: React.FC<ModelDeleteModal> = ({
           onOk={() => {
             if (!id) return
             setSubmitLoading(true)
-            request.models
-              .delete({ id })
-              .then(({ error }) => {
-                if (error) {
-                  toast.error(
-                    t('common.operationFailedWithStatus', {
-                      defaultValue: `Operation failed: ${error.status}`,
-                      status: error.status,
-                    })
-                  )
-                  return
-                }
-                toast.success(
-                  t('common.operationSuccess', { defaultValue: 'Success' })
-                )
+            void toastApiPromise(request.models.delete({ id }), {
+              loading: t('common.processing', {
+                defaultValue: 'Processing...',
+              }),
+              success: t('common.operationSuccess', {
+                defaultValue: 'Success',
+              }),
+              error: (error) =>
+                t('common.operationFailedWithStatus', {
+                  defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                  status: getToastRequestStatus(error),
+                }),
+              onSuccess: () => {
                 onOpenChange?.(false)
                 setValue('')
                 onSuccess?.()
-              })
-              .finally(() => {
-                setSubmitLoading(false)
-              })
+              },
+            }).finally(() => {
+              setSubmitLoading(false)
+            })
           }}
         />
       }

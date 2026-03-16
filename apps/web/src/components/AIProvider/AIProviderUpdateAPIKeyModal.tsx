@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
 import { useRequest } from '@/contexts/ApiContext'
-import { toast } from 'sonner'
 import { useTranslation } from 'react-i18next'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 interface AIProviderUpdateAPIKeyModalProps {
   id: string
@@ -35,22 +35,26 @@ export const AIProviderUpdateAPIKeyModal: React.FC<
             confirmText: t('actions.confirm', { defaultValue: 'Confirm' }),
           }}
           onOk={() => {
-            request.aiProviders.updateAPIKey.put({ id, apiKey }).then((res) => {
-              if (res.error) {
-                toast.error(
+            void toastApiPromise(
+              request.aiProviders.updateAPIKey.put({ id, apiKey }),
+              {
+                loading: t('common.processing', {
+                  defaultValue: 'Processing...',
+                }),
+                success: t('common.operationSuccess', {
+                  defaultValue: 'Success',
+                }),
+                error: (error) =>
                   t('common.operationFailedWithStatus', {
-                    defaultValue: `Operation failed: ${res.error.status}`,
-                    status: res.error.status,
-                  })
-                )
-                return
+                    defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                    status: getToastRequestStatus(error),
+                  }),
+                onSuccess: () => {
+                  onOpenChange(false)
+                  onSuccess?.()
+                },
               }
-              toast.success(
-                t('common.operationSuccess', { defaultValue: 'Success' })
-              )
-              onOpenChange(false)
-              onSuccess?.()
-            })
+            )
           }}
         />
       }
