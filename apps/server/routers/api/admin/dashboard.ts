@@ -4,7 +4,9 @@ import { UsageGroupedQuerySchema } from '@server/schemas'
 import {
   getAdminDashboardStats,
   getAdminDashboardUsageByModelGroup,
+  getAdminDashboardUsageByModelGroupGrouped,
   getAdminDashboardUsageByProvider,
+  getAdminDashboardUsageByProviderGrouped,
   getAdminDashboardUsageGrouped,
 } from '@server/services/admin-dashboard'
 
@@ -45,9 +47,35 @@ export const adminDashboardRouter = new Elysia({
     }
   )
   .get(
+    '/dashboard/usagesByModelGroupGrouped',
+    async ({ query }) => {
+      return await getAdminDashboardUsageByModelGroupGrouped(
+        query.rangeHours,
+        query.bucketCount
+      )
+    },
+    {
+      auth: { role: 'admin' },
+      query: UsageGroupedQuerySchema,
+    }
+  )
+  .get(
     '/dashboard/usagesByProvider',
     async ({ query }) => {
       return await getAdminDashboardUsageByProvider(query.rangeHours)
+    },
+    {
+      auth: { role: 'admin' },
+      query: UsageGroupedQuerySchema,
+    }
+  )
+  .get(
+    '/dashboard/usagesByProviderGrouped',
+    async ({ query }) => {
+      return await getAdminDashboardUsageByProviderGrouped(
+        query.rangeHours,
+        query.bucketCount
+      )
     },
     {
       auth: { role: 'admin' },

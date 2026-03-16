@@ -4,6 +4,74 @@ import * as dbSchema from '@server/lib/db/schema'
 import { supportedModelOwnedBy } from '@server/lib/const'
 import { getUsagesGrouped } from './usage'
 
+const getDashboardUsageGroupingWindow = (
+  rangeHours?: number,
+  bucketCount?: number
+) => {
+  const safeRangeHours =
+    typeof rangeHours === 'number' && Number.isFinite(rangeHours)
+      ? Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 365)
+      : 24
+  const effectiveBucketCount =
+    typeof bucketCount === 'number' && Number.isFinite(bucketCount)
+      ? Math.min(Math.max(Math.floor(bucketCount), 1), 1000)
+      : 24
+  const rangeMs = safeRangeHours * 60 * 60 * 1000
+  const bucketMs = rangeMs / effectiveBucketCount
+  const rangeEnd = new Date()
+  const alignedStartMs = rangeEnd.getTime() - rangeMs
+
+  return {
+    alignedStart: new Date(alignedStartMs),
+    alignedStartMs,
+    bucketMs,
+    effectiveBucketCount,
+    rangeEnd,
+  }
+}
+
+const groupDashboardUsageByBucketAndKey = <T extends { createdAt: Date }>(
+  rows: T[],
+  getKey: (row: T) => string,
+  alignedStartMs: number,
+  bucketMs: number,
+  effectiveBucketCount: number
+) => {
+  const grouped = new Map<
+    string,
+    { bucketAt: Date; key: string; requests: number }
+  >()
+
+  for (const row of rows) {
+    const diffMs = row.createdAt.getTime() - alignedStartMs
+    const bucketIndex = Math.floor(diffMs / bucketMs)
+
+    if (bucketIndex < 0 || bucketIndex >= effectiveBucketCount) {
+      continue
+    }
+
+    const bucketAtMs = alignedStartMs + bucketIndex * bucketMs
+    const bucketAt = new Date(bucketAtMs)
+    const key = getKey(row)
+    const groupedKey = `${bucketAtMs}:${key}`
+    const current = grouped.get(groupedKey)
+
+    if (current) {
+      current.requests += 1
+    } else {
+      grouped.set(groupedKey, {
+        bucketAt,
+        key,
+        requests: 1,
+      })
+    }
+  }
+
+  return Array.from(grouped.values()).sort(
+    (left, right) => left.bucketAt.getTime() - right.bucketAt.getTime()
+  )
+}
+
 const getTodayRange = () => {
   const start = new Date()
   start.setHours(0, 0, 0, 0)
@@ -74,7 +142,7 @@ export async function getAdminDashboardUsageGrouped(
 }
 
 export async function getAdminDashboardUsageByModelGroup(rangeHours = 24) {
-  const safeRangeHours = Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 30)
+  const safeRangeHours = Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 365)
   const rangeStart = new Date(Date.now() - safeRangeHours * 60 * 60 * 1000)
 
   const rows = await db
@@ -109,7 +177,7 @@ export async function getAdminDashboardUsageByModelGroup(rangeHours = 24) {
 }
 
 export async function getAdminDashboardUsageByProvider(rangeHours = 24) {
-  const safeRangeHours = Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 30)
+  const safeRangeHours = Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 365)
   const rangeStart = new Date(Date.now() - safeRangeHours * 60 * 60 * 1000)
 
   const [providers, rows] = await Promise.all([
@@ -162,4 +230,95 @@ export async function getAdminDashboardUsageByProvider(rangeHours = 24) {
     .sort((left, right) => right.requests - left.requests)
 
   return [...normalizedProviders, ...extraProviders]
+}
+
+export async function getAdminDashboardUsageByModelGroupGrouped(
+  rangeHours?: number,
+  bucketCount?: number
+) {
+  const {
+    alignedStart,
+    alignedStartMs,
+    bucketMs,
+    effectiveBucketCount,
+    rangeEnd,
+  } = getDashboardUsageGroupingWindow(rangeHours, bucketCount)
+
+  const rows = await db
+    .select({
+      createdAt: dbSchema.usages.createdAt,
+      modelGroup: dbSchema.usages.modelOwnedBy,
+    })
+    .from(dbSchema.usages)
+    .where(
+      and(
+        gte(dbSchema.usages.createdAt, alignedStart),
+        lt(dbSchema.usages.createdAt, rangeEnd)
+      )
+    )
+    .orderBy(dbSchema.usages.createdAt)
+
+  return groupDashboardUsageByBucketAndKey(
+    rows,
+    (row) => row.modelGroup?.trim() || 'other',
+    alignedStartMs,
+    bucketMs,
+    effectiveBucketCount
+  ).map((row) => ({
+    bucketAt: row.bucketAt,
+    modelGroup: row.key,
+    requests: row.requests,
+  }))
+}
+
+export async function getAdminDashboardUsageByProviderGrouped(
+  rangeHours?: number,
+  bucketCount?: number
+) {
+  const {
+    alignedStart,
+    alignedStartMs,
+    bucketMs,
+    effectiveBucketCount,
+    rangeEnd,
+  } = getDashboardUsageGroupingWindow(rangeHours, bucketCount)
+
+  const [providers, rows] = await Promise.all([
+    db.query.aiProviders.findMany({
+      columns: {
+        id: true,
+        name: true,
+      },
+    }),
+    db
+      .select({
+        createdAt: dbSchema.usages.createdAt,
+        providerId: dbSchema.usages.aiProviderId,
+      })
+      .from(dbSchema.usages)
+      .where(
+        and(
+          gte(dbSchema.usages.createdAt, alignedStart),
+          lt(dbSchema.usages.createdAt, rangeEnd)
+        )
+      )
+      .orderBy(dbSchema.usages.createdAt),
+  ])
+
+  const providerNameMap = new Map(
+    providers.map((provider) => [provider.id, provider.name])
+  )
+
+  return groupDashboardUsageByBucketAndKey(
+    rows,
+    (row) => row.providerId?.trim() || 'unknown',
+    alignedStartMs,
+    bucketMs,
+    effectiveBucketCount
+  ).map((row) => ({
+    bucketAt: row.bucketAt,
+    providerId: row.key,
+    providerName: providerNameMap.get(row.key) || row.key || 'Unknown',
+    requests: row.requests,
+  }))
 }

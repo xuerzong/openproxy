@@ -13,6 +13,6 @@ export const OptionalPaginationQuerySchema = t.Object({
 })
 
 export const UsageGroupedQuerySchema = t.Object({
-  rangeHours: t.Optional(t.Numeric({ minimum: 1, maximum: 24 * 30 })),
+  rangeHours: t.Optional(t.Numeric({ minimum: 1, maximum: 24 * 365 })),
   bucketCount: t.Optional(t.Numeric({ minimum: 1, maximum: 1000 })),
 })

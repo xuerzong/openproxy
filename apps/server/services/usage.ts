@@ -5,7 +5,7 @@ import * as dbSchema from '@server/lib/db/schema'
 const getUsageGroupingWindow = (rangeHours?: number, bucketCount?: number) => {
   const safeRangeHours =
     typeof rangeHours === 'number' && Number.isFinite(rangeHours)
-      ? Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 30)
+      ? Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 365)
       : 24
   const effectiveBucketCount =
     typeof bucketCount === 'number' && Number.isFinite(bucketCount)
