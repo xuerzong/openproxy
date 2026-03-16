@@ -6,7 +6,6 @@ import { PageContainer } from '@/components/PageContainer'
 import { Loader } from '@openproxy/ui/Loader'
 import { useRequest } from '@/contexts/ApiContext'
 import { useTranslation } from 'react-i18next'
-import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -18,25 +17,14 @@ const Page = () => {
 
   const fetchModel = async (refresh = false) => {
     setLoading(!refresh)
-    await toastApiPromise(request.models.get({ query: { id: modelId } }), {
-      loading: t('common.loading', {
-        defaultValue: 'Loading...',
-      }),
-      success: null,
-      error: (error) =>
-        t('common.operationFailedWithStatus', {
-          defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
-          status: getToastRequestStatus(error),
-        }),
-      onSuccess: (data) => {
-        setModel(data || null)
-      },
-      onError: () => {
-        setModel(null)
-      },
-    }).finally(() => {
+    try {
+      const data = await request.models.get({ query: { id: modelId } })
+      setModel(data || null)
+    } catch {
+      setModel(null)
+    } finally {
       setLoading(false)
-    })
+    }
   }
   useEffect(() => {
     fetchModel()
