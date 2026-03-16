@@ -9,6 +9,7 @@ import { TermsAndPrivacy } from '@/components/AuthForm/TermsAndPrivacy'
 import { Logo } from '@/components/Logo'
 import { useAuth } from '@/contexts/AuthContext'
 import { authClient } from '@/utils/better-auth'
+import { isOSS } from '@/utils/env'
 import { useTranslation } from 'react-i18next'
 import s from './index.module.css'
 
@@ -17,7 +18,7 @@ const Page = () => {
   const { refreshSession } = useAuth()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const showPhoneLogin = import.meta.env.VITE_SHOW_PHONE_LOGIN !== 'false'
+  const showPhoneLogin = isOSS
   const redirect = searchParams.get('redirect') || '/'
   const [loginMethod, setLoginMethod] = useState<'phone' | 'password'>(
     showPhoneLogin ? 'phone' : 'password'
