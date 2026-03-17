@@ -8,10 +8,12 @@ use reqwest::StatusCode;
 use serde_json::Value;
 use std::sync::Arc;
 use tokio_util::{
-    bytes,
     codec::{FramedRead, LinesCodec},
 };
 
+use super::proxy::{
+    build_usage_parts, is_event_stream_response, parse_proxy_request, proxy_to_provider,
+};
 use crate::utils::chat::{
     UsageStyle, extract_usage_input_with_tokens, remove_provider_metadata_fields,
     rewrite_usage_field,
@@ -38,54 +40,14 @@ pub async fn chat_handler(
         UsageStyle::OpenAI
     };
 
-    // Extract headers early because req will be consumed by into_body()
-    let original_headers = req.headers().clone();
-
-    let body_bytes = axum::body::to_bytes(req.into_body(), 10 * 1024 * 1024)
-        .await
-        .map_err(|e| {
-            ApiResponse::<()>::error(&format!("Invalid Body: {}", e), "BAD_REQUEST")
-                .to_res(StatusCode::BAD_REQUEST)
-        })?;
-
-    let body_json: Value = serde_json::from_slice(&body_bytes).map_err(|e| {
-        ApiResponse::<()>::error(&format!("Invalid Body: {}", e), "BAD_REQUEST")
-            .to_res(StatusCode::BAD_REQUEST)
-    })?;
+    let parsed = parse_proxy_request(req).await?;
+    let body_json = parsed.body_json;
 
     let is_stream = body_json["stream"].as_bool().unwrap_or(false);
 
     let pool = state.db.clone();
-    let model_info = services::usage::ModelInfo {
-        id: user.model_id.clone(),
-        name: user.model_name.clone(),
-        is_public: user.model_is_public,
-        owned_by: user.model_owned_by.clone(),
-        pricing: user.model_pricing.clone(),
-    };
-    let usage_ctx = services::usage::UsageContext {
-        team_id: user.team_id.clone(),
-        api_key_id: user.api_key_id.clone(),
-        response_time: 0,
-        completed_time: 0,
-        is_stream,
-        ai_provider_id: String::new(),
-    };
-
-    // Try each provider in order; fall back to the next one on failure
-    let mut last_error = None;
-    for (idx, provider) in user.providers.iter().enumerate() {
-        let mut headers = original_headers.clone();
-        headers.remove("host");
-        headers.remove("origin");
-        headers.remove("referer");
-
-        let auth_token = format!("Bearer {}", provider.model_api_key);
-        headers.insert("Authorization", auth_token.parse().unwrap());
-
-        let target_url = format!("{}{}", provider.model_base_url, req_path);
-
-        // Clone body JSON for each retry so we can patch the model field per-provider
+    let (model_info, usage_ctx) = build_usage_parts(&user, is_stream);
+    let upstream = proxy_to_provider(&state, &user, &parsed.original_headers, &usage_ctx, |provider| {
         let mut retry_body_json = body_json.clone();
         retry_body_json["model"] = Value::String(provider.model_model_name.clone());
         ProviderAdapterFactory::for_provider(provider).adapt_request_body(
@@ -94,108 +56,37 @@ pub async fn chat_handler(
             is_stream,
         );
 
-        let next_body_bytes = serde_json::to_vec(&retry_body_json).unwrap();
-        let next_body = bytes::Bytes::from(next_body_bytes);
-
-        headers.remove(axum::http::header::CONTENT_LENGTH);
-
-        match state
-            .http_client
-            .post(&target_url)
-            .headers(headers)
-            .body(next_body)
-            .send()
-            .await
-        {
-            Ok(upstream_res) => {
-                // Non-2xx response: try next provider if one is available
-                let status = upstream_res.status();
-                if !status.is_success() {
-                    if idx < user.providers.len() - 1 {
-                        tracing::warn!(
-                            provider = idx + 1,
-                            status = %status,
-                            "Provider failed, trying next"
-                        );
-                        last_error =
-                            Some((status, "Provider unavailable, retrying...".to_string()));
-                        continue;
-                    } else {
-                        // Last provider failed; forward the upstream error body and status directly
-                        let error_bytes = upstream_res.bytes().await.unwrap_or_default();
-                        let error_resp =
-                            if let Ok(v) = serde_json::from_slice::<Value>(&error_bytes) {
-                                (status, Json(v)).into_response()
-                            } else {
-                                let raw_err = String::from_utf8_lossy(&error_bytes);
-                                ApiResponse::<()>::error(&raw_err, "UPSTREAM_ERROR").to_res(status)
-                            };
-                        return Err(error_resp);
-                    }
-                }
-
-                // Successful response: branch into streaming or buffered JSON handling
-                let content_type = upstream_res.headers().get("content-type").cloned();
-                let is_event_stream = content_type
-                    .is_some_and(|ct| ct.to_str().unwrap_or("").contains("text/event-stream"));
-
-                let mut provider_ctx = usage_ctx.clone();
-                provider_ctx.ai_provider_id = provider.ai_provider_id.clone();
-
-                let resp = if is_stream || is_event_stream {
-                    handle_stream(
-                        upstream_res,
-                        pool,
-                        model_info,
-                        provider_ctx,
-                        start_time,
-                        target_style,
-                    )
-                    .into_response()
-                } else {
-                    handle_json(
-                        upstream_res,
-                        pool,
-                        model_info,
-                        provider_ctx,
-                        start_time,
-                        target_style,
-                    )
-                    .await
-                    .into_response()
-                };
-
-                return Ok(resp);
-            }
-            Err(e) => {
-                // Network/connection error: try next provider if available
-                if idx < user.providers.len() - 1 {
-                    tracing::warn!(
-                        provider = idx + 1,
-                        error = %e,
-                        "Provider connection failed, trying next"
-                    );
-                    last_error =
-                        Some((StatusCode::BAD_GATEWAY, format!("Connection failed: {}", e)));
-                    continue;
-                } else {
-                    // All providers exhausted; return the last connection error
-                    return Err(ApiResponse::<()>::error(
-                        &format!("All providers failed. Last error: {}", e),
-                        "BAD_GATEWAY",
-                    )
-                    .to_res(StatusCode::BAD_GATEWAY));
-                }
-            }
+        super::proxy::PreparedUpstreamRequest {
+            target_url: format!("{}{}", provider.model_base_url, req_path),
+            body_json: retry_body_json,
         }
-    }
+    })
+    .await?;
 
-    // All providers failed (non-2xx fallthrough)
-    Err(ApiResponse::<()>::error(
-        &format!("All providers unavailable. Last error: {:?}", last_error),
-        "BAD_GATEWAY",
-    )
-    .to_res(StatusCode::BAD_GATEWAY))
+    let resp = if is_stream || is_event_stream_response(&upstream.upstream_res) {
+        handle_stream(
+            upstream.upstream_res,
+            pool,
+            model_info,
+            upstream.provider_ctx,
+            start_time,
+            target_style,
+        )
+        .into_response()
+    } else {
+        handle_json(
+            upstream.upstream_res,
+            pool,
+            model_info,
+            upstream.provider_ctx,
+            start_time,
+            target_style,
+        )
+        .await
+        .into_response()
+    };
+
+    Ok(resp)
 }
 
 async fn handle_json(
