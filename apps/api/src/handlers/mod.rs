@@ -1,7 +1,6 @@
 pub mod chat;
 pub mod health;
 pub mod models;
-pub mod proxy;
 pub mod responses;
 
 pub use chat::chat_handler;
