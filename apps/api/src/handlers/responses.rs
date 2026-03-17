@@ -1,8 +1,4 @@
-use axum::{
-    Extension, Json,
-    extract::{Request, State},
-    response::{IntoResponse, Response, Sse, sse::Event},
-};
+use axum::{Extension, Json, extract::{Request, State}, response::{IntoResponse, Response, Sse, sse::Event}};
 use futures_util::{Stream, StreamExt, io};
 use reqwest::StatusCode;
 use serde_json::Value;
@@ -11,9 +7,10 @@ use tokio_util::{
     codec::{FramedRead, LinesCodec},
 };
 
-use crate::shared::proxy::{
-    PreparedUpstreamRequest, build_usage_parts, is_event_stream_response, parse_proxy_request,
-    proxy_to_provider,
+use crate::shared::{
+    AppState,
+    proxy::PreparedUpstreamRequest,
+    proxy_flow::{ProxyRequestHandler, ProxyResponseContext, ResponseFuture, execute_proxy_request},
 };
 use crate::utils::chat::{UsageStyle, extract_usage_input_with_tokens, remove_provider_metadata_fields};
 use crate::utils::openresponses::{
@@ -25,7 +22,6 @@ use crate::{
     models::provider::ModelAccessResult,
     services::{self, usage::find_usage_recursive},
     shared::ApiResponse,
-    shared::AppState,
 };
 
 pub async fn responses_handler(
@@ -33,20 +29,35 @@ pub async fn responses_handler(
     Extension(user): Extension<ModelAccessResult>,
     req: Request,
 ) -> Result<Response, Response> {
-    let start_time = std::time::Instant::now();
-    let parsed = parse_proxy_request(req).await?;
-    let body_json = parsed.body_json;
+    execute_proxy_request::<ResponsesRequestHandler>(state, user, req).await
+}
 
-    let translated_request = translate_responses_request(&body_json).map_err(|e| {
-        ApiResponse::<()>::error(&e, "BAD_REQUEST").to_res(StatusCode::BAD_REQUEST)
-    })?;
+struct ResponsesRequestHandler {
+    request: Value,
+    translated_request: Value,
+}
 
-    let is_stream = translated_request["stream"].as_bool().unwrap_or(false);
+impl ProxyRequestHandler for ResponsesRequestHandler {
+    fn try_new(_req_path: String, body_json: Value) -> Result<Self, Response> {
+        let translated_request = translate_responses_request(&body_json).map_err(|e| {
+            ApiResponse::<()>::error(&e, "BAD_REQUEST").to_res(StatusCode::BAD_REQUEST)
+        })?;
 
-    let pool = state.db.clone();
-    let (model_info, usage_ctx) = build_usage_parts(&user, is_stream);
-    let upstream = proxy_to_provider(&state, &user, &parsed.original_headers, &usage_ctx, |provider| {
-        let mut retry_body_json = translated_request.clone();
+        Ok(Self {
+            request: body_json,
+            translated_request,
+        })
+    }
+
+    fn is_stream(&self) -> bool {
+        self.translated_request["stream"].as_bool().unwrap_or(false)
+    }
+
+    fn prepare_upstream_request(
+        &self,
+        provider: &crate::models::provider::ProviderInfo,
+    ) -> PreparedUpstreamRequest {
+        let mut retry_body_json = self.translated_request.clone();
         retry_body_json["model"] = Value::String(provider.model_model_name.clone());
 
         PreparedUpstreamRequest {
@@ -56,33 +67,34 @@ pub async fn responses_handler(
             ),
             body_json: retry_body_json,
         }
-    })
-    .await?;
+    }
 
-    let response = if is_stream || is_event_stream_response(&upstream.upstream_res) {
+    fn handle_json<'a>(
+        &'a self,
+        upstream_res: reqwest::Response,
+        ctx: ProxyResponseContext,
+    ) -> ResponseFuture<'a> {
+        Box::pin(handle_openresponses_json(
+            upstream_res,
+            ctx.pool,
+            ctx.model,
+            ctx.usage_ctx,
+            ctx.start_time,
+            self.request.clone(),
+        ))
+    }
+
+    fn handle_stream(&self, upstream_res: reqwest::Response, ctx: ProxyResponseContext) -> Response {
         handle_openresponses_stream(
-            upstream.upstream_res,
-            pool,
-            model_info,
-            upstream.provider_ctx,
-            start_time,
-            body_json.clone(),
+            upstream_res,
+            ctx.pool,
+            ctx.model,
+            ctx.usage_ctx,
+            ctx.start_time,
+            self.request.clone(),
         )
         .into_response()
-    } else {
-        handle_openresponses_json(
-            upstream.upstream_res,
-            pool,
-            model_info,
-            upstream.provider_ctx,
-            start_time,
-            body_json.clone(),
-        )
-        .await
-        .into_response()
-    };
-
-    Ok(response)
+    }
 }
 
 async fn handle_openresponses_json(
