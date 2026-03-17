@@ -18,10 +18,13 @@ pub fn create_app(state: Arc<AppState>) -> Router {
         .allow_headers(Any);
 
     let proxy_routers = Router::new()
-        .route("/chat/completions", post(handlers::chat_handler))
-        .route("/messages", post(handlers::chat_handler))
+        .route(
+            "/chat/completions",
+            post(handlers::chat_completions_handler),
+        )
+        .route("/messages", post(handlers::messages_handler))
         .route("/responses", post(handlers::responses_handler))
-        .route("/embeddings", post(handlers::chat_handler))
+        .route("/embeddings", post(handlers::chat_completions_handler))
         .layer(from_fn_with_state(
             state.clone(),
             middleware::auth::auth_middleware,
