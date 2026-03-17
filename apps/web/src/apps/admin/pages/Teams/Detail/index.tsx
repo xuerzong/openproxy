@@ -341,7 +341,7 @@ const Page = () => {
             >
               <div className="flex items-center gap-3">
                 <Switch />
-                <span className="text-sm text-secondary">
+                <span className="text-sm text-primary/75">
                   {teamForm.values.allowJoin
                     ? t('teams.form.allowJoinEnabled', {
                         defaultValue:

@@ -159,7 +159,7 @@ const Page = () => {
                 defaultValue: 'Invite Members',
               })}
             </div>
-            <div className="text-sm text-secondary mt-1">
+            <div className="text-sm text-primary/75 mt-1">
               {t('teamSettings.members.inviteDescription', {
                 defaultValue:
                   'Share the invitation link to let users join the current team. When seats are full, invitees will see a warning.',
@@ -205,7 +205,7 @@ const Page = () => {
               defaultValue: 'User Management',
             })}
           </div>
-          <div className="text-sm text-secondary mt-1">
+          <div className="text-sm text-primary/75 mt-1">
             {canManageMembers
               ? t('teamSettings.members.manageDescription', {
                   defaultValue:

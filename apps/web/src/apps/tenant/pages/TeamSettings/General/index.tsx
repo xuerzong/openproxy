@@ -261,7 +261,7 @@ const Page = () => {
               defaultValue: 'Basic Information',
             })}
           </div>
-          <div className="text-sm text-secondary mt-1">
+          <div className="text-sm text-primary/75 mt-1">
             {t('teamSettings.general.basicInfoDescription', {
               defaultValue:
                 'Update the current team name and review the active invitation link.',
@@ -307,7 +307,7 @@ const Page = () => {
               })}
             </label>
             <div className="min-h-10 px-3 py-2 rounded-md border border-border flex items-center justify-between gap-3 bg-muted/20">
-              <div className="text-sm text-secondary">
+              <div className="text-sm text-primary/75">
                 {allowJoin
                   ? t('teamSettings.general.allowJoinEnabled', {
                       defaultValue:
@@ -375,7 +375,7 @@ const Page = () => {
                 defaultValue: 'Danger Zone',
               })}
             </div>
-            <div className="text-sm text-secondary mt-1">
+            <div className="text-sm text-primary/75 mt-1">
               {t('teamSettings.dangerZone.description', {
                 defaultValue:
                   'Deleting the team will remove the workspace for all members. This action cannot be undone.',

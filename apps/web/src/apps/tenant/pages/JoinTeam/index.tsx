@@ -232,7 +232,7 @@ const JoinTeamPageInner = () => {
           {content.icon}
           <div>
             <div className="text-2xl font-semibold">{content.title}</div>
-            <div className="text-sm text-secondary mt-2">
+            <div className="text-sm text-primary/75 mt-2">
               {content.description}
             </div>
           </div>
