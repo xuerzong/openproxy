@@ -11,8 +11,9 @@ use tokio_util::{
     codec::{FramedRead, LinesCodec},
 };
 
-use super::proxy::{
+use crate::shared::proxy::{
     build_usage_parts, is_event_stream_response, parse_proxy_request, proxy_to_provider,
+    PreparedUpstreamRequest,
 };
 use crate::utils::chat::{
     UsageStyle, extract_usage_input_with_tokens, remove_provider_metadata_fields,
@@ -56,7 +57,7 @@ pub async fn chat_handler(
             is_stream,
         );
 
-        super::proxy::PreparedUpstreamRequest {
+        PreparedUpstreamRequest {
             target_url: format!("{}{}", provider.model_base_url, req_path),
             body_json: retry_body_json,
         }

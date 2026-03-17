@@ -11,7 +11,7 @@ use tokio_util::{
     codec::{FramedRead, LinesCodec},
 };
 
-use super::proxy::{
+use crate::shared::proxy::{
     PreparedUpstreamRequest, build_usage_parts, is_event_stream_response, parse_proxy_request,
     proxy_to_provider,
 };
