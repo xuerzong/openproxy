@@ -1,7 +1,7 @@
 use chrono::Utc;
 use rand::Rng;
 use rust_decimal::Decimal;
-use sqlx::PgPool;
+use sqlx::{FromRow, PgPool};
 use std::env;
 
 use crate::{
@@ -9,13 +9,36 @@ use crate::{
     utils,
 };
 
+#[derive(Debug, FromRow)]
+struct AccessRow {
+    api_key_id: String,
+    api_key_max_quota: Decimal,
+    api_key_max_requests: i32,
+    api_key_total_quota: Decimal,
+    api_key_total_requests: i32,
+    api_key_expires_at: Option<chrono::DateTime<Utc>>,
+    team_id: String,
+    model_id: String,
+    model_name: String,
+    model_owned_by: String,
+    model_is_public: bool,
+    model_pricing: serde_json::Value,
+    team_amount: Decimal,
+    provider_id: String,
+    provider_model_name: String,
+    provider_base_url: String,
+    provider_api_key_hash: String,
+    provider_api_key: String,
+    provider_weight: i32,
+}
+
 pub async fn validate_model_access(
     pool: &PgPool,
     hash_api_key: &str,
     model_id: &str,
 ) -> Result<ModelAccessResult, (u16, &'static str, &'static str)> {
     // 1. Query all provider candidates alongside key/model/team info in one shot
-    let rows = sqlx::query!(
+    let rows = sqlx::query_as::<_, AccessRow>(
         r#"
         WITH api_key_info AS (
             SELECT 
@@ -31,7 +54,7 @@ pub async fn validate_model_access(
         ),
         model_info AS (
             SELECT 
-                m.id as model_id, 
+                m.id as model_id,
                 m.name as model_name, 
                 m.owned_by as model_owned_by, 
                 m.is_public as model_is_public, 
@@ -72,9 +95,8 @@ pub async fn validate_model_access(
             mi.model_owned_by,
             mi.model_is_public,
             mi.model_pricing,
-            ti.team_amount,
+            COALESCE(ti.team_amount, 0) as team_amount,
             p.provider_id,
-            p.provider_name,
             p.provider_model_name,
             p.provider_base_url,
             p.provider_api_key_hash,
@@ -90,9 +112,9 @@ pub async fn validate_model_access(
             AND akm.model_id = mi.model_id
         )
         "#,
-        hash_api_key,
-        model_id
     )
+    .bind(hash_api_key)
+    .bind(model_id)
     .fetch_all(pool)
     .await
     .map_err(|_| (500, "DB_ERROR", "Database query failed"))?;
@@ -133,7 +155,7 @@ pub async fn validate_model_access(
     let provider_candidates: Vec<_> = rows
         .iter()
         .map(|r| ProviderCandidate {
-            weight: r.provider_weight.unwrap_or(1),
+            weight: r.provider_weight,
             id: r.provider_id.clone(),
             model_name: r.provider_model_name.clone(),
             base_url: r.provider_base_url.clone(),
