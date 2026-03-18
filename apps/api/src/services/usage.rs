@@ -81,20 +81,20 @@ pub async fn add_usage(
     .await?;
 
     if model.is_public {
-        sqlx::query!(
+        sqlx::query(
             r#"
             UPDATE teams
             SET amount = amount - $1
             WHERE id = $2
             "#,
-            input.cost,
-            ctx.team_id
         )
+        .bind(input.cost)
+        .bind(&ctx.team_id)
         .execute(&mut *tx)
         .await?;
     }
 
-    sqlx::query!(
+    sqlx::query(
         r#"
         UPDATE api_keys
         SET total_quota = total_quota + $1,
@@ -102,10 +102,10 @@ pub async fn add_usage(
             last_used_at = $2
         WHERE id = $3
         "#,
-        input.cost,
-        Utc::now(),
-        ctx.api_key_id
     )
+    .bind(input.cost)
+    .bind(Utc::now())
+    .bind(&ctx.api_key_id)
     .execute(&mut *tx)
     .await?;
 
