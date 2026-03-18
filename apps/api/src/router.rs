@@ -24,7 +24,7 @@ pub fn create_app(state: Arc<AppState>) -> Router {
         )
         .route("/messages", post(handlers::messages_handler))
         .route("/responses", post(handlers::responses_handler))
-        .route("/embeddings", post(handlers::chat_completions_handler))
+        .route("/embeddings", post(handlers::embeddings_handler))
         .layer(from_fn_with_state(
             state.clone(),
             middleware::auth::auth_middleware,
