@@ -6,6 +6,7 @@ use std::env;
 
 use crate::{
     models::provider::{ModelAccessResult, ProviderInfo},
+    shared::cache::{get_decrypted_provider_key, set_decrypted_provider_key},
     utils,
 };
 
@@ -172,6 +173,12 @@ pub async fn validate_model_access(
 
     for provider in &mut providers {
         let encrypted_key = provider.model_api_key_hash.clone();
+
+        if let Some(cached_key) = get_decrypted_provider_key(&encrypted_key) {
+            provider.model_api_key = cached_key;
+            continue;
+        }
+
         let rsa_priv_key_clone = rsa_priv_key.clone();
 
         let decrypted_key = tokio::task::spawn_blocking(move || {
@@ -181,7 +188,8 @@ pub async fn validate_model_access(
         .map_err(|_| (500u16, "SERVER_ERROR", "Thread scheduling failed"))?
         .map_err(|_| (500u16, "DECRYPT_ERROR", "Provider key decryption failed"))?;
 
-        provider.model_api_key = decrypted_key;
+        provider.model_api_key = decrypted_key.clone();
+        set_decrypted_provider_key(provider.model_api_key_hash.clone(), decrypted_key);
     }
 
     if providers.is_empty() {

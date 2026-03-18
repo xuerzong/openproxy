@@ -1,3 +1,4 @@
+pub mod cache;
 pub mod chat_common;
 pub mod db;
 pub mod proxy;
