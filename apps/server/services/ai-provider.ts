@@ -48,6 +48,7 @@ export const getAIProviders = async () => {
         columns: {
           id: true,
           apiKey: true,
+          remark: true,
           createdAt: true,
         },
       },
@@ -127,9 +128,11 @@ export const updateAIProvider = async (input: {
 
 export const createAIProviderAPIKey = async (
   aiProviderId: string,
-  apiKey: string
+  apiKey: string,
+  remark?: string
 ) => {
   const normalizedAPIKey = apiKey.trim()
+  const normalizedRemark = remark?.trim() ?? ''
 
   if (!normalizedAPIKey) {
     throw new Error('API key is required')
@@ -138,6 +141,7 @@ export const createAIProviderAPIKey = async (
   await db.transaction(async (tx) => {
     await tx.insert(dbSchema.aiProviderAPIKeys).values({
       aiProviderId,
+      remark: normalizedRemark,
       ...(await encryptAIProviderAPIKey(normalizedAPIKey)),
     })
 

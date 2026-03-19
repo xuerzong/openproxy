@@ -459,6 +459,7 @@ export const aiProviderAPIKeys = pgTable(
       .references(() => aiProviders.id, { onDelete: 'cascade' }),
     apiKey: text('api_key').notNull(),
     apiKeyHash: varchar('api_key_hash').notNull(),
+    remark: text('remark').notNull().default(''),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
       .defaultNow()
       .notNull(),

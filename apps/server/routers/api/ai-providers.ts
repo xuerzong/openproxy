@@ -41,7 +41,7 @@ export const aiProvidersRouter = new Elysia()
   .post(
     'aiProviders/apiKeys',
     async ({ body }) => {
-      await createAIProviderAPIKey(body.aiProviderId, body.apiKey)
+      await createAIProviderAPIKey(body.aiProviderId, body.apiKey, body.remark)
     },
     { auth: { role: 'admin' }, body: CreateAIProviderAPIKeySchema }
   )

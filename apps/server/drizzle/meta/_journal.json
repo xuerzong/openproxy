@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1772813152502,
+      "when": 1773929867138,
       "tag": "0000_init",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1773820800000,
-      "tag": "0001_ai_provider_api_keys",
       "breakpoints": true
     }
   ]

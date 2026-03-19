@@ -17,6 +17,7 @@ export const UpdateAIProviderSchema = t.Object({
 export const CreateAIProviderAPIKeySchema = t.Object({
   aiProviderId: t.String(),
   apiKey: t.String(),
+  remark: t.Optional(t.String()),
 })
 
 export const AIProviderAPIKeyIdParamSchema = t.Object({
