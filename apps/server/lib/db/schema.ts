@@ -443,8 +443,44 @@ export const aiProviders = pgTable(
 )
 
 export const aiProvidersRelations = relations(aiProviders, ({ many }) => ({
+  aiProviderAPIKeys: many(aiProviderAPIKeys),
   modelsToAIProviders: many(modelsToAIProviders),
 }))
+
+export const aiProviderAPIKeys = pgTable(
+  'ai_provider_api_keys',
+  {
+    id: varchar('id')
+      .notNull()
+      .$defaultFn(() => generateDBId())
+      .primaryKey(),
+    aiProviderId: varchar('ai_provider_id')
+      .notNull()
+      .references(() => aiProviders.id, { onDelete: 'cascade' }),
+    apiKey: text('api_key').notNull(),
+    apiKeyHash: varchar('api_key_hash').notNull(),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index('ai_provider_api_keys_ai_provider_id_index').on(table.aiProviderId),
+    index('ai_provider_api_keys_hash_index').on(table.apiKeyHash),
+  ]
+)
+
+export const aiProviderAPIKeysRelations = relations(
+  aiProviderAPIKeys,
+  ({ one }) => ({
+    aiProvider: one(aiProviders, {
+      fields: [aiProviderAPIKeys.aiProviderId],
+      references: [aiProviders.id],
+    }),
+  })
+)
 
 export const modelsToAIProviders = pgTable(
   'models_to_ai_providers',

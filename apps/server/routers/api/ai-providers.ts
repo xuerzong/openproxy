@@ -1,15 +1,17 @@
 import Elysia from 'elysia'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
+  createAIProviderAPIKey,
   createAIProvider,
-  delAIProviderAPIKey,
+  deleteAIProvider,
+  deleteAIProviderAPIKey,
   getAIProviders,
   updateAIProvider,
-  updateAIProviderAPIKey,
 } from '@server/services/ai-provider'
 import {
+  AIProviderAPIKeyIdParamSchema,
+  CreateAIProviderAPIKeySchema,
   CreateAIProviderSchema,
-  UpdateAIProviderAPIKeySchema,
   UpdateAIProviderSchema,
 } from '@server/schemas/ai-provider'
 
@@ -36,17 +38,24 @@ export const aiProvidersRouter = new Elysia()
     },
     { auth: { role: 'admin' }, body: UpdateAIProviderSchema }
   )
-  .put(
-    'aiProviders/updateAPIKey',
+  .post(
+    'aiProviders/apiKeys',
     async ({ body }) => {
-      await updateAIProviderAPIKey(body.id, body.apiKey)
+      await createAIProviderAPIKey(body.aiProviderId, body.apiKey)
     },
-    { auth: { role: 'admin' }, body: UpdateAIProviderAPIKeySchema }
+    { auth: { role: 'admin' }, body: CreateAIProviderAPIKeySchema }
+  )
+  .delete(
+    'aiProviders/apiKeys/:id',
+    async ({ params }) => {
+      await deleteAIProviderAPIKey(params.id)
+    },
+    { auth: { role: 'admin' }, params: AIProviderAPIKeyIdParamSchema }
   )
   .delete(
     'aiProviders/:id',
     async ({ params }) => {
-      await delAIProviderAPIKey(params.id)
+      await deleteAIProvider(params.id)
     },
     { auth: { role: 'admin' } }
   )

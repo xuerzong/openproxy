@@ -2,7 +2,7 @@ import { t } from 'elysia'
 
 export const CreateAIProviderSchema = t.Object({
   name: t.String(),
-  apiKey: t.String(),
+  apiKeys: t.Array(t.String()),
   baseUrl: t.String(),
   icon: t.Optional(t.String()),
 })
@@ -14,7 +14,11 @@ export const UpdateAIProviderSchema = t.Object({
   icon: t.Optional(t.String()),
 })
 
-export const UpdateAIProviderAPIKeySchema = t.Object({
-  id: t.String(),
+export const CreateAIProviderAPIKeySchema = t.Object({
+  aiProviderId: t.String(),
   apiKey: t.String(),
+})
+
+export const AIProviderAPIKeyIdParamSchema = t.Object({
+  id: t.String(),
 })

@@ -1,5 +1,5 @@
 import { Form, FormField, type FormInstance } from '@openproxy/ui/Form'
-import { Input } from '@openproxy/ui/Input'
+import { Input, Textarea } from '@openproxy/ui/Input'
 import { useTranslation } from 'react-i18next'
 import { Select } from '@openproxy/ui/Select'
 import { ICON_SVG_MAP } from '@/constants/icons'
@@ -48,17 +48,21 @@ export const AIProviderForm: React.FC<AIProviderFormProps> = ({
         />
       </FormField>
 
-      <FormField
-        name="apiKey"
-        label={t('common.apiKey', { defaultValue: 'API Key' })}
-      >
-        <Input
-          placeholder={t('common.pleaseInput', {
-            defaultValue: 'Please input',
+      {!isEdit && (
+        <FormField
+          name="apiKeysText"
+          label={t('aiProviders.apiKeys', { defaultValue: 'API Keys' })}
+          help={t('aiProviders.apiKeysHelp', {
+            defaultValue: 'Enter one API key per line',
           })}
-          disabled={isEdit}
-        />
-      </FormField>
+        >
+          <Textarea
+            placeholder={t('aiProviders.apiKeysPlaceholder', {
+              defaultValue: 'sk-xxx\nsk-yyy',
+            })}
+          />
+        </FormField>
+      )}
     </Form>
   )
 }

@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import {
   MoreHorizontalIcon,
+  KeyRoundIcon,
   PenSquareIcon,
-  RotateCcwKeyIcon,
   Trash2Icon,
 } from 'lucide-react'
 import { AIProviderFormSchema } from '@openproxy/schema'
@@ -22,6 +22,18 @@ import { AIProviderDeleteModal } from '@/components/AIProvider/AIProviderDeleteM
 import { useTranslation } from 'react-i18next'
 import { ModelIcon } from '@/components/ModelIcon'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
+import type { AIProviderItem } from '@/hooks/queries/useAIProvidersQuery'
+
+const parseAPIKeysText = (value?: string | null) => {
+  return Array.from(
+    new Set(
+      (value ?? '')
+        .split('\n')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    )
+  )
+}
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -31,7 +43,7 @@ const Page = () => {
     defaultValues: {
       name: '',
       baseUrl: '',
-      apiKey: '',
+      apiKeysText: '',
       icon: '',
     },
     zodResolver: AIProviderFormSchema,
@@ -39,7 +51,8 @@ const Page = () => {
   const [aiProviderOpen, setAIProviderOpen] = useState(false)
   const isEdit = Boolean(aiProviderForm.values.id)
 
-  const [updateAPIKeyId, setUpdateAPIKeyId] = useState('')
+  const [manageAPIKeysProvider, setManageAPIKeysProvider] =
+    useState<AIProviderItem | null>(null)
   const [delAIProviderId, setDelAIProviderId] = useState('')
 
   const onAIProviderShow = () => {
@@ -48,10 +61,27 @@ const Page = () => {
 
   const onAIProviderOk = () => {
     aiProviderForm.onSubmit((values) => {
+      const payload = {
+        name: values.name,
+        baseUrl: values.baseUrl,
+        icon: values.icon,
+      }
+      const apiKeys = parseAPIKeysText(values.apiKeysText)
+
+      if (!isEdit && apiKeys.length === 0) {
+        aiProviderForm.setFieldError(
+          'apiKeysText',
+          t('aiProviders.apiKeysRequired', {
+            defaultValue: 'Please enter at least one API key',
+          })
+        )
+        return
+      }
+
       void toastApiPromise(
         isEdit
-          ? request.aiProviders.put(values)
-          : request.aiProviders.post(values),
+          ? request.aiProviders.put({ id: values.id, ...payload })
+          : request.aiProviders.post({ ...payload, apiKeys }),
         {
           loading: t('common.processing', {
             defaultValue: 'Processing...',
@@ -110,7 +140,25 @@ const Page = () => {
             },
             {
               key: 'apiKey',
-              label: t('common.apiKey', { defaultValue: 'API Key' }),
+              label: t('aiProviders.apiKeys', { defaultValue: 'API Keys' }),
+              render: (_, record) => {
+                if (!record.apiKeys?.length) {
+                  return '-'
+                }
+
+                return (
+                  <div className="space-y-1 py-1">
+                    {record.apiKeys.map((item: any) => (
+                      <div
+                        key={item.id}
+                        className="text-xs leading-5 break-all"
+                      >
+                        {item.apiKey}
+                      </div>
+                    ))}
+                  </div>
+                )
+              },
             },
             {
               key: 'operation',
@@ -126,19 +174,22 @@ const Page = () => {
                           label: t('actions.edit', { defaultValue: 'Edit' }),
                           icon: <PenSquareIcon />,
                           onClick() {
-                            aiProviderForm.setValues(record)
+                            aiProviderForm.setValues({
+                              ...record,
+                              apiKeysText: '',
+                            })
                             onAIProviderShow()
                           },
                         },
                         {
                           type: 'item',
-                          key: 'updateAPIKey',
-                          label: t('apiKeys.updateApiKey', {
-                            defaultValue: 'Update API Key',
+                          key: 'manageAPIKeys',
+                          label: t('aiProviders.manageApiKeys', {
+                            defaultValue: 'Manage API Keys',
                           }),
-                          icon: <RotateCcwKeyIcon />,
+                          icon: <KeyRoundIcon />,
                           onClick() {
-                            setUpdateAPIKeyId(record.id)
+                            setManageAPIKeysProvider(record)
                           },
                         },
                         {
@@ -199,15 +250,15 @@ const Page = () => {
       </Dialog>
 
       <AIProviderUpdateAPIKeyModal
-        id={updateAPIKeyId}
-        open={Boolean(updateAPIKeyId)}
+        provider={manageAPIKeysProvider}
+        open={Boolean(manageAPIKeysProvider)}
         onOpenChange={(open) => {
           if (!open) {
-            setUpdateAPIKeyId('')
+            setManageAPIKeysProvider(null)
           }
         }}
         onSuccess={() => {
-          aiProvidersQuery.refetch()
+          void aiProvidersQuery.refetch()
         }}
       />
 
