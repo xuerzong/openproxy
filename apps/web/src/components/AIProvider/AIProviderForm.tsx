@@ -1,5 +1,5 @@
 import { Form, FormField, type FormInstance } from '@openproxy/ui/Form'
-import { Input, Textarea } from '@openproxy/ui/Input'
+import { Input } from '@openproxy/ui/Input'
 import { useTranslation } from 'react-i18next'
 import { Select } from '@openproxy/ui/Select'
 import { ICON_SVG_MAP } from '@/constants/icons'
@@ -7,14 +7,11 @@ import { ModelIcon } from '../ModelIcon'
 
 interface AIProviderFormProps {
   form: FormInstance
-  isEdit?: boolean
 }
 
-export const AIProviderForm: React.FC<AIProviderFormProps> = ({
-  form,
-  isEdit = false,
-}) => {
+export const AIProviderForm: React.FC<AIProviderFormProps> = ({ form }) => {
   const { t } = useTranslation('common')
+
   return (
     <Form form={form}>
       <FormField name="icon" label={t('common.icon', { defaultValue: 'Icon' })}>
@@ -47,22 +44,6 @@ export const AIProviderForm: React.FC<AIProviderFormProps> = ({
           })}
         />
       </FormField>
-
-      {!isEdit && (
-        <FormField
-          name="apiKeysText"
-          label={t('aiProviders.apiKeys', { defaultValue: 'API Keys' })}
-          help={t('aiProviders.apiKeysHelp', {
-            defaultValue: 'Enter one API key per line',
-          })}
-        >
-          <Textarea
-            placeholder={t('aiProviders.apiKeysPlaceholder', {
-              defaultValue: 'sk-xxx\nsk-yyy',
-            })}
-          />
-        </FormField>
-      )}
     </Form>
   )
 }

@@ -63,19 +63,17 @@ export const getAIProviders = async () => {
 
 export const createAIProvider = async (input: {
   name: string
-  apiKeys: string[]
+  apiKeys?: string[]
   baseUrl: string
   icon?: string
 }) => {
-  const apiKeys = normalizeAPIKeys(input.apiKeys)
-
-  if (apiKeys.length === 0) {
-    throw new Error('At least one API key is required')
-  }
+  const apiKeys = normalizeAPIKeys(input.apiKeys ?? [])
 
   await db.transaction(async (tx) => {
     const [legacyAPIKey, ...restAPIKeys] = apiKeys
-    const encryptedLegacyAPIKey = await encryptAIProviderAPIKey(legacyAPIKey!)
+    const encryptedLegacyAPIKey = await encryptAIProviderAPIKey(
+      legacyAPIKey ?? ''
+    )
 
     const aiProviders = await tx
       .insert(dbSchema.aiProviders)
@@ -94,7 +92,11 @@ export const createAIProvider = async (input: {
       throw new Error('Failed to create AI provider')
     }
 
-    const allAPIKeys = [legacyAPIKey, ...restAPIKeys]
+    const allAPIKeys = [legacyAPIKey, ...restAPIKeys].filter(Boolean)
+
+    if (allAPIKeys.length === 0) {
+      return
+    }
 
     await tx.insert(dbSchema.aiProviderAPIKeys).values(
       await Promise.all(
