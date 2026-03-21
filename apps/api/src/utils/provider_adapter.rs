@@ -76,9 +76,11 @@ mod tests {
         ProviderInfo {
             model_model_name: "qwen-plus".to_string(),
             model_base_url: base_url.to_string(),
-            model_api_key_hash: "hash".to_string(),
-            model_api_key: "key".to_string(),
             ai_provider_id: "provider-id".to_string(),
+            api_keys: vec![crate::models::provider::ApiKeyEntry {
+                api_key_hash: "hash".to_string(),
+                api_key: "key".to_string(),
+            }],
         }
     }
 

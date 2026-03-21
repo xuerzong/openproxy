@@ -7,14 +7,11 @@ import { ModelIcon } from '../ModelIcon'
 
 interface AIProviderFormProps {
   form: FormInstance
-  isEdit?: boolean
 }
 
-export const AIProviderForm: React.FC<AIProviderFormProps> = ({
-  form,
-  isEdit = false,
-}) => {
+export const AIProviderForm: React.FC<AIProviderFormProps> = ({ form }) => {
   const { t } = useTranslation('common')
+
   return (
     <Form form={form}>
       <FormField name="icon" label={t('common.icon', { defaultValue: 'Icon' })}>
@@ -45,18 +42,6 @@ export const AIProviderForm: React.FC<AIProviderFormProps> = ({
           placeholder={t('common.pleaseInput', {
             defaultValue: 'Please input',
           })}
-        />
-      </FormField>
-
-      <FormField
-        name="apiKey"
-        label={t('common.apiKey', { defaultValue: 'API Key' })}
-      >
-        <Input
-          placeholder={t('common.pleaseInput', {
-            defaultValue: 'Please input',
-          })}
-          disabled={isEdit}
         />
       </FormField>
     </Form>

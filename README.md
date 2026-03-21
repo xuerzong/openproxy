@@ -6,6 +6,7 @@ A self-hosted AI API proxy service. Manage multiple AI provider backends (OpenAI
 
 - **Unified API** — OpenAI-compatible (`/v1/chat/completions`) and Anthropic-compatible (`/v1/messages`) endpoints
 - **Multi-provider failover** — Configure multiple backends per model with weighted random load balancing; automatically falls back to the next provider on failure
+- **Multi-key rotation** — Each provider can have multiple API keys. The proxy tracks the last N used `(provider, key)` combinations per user API key (N = min(10, total combinations)) and deprioritises recently-used combinations on the next request, spreading load and reducing rate-limit exposure
 - **API key management** — Per-key quota, request limits, expiry, and model access control
 - **Usage tracking** — Per-request cost calculation (based on token pricing), response time, and provider attribution
 - **Admin panel** — Manage models, AI providers, users, and orders
@@ -32,7 +33,8 @@ openproxy/
 Client → apps/api (Rust, port 5060)
            ├── Auth middleware: validates API key via apps/server DB
            ├── Weighted-random provider selection
-           ├── Forwards request to upstream AI provider
+           ├── Key-rotation: skip recently used (provider, key) combinations
+           ├── Forwards request to upstream AI provider (failover on error)
            └── Records usage (tokens, cost, latency) to DB
 ```
 

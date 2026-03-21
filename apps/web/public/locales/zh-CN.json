@@ -343,7 +343,15 @@
     "add": "添加供应商",
     "addTitle": "添加 AI 供应商",
     "editTitle": "编辑 AI 供应商",
-    "deleteConfirm": "确定删除供应商吗"
+    "deleteConfirm": "确定删除供应商吗",
+    "apiKeys": "API Keys",
+    "apiKeysHelp": "逐条添加 API Key，并在表格中查看",
+    "apiKeysPlaceholder": "请输入 API Key",
+    "apiKeysRequired": "请至少添加一个 API Key",
+    "addApiKey": "添加 API Key",
+    "manageApiKeys": "AI Keys",
+    "noApiKeys": "暂未添加 API Key",
+    "apiKeyCount": "{{count}} 个 Key"
   },
   "models": {
     "title": "模型列表",
@@ -411,6 +419,7 @@
   "auth": {
     "login": "登录",
     "loginSuccess": "登录成功",
+    "loginFailed": "密码或邮箱错误",
     "phoneLogin": "手机号码登录",
     "passwordLogin": "密码登录",
     "phonePlaceholder": "请输入手机号",
@@ -429,7 +438,9 @@
     "termsPrefix": "注册或登录即代表您已阅读并同意我们的",
     "termsOfService": "用户服务协议",
     "privacyPolicy": "隐私政策",
-    "termsSuffix": "，未注册的手机号将自动注册。"
+    "termsSuffix": "，未注册的手机号将自动注册。",
+    "githubLogin": "通过 GitHub 登录",
+    "googleLogin": "通过 Google 登录"
   },
   "notFound": {
     "title": "错误404: 页面找不到了",

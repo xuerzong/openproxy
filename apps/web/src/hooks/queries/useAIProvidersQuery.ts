@@ -14,3 +14,5 @@ export type UseAIProvidersQueryOutput = Awaited<
 >['data']
 
 export type AIProvider = NonNullable<UseAIProvidersQueryOutput>
+
+export type AIProviderItem = AIProvider[number]

@@ -5,7 +5,8 @@ use sqlx::{FromRow, PgPool};
 use std::env;
 
 use crate::{
-    models::provider::{ModelAccessResult, ProviderInfo},
+    models::provider::{ApiKeyEntry, ModelAccessResult, ProviderInfo},
+    shared::cache::{get_decrypted_provider_key, set_decrypted_provider_key},
     utils,
 };
 
@@ -30,6 +31,7 @@ struct AccessRow {
     provider_api_key_hash: String,
     provider_api_key: String,
     provider_weight: i32,
+    provider_api_key_id: String,
 }
 
 pub async fn validate_model_access(
@@ -37,7 +39,6 @@ pub async fn validate_model_access(
     hash_api_key: &str,
     model_id: &str,
 ) -> Result<ModelAccessResult, (u16, &'static str, &'static str)> {
-    // 1. Query all provider candidates alongside key/model/team info in one shot
     let rows = sqlx::query_as::<_, AccessRow>(
         r#"
         WITH api_key_info AS (
@@ -68,11 +69,13 @@ pub async fn validate_model_access(
                 ap.name as provider_name,
                 mtap.model as provider_model_name,
                 ap.base_url as provider_base_url,
-                ap.api_key_hash as provider_api_key_hash,
-                ap.api_key as provider_api_key,
+                apk.api_key_hash as provider_api_key_hash,
+                apk.api_key as provider_api_key,
+                apk.id as provider_api_key_id,
                 COALESCE(mtap.weight, 1) as provider_weight
             FROM models_to_ai_providers mtap
             INNER JOIN ai_providers ap ON mtap.ai_provider_id = ap.id
+            INNER JOIN ai_provider_api_keys apk ON apk.ai_provider_id = ap.id
                         WHERE mtap.model_id = $2
                             AND mtap.status = 1
         ),
@@ -101,7 +104,8 @@ pub async fn validate_model_access(
             p.provider_base_url,
             p.provider_api_key_hash,
             p.provider_api_key,
-            p.provider_weight
+            p.provider_weight,
+            p.provider_api_key_id
         FROM api_key_info aki
         CROSS JOIN model_info mi
         CROSS JOIN providers p
@@ -125,63 +129,76 @@ pub async fn validate_model_access(
 
     let first_row = &rows[0];
 
-    // 2. Expiry check
     if let Some(expires_at) = first_row.api_key_expires_at
         && expires_at < Utc::now()
     {
         return Err((402, "API_KEY_EXPIRED", "API key has expired"));
     }
 
-    // 3. Quota check
     if first_row.api_key_max_quota != Decimal::ZERO
         && first_row.api_key_total_quota >= first_row.api_key_max_quota
     {
         return Err((403, "TOTAL_QUOTA_EXHAUSTED", "API key quota exhausted"));
     }
 
-    // 4. Request count check
     if first_row.api_key_max_requests != 0
         && first_row.api_key_total_requests >= first_row.api_key_max_requests
     {
         return Err((402, "REQUEST_LIMIT_EXCEEDED", "Request limit reached"));
     }
 
-    // 5. Team balance check (public models only)
     if first_row.model_is_public && first_row.team_amount <= Decimal::ZERO {
         return Err((402, "INSUFFICIENT_BALANCE", "Insufficient team balance"));
     }
 
-    // 6. Build weighted-randomly sorted provider list
-    let provider_candidates: Vec<_> = rows
-        .iter()
-        .map(|r| ProviderCandidate {
-            weight: r.provider_weight,
-            id: r.provider_id.clone(),
-            model_name: r.provider_model_name.clone(),
-            base_url: r.provider_base_url.clone(),
-            api_key_hash: r.provider_api_key_hash.clone(),
-            api_key: r.provider_api_key.clone(),
-        })
-        .collect();
+    use std::collections::HashMap;
+    let mut provider_map: HashMap<String, ProviderCandidate> = HashMap::new();
+    for r in &rows {
+        let entry = provider_map.entry(r.provider_id.clone()).or_insert_with(|| {
+            ProviderCandidate {
+                weight: r.provider_weight,
+                id: r.provider_id.clone(),
+                model_name: r.provider_model_name.clone(),
+                base_url: r.provider_base_url.clone(),
+                api_keys: Vec::new(),
+            }
+        });
+        if !entry.api_keys.iter().any(|k| k.id == r.provider_api_key_id) {
+            entry.api_keys.push(ProviderApiKeyCandidate {
+                id: r.provider_api_key_id.clone(),
+                api_key_hash: r.provider_api_key_hash.clone(),
+                api_key: r.provider_api_key.clone(),
+            });
+        }
+    }
+    let provider_candidates: Vec<_> = provider_map.into_values().collect();
 
     let mut providers = weighted_random_sort(&provider_candidates);
 
-    // 7. Decrypt all provider API keys
     let rsa_priv_key = env::var("RSA_PRIVATE_KEY")
         .map_err(|_| (500u16, "SERVER_ERROR", "RSA_PRIVATE_KEY not configured"))?;
 
     for provider in &mut providers {
-        let encrypted_key = provider.model_api_key_hash.clone();
-        let rsa_priv_key_clone = rsa_priv_key.clone();
+        for api_key_entry in &mut provider.api_keys {
+            let encrypted_key = api_key_entry.api_key_hash.clone();
 
-        let decrypted_key = tokio::task::spawn_blocking(move || {
-            utils::rsa::RsaCrypto::decrypt(&encrypted_key, &rsa_priv_key_clone)
-        })
-        .await
-        .map_err(|_| (500u16, "SERVER_ERROR", "Thread scheduling failed"))?
-        .map_err(|_| (500u16, "DECRYPT_ERROR", "Provider key decryption failed"))?;
+            if let Some(cached_key) = get_decrypted_provider_key(&encrypted_key) {
+                api_key_entry.api_key = cached_key;
+                continue;
+            }
 
-        provider.model_api_key = decrypted_key;
+            let rsa_priv_key_clone = rsa_priv_key.clone();
+
+            let decrypted_key = tokio::task::spawn_blocking(move || {
+                utils::rsa::RsaCrypto::decrypt(&encrypted_key, &rsa_priv_key_clone)
+            })
+            .await
+            .map_err(|_| (500u16, "SERVER_ERROR", "Thread scheduling failed"))?
+            .map_err(|_| (500u16, "DECRYPT_ERROR", "Provider key decryption failed"))?;
+
+            api_key_entry.api_key = decrypted_key.clone();
+            set_decrypted_provider_key(api_key_entry.api_key_hash.clone(), decrypted_key);
+        }
     }
 
     if providers.is_empty() {
@@ -215,17 +232,22 @@ pub async fn validate_model_access(
 }
 
 #[derive(Debug, Clone)]
-struct ProviderCandidate {
-    weight: i32,
+struct ProviderApiKeyCandidate {
     id: String,
-    model_name: String,
-    base_url: String,
     api_key_hash: String,
     #[allow(dead_code)]
     api_key: String,
 }
 
-/// Returns providers in weighted-random order.
+#[derive(Debug, Clone)]
+struct ProviderCandidate {
+    weight: i32,
+    id: String,
+    model_name: String,
+    base_url: String,
+    api_keys: Vec<ProviderApiKeyCandidate>,
+}
+
 fn weighted_random_sort(candidates: &[ProviderCandidate]) -> Vec<ProviderInfo> {
     if candidates.is_empty() {
         return Vec::new();
@@ -257,9 +279,15 @@ fn weighted_random_sort(candidates: &[ProviderCandidate]) -> Vec<ProviderInfo> {
         result.push(ProviderInfo {
             model_model_name: selected.model_name,
             model_base_url: selected.base_url,
-            model_api_key_hash: selected.api_key_hash,
-            model_api_key: selected.api_key,
             ai_provider_id: selected.id,
+            api_keys: selected
+                .api_keys
+                .into_iter()
+                .map(|k| ApiKeyEntry {
+                    api_key_hash: k.api_key_hash,
+                    api_key: k.api_key,
+                })
+                .collect(),
         });
     }
 

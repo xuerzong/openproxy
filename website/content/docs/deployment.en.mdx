@@ -3,60 +3,138 @@ title: Deployment
 description: Deploy OpenProxy via Docker Compose or manually
 ---
 
-## Docker Compose deployment
+## Option A — Docker Compose (recommended)
 
-The root `docker-compose.yml` includes these services by default:
+Use `docker/docker-compose.yml` for a one-command production deployment. It includes:
 
-- `server` (host port `5080`)
-- `web-tenant` (host port `5090`)
-- `web-admin` (host port `5091`)
+| Service | Host port |
+| --- | --- |
+| `server` (Bun backend) | `3888` |
+| `api` (Rust proxy) | `5060` |
+| `web-tenant` | `5090` |
+| `web-admin` | `5091` |
+| `postgres` | internal only |
 
-### 1) Prepare environment variables
-
-`docker-compose.yml` consumes environment variables. At minimum provide:
-
-- `DATABASE_URL`
-- `BETTER_AUTH_SECRET`
-- `BETTER_AUTH_TRUSTED_ORIGINS`
-- `BETTER_AUTH_URL`
-- `RSA_PRIVATE_KEY`
-- `RSA_PUBLIC_KEY`
-
-Also provide email/OAuth/SMS/payment variables based on your actual setup.
-
-### 2) Start services
+### 1. Prepare environment file
 
 ```bash
-docker-compose up -d
+cp docker/.env.example docker/.env
 ```
 
-### 3) Verify endpoints
+Edit `docker/.env`. Required variables:
 
-- `http://localhost:5080` for server
-- `http://localhost:5090` for tenant web
-- `http://localhost:5091` for admin web
+```dotenv
+DATABASE_URL=postgres://user:password@postgres:5432/openproxy
+BETTER_AUTH_SECRET=<random 32-byte base64>
+BETTER_AUTH_URL=https://your-server-domain/api
+BETTER_AUTH_TRUSTED_ORIGINS=https://your-tenant-domain,https://your-admin-domain
+RSA_PRIVATE_KEY=<generated with bun scripts/generateRSAKey.ts>
+RSA_PUBLIC_KEY=<same generation>
+```
 
-## Rust Proxy deployment note
+Also add email (RESEND or SMTP), OAuth, SMS, and payment variables as needed.
 
-Current `docker-compose.yml` does not include `apps/api`. Deploy it separately:
+### 2. Start
+
+```bash
+cd docker
+docker compose up -d
+```
+
+### 3. Verify
+
+```bash
+curl http://localhost:5060/health       # Rust proxy
+curl http://localhost:3888/api/health   # Bun server
+```
+
+### 4. Domain and reverse proxy
+
+Bind domains with Nginx (or any reverse proxy):
+
+```nginx
+server {
+	listen 80;
+	server_name api.example.com;
+	location / {
+		proxy_pass http://127.0.0.1:5060;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+}
+
+server {
+	listen 80;
+	server_name app.example.com;
+	location / {
+		proxy_pass http://127.0.0.1:5090;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+}
+```
+
+For HTTPS, add `ssl_certificate` / `ssl_certificate_key` or use Certbot.
+
+## Option B — Manual deployment
+
+### PostgreSQL
+
+Provision PostgreSQL 15+ and create a database. Run migrations:
+
+```bash
+cd apps/server
+DATABASE_URL=postgres://... bun run migrate
+```
+
+### apps/server (Bun)
+
+```bash
+cd apps/server
+bun install
+bun run start   # or use pm2 / systemd
+```
+
+### apps/api (Rust)
 
 ```bash
 cd apps/api
-cargo run --release
+cargo build --release
+./target/release/api
 ```
 
-For production, use `systemd`, container orchestration, or a process supervisor.
+For production process management use `systemd` or a container:
 
-## Manual deployment (without Docker)
+```ini
+# /etc/systemd/system/openproxy-api.service
+[Unit]
+Description=OpenProxy Rust API
+After=network.target
 
-1. Deploy PostgreSQL
-2. Deploy `apps/server`
-3. Deploy `apps/api`
-4. Build and host `apps/web` (tenant/admin)
+[Service]
+EnvironmentFile=/etc/openproxy/api.env
+ExecStart=/usr/local/bin/openproxy-api
+Restart=always
 
-## Production recommendations
+[Install]
+WantedBy=multi-user.target
+```
 
-- Use a reverse proxy for unified domain and HTTPS
-- Set `BETTER_AUTH_URL` and `BETTER_AUTH_TRUSTED_ORIGINS` to production domains
-- Enable database backup strategy
-- Avoid logging plaintext keys or sensitive fields
+### apps/web (React)
+
+```bash
+cd apps/web
+bun run build:tenant   # outputs to dist/tenant
+bun run build:admin    # outputs to dist/admin
+```
+
+Serve the `dist/` directories with Nginx or any static file host.
+
+## Production checklist
+
+- [ ] Use HTTPS with valid certificates for all public domains
+- [ ] Set `BETTER_AUTH_URL` and `BETTER_AUTH_TRUSTED_ORIGINS` to production URLs
+- [ ] Enable PostgreSQL backups (e.g. pg_dump cron or managed DB snapshot)
+- [ ] Never log `RSA_PRIVATE_KEY` or plaintext API keys
+- [ ] Use secrets management (e.g. Docker secrets, Vault) rather than plain `.env` files in production
+- [ ] Configure resource limits (memory, CPU) for the Rust proxy container

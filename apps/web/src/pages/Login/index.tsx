@@ -11,6 +11,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { authClient } from '@/utils/better-auth'
 import { isOSS } from '@/utils/env'
 import { useTranslation } from 'react-i18next'
+import { GithubIcon } from '@/components/GithubIcon'
+import { GoogleIcon } from '@/components/GoogleIcon'
+import { useLoginMethodsQuery } from '@/hooks/queries/useLoginMethodsQuery'
 import s from './index.module.css'
 
 const Page = () => {
@@ -23,17 +26,19 @@ const Page = () => {
   const [loginMethod, setLoginMethod] = useState<'phone' | 'password'>(
     showPhoneLogin ? 'phone' : 'password'
   )
+  const { data: loginMethods } = useLoginMethodsQuery()
+
+  const signInWithSocial = (provider: 'github' | 'google') => {
+    authClient.signIn.social({ provider, callbackURL: redirect })
+  }
 
   return (
     <div className="w-96 p-4">
       <div className="flex flex-col items-center justify-center mb-8">
         <Logo className="h-12 w-auto" />
         <span className="text-xs text-primary font-bold">
-          {loginMethod === 'phone' &&
-            showPhoneLogin &&
-            t('auth.phoneLogin', { defaultValue: 'Phone Login' })}
-          {loginMethod === 'password' &&
-            t('auth.passwordLogin', { defaultValue: 'Password Login' })}
+          {loginMethod === 'phone' && showPhoneLogin && t('auth.phoneLogin')}
+          {loginMethod === 'password' && t('auth.passwordLogin')}
         </span>
       </div>
 
@@ -72,11 +77,7 @@ const Page = () => {
         )}
       >
         {loginMethod === 'phone' && showPhoneLogin && (
-          <Tooltip
-            content={t('auth.passwordLogin', {
-              defaultValue: 'Password Login',
-            })}
-          >
+          <Tooltip content={t('auth.passwordLogin')}>
             <button
               className={cn(
                 'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
@@ -92,9 +93,7 @@ const Page = () => {
         )}
 
         {loginMethod === 'password' && showPhoneLogin && (
-          <Tooltip
-            content={t('auth.phoneLogin', { defaultValue: 'Phone Login' })}
-          >
+          <Tooltip content={t('auth.phoneLogin')}>
             <button
               className={cn(
                 'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
@@ -105,6 +104,34 @@ const Page = () => {
               }}
             >
               <SmartphoneIcon className="w-5 h-5" />
+            </button>
+          </Tooltip>
+        )}
+
+        {loginMethods?.github && (
+          <Tooltip content={t('auth.githubLogin')}>
+            <button
+              className={cn(
+                'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
+                'hover:bg-muted'
+              )}
+              onClick={() => signInWithSocial('github')}
+            >
+              <GithubIcon className="w-5 h-5" />
+            </button>
+          </Tooltip>
+        )}
+
+        {loginMethods?.google && (
+          <Tooltip content={t('auth.googleLogin')}>
+            <button
+              className={cn(
+                'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
+                'hover:bg-muted'
+              )}
+              onClick={() => signInWithSocial('google')}
+            >
+              <GoogleIcon className="w-5 h-5" />
             </button>
           </Tooltip>
         )}

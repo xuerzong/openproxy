@@ -1,14 +1,20 @@
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 
+/// A single API key entry for a provider.
+#[derive(Debug, Clone)]
+pub struct ApiKeyEntry {
+    pub api_key_hash: String,
+    pub api_key: String,
+}
+
 /// Information about a selected AI provider backend.
 #[derive(Debug, Clone)]
 pub struct ProviderInfo {
     pub model_model_name: String,
     pub model_base_url: String,
-    pub model_api_key_hash: String,
-    pub model_api_key: String,
     pub ai_provider_id: String,
+    pub api_keys: Vec<ApiKeyEntry>,
 }
 
 /// Full result of validating an API key and selecting providers for a model.

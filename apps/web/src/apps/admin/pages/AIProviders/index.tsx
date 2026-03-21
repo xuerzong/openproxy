@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import {
   MoreHorizontalIcon,
+  KeyRoundIcon,
   PenSquareIcon,
-  RotateCcwKeyIcon,
   Trash2Icon,
 } from 'lucide-react'
 import { AIProviderFormSchema } from '@openproxy/schema'
@@ -17,7 +17,7 @@ import { Table } from '@openproxy/ui/Table'
 import { useAIProvidersQuery } from '@/hooks/queries/useAIProvidersQuery'
 import { useRequest } from '@/contexts/ApiContext'
 import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
-import { AIProviderUpdateAPIKeyModal } from '@/components/AIProvider/AIProviderUpdateAPIKeyModal'
+import { AIProviderAPIKeys } from '@/components/AIProvider/AIProviderAPIKeys'
 import { AIProviderDeleteModal } from '@/components/AIProvider/AIProviderDeleteModal'
 import { useTranslation } from 'react-i18next'
 import { ModelIcon } from '@/components/ModelIcon'
@@ -31,7 +31,6 @@ const Page = () => {
     defaultValues: {
       name: '',
       baseUrl: '',
-      apiKey: '',
       icon: '',
     },
     zodResolver: AIProviderFormSchema,
@@ -39,8 +38,13 @@ const Page = () => {
   const [aiProviderOpen, setAIProviderOpen] = useState(false)
   const isEdit = Boolean(aiProviderForm.values.id)
 
-  const [updateAPIKeyId, setUpdateAPIKeyId] = useState('')
+  const [manageAPIKeysProviderId, setManageAPIKeysProviderId] = useState('')
   const [delAIProviderId, setDelAIProviderId] = useState('')
+
+  const manageAPIKeysProvider =
+    aiProvidersQuery.data?.find(
+      (provider) => provider.id === manageAPIKeysProviderId
+    ) || null
 
   const onAIProviderShow = () => {
     setAIProviderOpen(true)
@@ -48,10 +52,16 @@ const Page = () => {
 
   const onAIProviderOk = () => {
     aiProviderForm.onSubmit((values) => {
+      const payload = {
+        name: values.name,
+        baseUrl: values.baseUrl,
+        icon: values.icon,
+      }
+
       void toastApiPromise(
         isEdit
-          ? request.aiProviders.put(values)
-          : request.aiProviders.post(values),
+          ? request.aiProviders.put({ id: values.id, ...payload })
+          : request.aiProviders.post({ ...payload, apiKeys: [] }),
         {
           loading: t('common.processing', {
             defaultValue: 'Processing...',
@@ -110,7 +120,21 @@ const Page = () => {
             },
             {
               key: 'apiKey',
-              label: t('common.apiKey', { defaultValue: 'API Key' }),
+              label: t('aiProviders.apiKeys', { defaultValue: 'API Keys' }),
+              render: (_, record) => {
+                if (!record.apiKeys?.length) {
+                  return '-'
+                }
+
+                return (
+                  <span>
+                    {t('aiProviders.apiKeyCount', {
+                      defaultValue: '{{count}} keys',
+                      count: record.apiKeys.length,
+                    })}
+                  </span>
+                )
+              },
             },
             {
               key: 'operation',
@@ -126,19 +150,21 @@ const Page = () => {
                           label: t('actions.edit', { defaultValue: 'Edit' }),
                           icon: <PenSquareIcon />,
                           onClick() {
-                            aiProviderForm.setValues(record)
+                            aiProviderForm.setValues({
+                              ...record,
+                            })
                             onAIProviderShow()
                           },
                         },
                         {
                           type: 'item',
-                          key: 'updateAPIKey',
-                          label: t('apiKeys.updateApiKey', {
-                            defaultValue: 'Update API Key',
+                          key: 'manageAPIKeys',
+                          label: t('aiProviders.manageApiKeys', {
+                            defaultValue: 'AI Keys',
                           }),
-                          icon: <RotateCcwKeyIcon />,
+                          icon: <KeyRoundIcon />,
                           onClick() {
-                            setUpdateAPIKeyId(record.id)
+                            setManageAPIKeysProviderId(record.id)
                           },
                         },
                         {
@@ -195,19 +221,21 @@ const Page = () => {
           />
         }
       >
-        <AIProviderForm form={aiProviderForm} isEdit={isEdit} />
+        <div className="overflow-y-scroll h-full">
+          <AIProviderForm form={aiProviderForm} />
+        </div>
       </Dialog>
 
-      <AIProviderUpdateAPIKeyModal
-        id={updateAPIKeyId}
-        open={Boolean(updateAPIKeyId)}
+      <AIProviderAPIKeys
+        provider={manageAPIKeysProvider}
+        open={Boolean(manageAPIKeysProviderId)}
         onOpenChange={(open) => {
           if (!open) {
-            setUpdateAPIKeyId('')
+            setManageAPIKeysProviderId('')
           }
         }}
         onSuccess={() => {
-          aiProvidersQuery.refetch()
+          void aiProvidersQuery.refetch()
         }}
       />
 

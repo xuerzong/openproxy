@@ -15,48 +15,138 @@ description: 使用 Docker Compose 或手动方式部署 OpenProxy
 
 `docker-compose.yml` 会读取环境变量，请在部署环境中准备：
 
-- `DATABASE_URL`
-- `BETTER_AUTH_SECRET`
-- `BETTER_AUTH_TRUSTED_ORIGINS`
-- `BETTER_AUTH_URL`
-- `RSA_PRIVATE_KEY`
-- `RSA_PUBLIC_KEY`
+## 方案 A — Docker Compose（推荐）
 
-以及你实际使用到的邮件、OAuth、短信、支付相关变量。
+使用 `docker/docker-compose.yml` 可一键启动完整的生产部署，包含以下服务：
 
-### 2) 启动
+| 服务 | 主机端口 |
+| --- | --- |
+| `server`（Bun 后端） | `3888` |
+| `api`（Rust 代理） | `5060` |
+| `web-tenant`（用户端） | `5090` |
+| `web-admin`（管理后台） | `5091` |
+| `postgres` | 内部网络 |
+
+### 1. 准备环境文件
 
 ```bash
-docker-compose up -d
+cp docker/.env.example docker/.env
 ```
 
-### 3) 验证
+编辑 `docker/.env`，至少填写以下变量：
 
-- 访问 `http://localhost:5080` 检查 server
-- 访问 `http://localhost:5090` 检查租户端
-- 访问 `http://localhost:5091` 检查管理端
+```dotenv
+DATABASE_URL=postgres://user:password@postgres:5432/openproxy
+BETTER_AUTH_SECRET=<随机 32 字节 base64>
+BETTER_AUTH_URL=https://your-server-domain/api
+BETTER_AUTH_TRUSTED_ORIGINS=https://your-tenant-domain,https://your-admin-domain
+RSA_PRIVATE_KEY=<通过 bun scripts/generateRSAKey.ts 生成>
+RSA_PUBLIC_KEY=<同上生成>
+```
 
-## Rust Proxy 的部署说明
+根据实际需要补充邮件（RESEND/SMTP）、OAuth、短信、支付变量。
 
-当前 `docker-compose.yml` 未包含 `apps/api` 服务，建议单独部署 `apps/api`：
+### 2. 启动
+
+```bash
+cd docker
+docker compose up -d
+```
+
+### 3. 验证
+
+```bash
+curl http://localhost:5060/health       # Rust 代理
+curl http://localhost:3888/api/health   # Bun 服务端
+```
+
+### 4. 域名与反向代理
+
+使用 Nginx（或其他反向代理）绑定域名：
+
+```nginx
+server {
+	listen 80;
+	server_name api.example.com;
+	location / {
+		proxy_pass http://127.0.0.1:5060;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+}
+
+server {
+	listen 80;
+	server_name app.example.com;
+	location / {
+		proxy_pass http://127.0.0.1:5090;
+		proxy_set_header Host $host;
+		proxy_set_header X-Real-IP $remote_addr;
+	}
+}
+```
+
+如需 HTTPS，添加 `ssl_certificate` / `ssl_certificate_key` 配置或使用 Certbot 自动申请。
+
+## 方案 B — 手动部署
+
+### PostgreSQL
+
+部署 PostgreSQL 15+，创建数据库后运行迁移：
+
+```bash
+cd apps/server
+DATABASE_URL=postgres://... bun run migrate
+```
+
+### apps/server（Bun）
+
+```bash
+cd apps/server
+bun install
+bun run start   # 或使用 pm2 / systemd 管理
+```
+
+### apps/api（Rust）
 
 ```bash
 cd apps/api
-cargo run --release
+cargo build --release
+./target/release/api
 ```
 
-生产环境建议使用 `systemd`、容器编排或进程守护工具管理该服务。
+推荐使用 `systemd` 进行进程管理：
 
-## 手动部署（无 Docker）
+```ini
+# /etc/systemd/system/openproxy-api.service
+[Unit]
+Description=OpenProxy Rust API
+After=network.target
 
-1. 部署 PostgreSQL
-2. 部署 `apps/server`
-3. 部署 `apps/api`
-4. 构建并托管 `apps/web`（tenant/admin）
+[Service]
+EnvironmentFile=/etc/openproxy/api.env
+ExecStart=/usr/local/bin/openproxy-api
+Restart=always
 
-## 生产建议
+[Install]
+WantedBy=multi-user.target
+```
 
-- 通过反向代理统一域名和 HTTPS
-- 将 `BETTER_AUTH_URL`、`BETTER_AUTH_TRUSTED_ORIGINS` 设置为生产域名
-- 为数据库启用备份策略
-- 不在日志中输出明文密钥与敏感字段
+### apps/web（React）
+
+```bash
+cd apps/web
+bun run build:tenant   # 输出到 dist/tenant
+bun run build:admin    # 输出到 dist/admin
+```
+
+将生成的 `dist/` 目录通过 Nginx 或静态文件托管服务发布。
+
+## 生产环境检查清单
+
+- [ ] 所有公开域名均启用 HTTPS 并使用有效证书
+- [ ] `BETTER_AUTH_URL` 和 `BETTER_AUTH_TRUSTED_ORIGINS` 已设置为生产地址
+- [ ] 开启 PostgreSQL 自动备份（如定时 pg_dump 或托管数据库快照）
+- [ ] 禁止记录 `RSA_PRIVATE_KEY` 或明文 API 密钥
+- [ ] 生产环境使用密钥管理工具（Docker secrets、Vault 等），而非明文 `.env` 文件
+- [ ] 为 Rust 代理容器配置内存和 CPU 资源限制

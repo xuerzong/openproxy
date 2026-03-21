@@ -46,7 +46,7 @@ export const PasswordLoginForm = () => {
       success = false
       setFormErrors((pre) => ({
         ...pre,
-        account: t('auth.invalidAccount', { defaultValue: 'Invalid account' }),
+        account: t('auth.invalidAccount'),
       }))
     } else {
       setFormErrors((pre) => ({ ...pre, account: '' }))
@@ -56,9 +56,7 @@ export const PasswordLoginForm = () => {
       success = false
       setFormErrors((pre) => ({
         ...pre,
-        password: t('auth.invalidPassword', {
-          defaultValue: 'Invalid password',
-        }),
+        password: t('auth.invalidPassword'),
       }))
     } else {
       setFormErrors((pre) => ({ ...pre, password: '' }))
@@ -77,26 +75,16 @@ export const PasswordLoginForm = () => {
     void toastPromise(
       signIn(values.account, values.password).then((success) => {
         if (!success) {
-          throw new Error(
-            t('auth.loginFailed', {
-              defaultValue: 'Incorrect password or email',
-            })
-          )
+          throw new Error(t('auth.loginFailed'))
         }
 
         return success
       }),
       {
-        loading: t('common.processing', {
-          defaultValue: 'Processing...',
-        }),
-        success: t('auth.loginSuccess', { defaultValue: 'Login successful' }),
+        loading: t('common.processing'),
+        success: t('auth.loginSuccess'),
         error: (error) =>
-          error instanceof Error
-            ? error.message
-            : t('auth.loginFailed', {
-                defaultValue: 'Incorrect password or email',
-              }),
+          error instanceof Error ? error.message : t('auth.loginFailed'),
         onSuccess: () => {
           navigate(redirect, { replace: true })
         },
@@ -115,9 +103,7 @@ export const PasswordLoginForm = () => {
               onChangeFormValues('account', e.target.value)
             }}
             name="account"
-            placeholder={t('auth.accountPlaceholder', {
-              defaultValue: 'Please input phone or email',
-            })}
+            placeholder={t('auth.accountPlaceholder')}
             isError={!!formErrors.account}
           />
           {formErrors.account && (
@@ -130,9 +116,7 @@ export const PasswordLoginForm = () => {
           <LoginInput
             name="password"
             type="password"
-            placeholder={t('auth.passwordPlaceholder', {
-              defaultValue: 'Please input password',
-            })}
+            placeholder={t('auth.passwordPlaceholder')}
             value={formValues.password}
             onChange={(e) => {
               onChangeFormValues('password', e.target.value)

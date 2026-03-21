@@ -3,35 +3,78 @@ title: API Reference
 description: Proxy endpoints and request examples for OpenProxy
 ---
 
-This page documents public endpoints of `apps/api` (Rust Proxy).
+The API exposed by `apps/api` (Rust proxy) is compatible with the OpenAI API format.
+Any client library or tool that supports a custom base URL can use OpenProxy without code changes.
 
 ## Base URL
 
-Default local URL:
-
-```text
-http://localhost:5060
-```
+| Environment | URL |
+| --- | --- |
+| Local development | `http://localhost:5060` |
+| Production (Docker) | `https://api.example.com` (after reverse proxy) |
 
 ## Authentication
 
-All business endpoints except health checks require bearer auth:
+All endpoints except `/health` require a Bearer token issued by the `apps/server` backend:
 
 ```http
-Authorization: Bearer <your-api-key>
+Authorization: Bearer op_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
+
+Each API key can be scoped to specific models, have rate limits, a usage quota, and expiry settings configured in the admin panel.
 
 ## Endpoints
 
-| Method | Path | Description |
-| --- | --- | --- |
-| GET | /health | Health check |
-| GET | /v1/models | List available models |
-| POST | /v1/chat/completions | OpenAI-style chat endpoint |
-| POST | /v1/messages | Anthropic-style messages endpoint |
-| POST | /v1/embeddings | Embeddings endpoint |
+| Method | Path | Auth required | Description |
+| --- | --- | --- | --- |
+| `GET` | `/health` | No | Liveness probe |
+| `GET` | `/v1/models` | Yes | List models the key can access |
+| `POST` | `/v1/chat/completions` | Yes | OpenAI-compatible chat (streaming supported) |
+| `POST` | `/v1/messages` | Yes | Anthropic-compatible messages |
+| `POST` | `/v1/embeddings` | Yes | Embeddings |
 
-## Example: chat completions
+---
+
+## GET /health
+
+Returns `200 OK` with a plain-text body when the proxy is running.
+
+```bash
+curl http://localhost:5060/health
+# → 200 OK
+```
+
+---
+
+## GET /v1/models
+
+Returns all models the authenticated API key is permitted to access.
+
+```bash
+curl http://localhost:5060/v1/models \
+  -H "Authorization: Bearer <your-api-key>"
+```
+
+**Response**
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "id": "gpt-4o", "object": "model", "created": 0, "owned_by": "openai" },
+    { "id": "claude-3-5-sonnet", "object": "model", "created": 0, "owned_by": "anthropic" }
+  ]
+}
+```
+
+---
+
+## POST /v1/chat/completions
+
+OpenAI-compatible chat completions. The proxy selects a provider + upstream key,
+forwards the request, and returns the response transparently.
+
+**Request**
 
 ```bash
 curl http://localhost:5060/v1/chat/completions \
@@ -39,19 +82,139 @@ curl http://localhost:5060/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4o",
-    "messages": [{"role": "user", "content": "Hello"}]
+    "messages": [
+      { "role": "system", "content": "You are a helpful assistant." },
+      { "role": "user", "content": "Hello!" }
+    ],
+    "stream": false
   }'
 ```
 
-## Example: models
+Set `"stream": true` to receive a Server-Sent Events (SSE) stream.
+
+**Response** (non-streaming)
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion",
+  "created": 1700000000,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "Hello! How can I help?" },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 19, "completion_tokens": 10, "total_tokens": 29 }
+}
+```
+
+---
+
+## POST /v1/messages
+
+Anthropic-compatible messages endpoint for models such as `claude-3-5-sonnet`.
 
 ```bash
-curl http://localhost:5060/v1/models \
-  -H "Authorization: Bearer <your-api-key>"
+curl http://localhost:5060/v1/messages \
+  -H "Authorization: Bearer <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-3-5-sonnet",
+    "max_tokens": 1024,
+    "messages": [
+      { "role": "user", "content": "Summarize quantum entanglement in one paragraph." }
+    ]
+  }'
 ```
+
+---
+
+## POST /v1/embeddings
+
+```bash
+curl http://localhost:5060/v1/embeddings \
+  -H "Authorization: Bearer <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "The food was delicious."
+  }'
+```
+
+---
+
+## Using with client libraries
+
+### Python (openai)
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="op_xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    base_url="http://localhost:5060/v1",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.choices[0].message.content)
+```
+
+### TypeScript (openai)
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "op_xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  baseURL: "http://localhost:5060/v1",
+});
+
+const completion = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "Hello!" }],
+});
+console.log(completion.choices[0].message.content);
+```
+
+---
+
+## Error responses
+
+| HTTP Status | Meaning |
+| --- | --- |
+| `401 Unauthorized` | Missing or invalid API key |
+| `403 Forbidden` | Key does not have access to the requested model |
+| `400 Bad Request` | Malformed request body |
+| `429 Too Many Requests` | Rate limit or quota exceeded |
+| `502 Bad Gateway` | All upstream providers failed for this request |
+| `5xx` | Internal error or upstream unreachable |
+
+**Error body format**
+
+```json
+{
+  "error": {
+    "message": "You do not have access to model gpt-4o",
+    "type": "permission_error",
+    "code": 403
+  }
+}
+```
+
+---
 
 ## Troubleshooting
 
-- `401/403`: API key may be invalid, expired, or missing model permissions
-- `5xx`: check upstream provider status and network connectivity
-- Slow response: check upstream model latency or proxy resource bottlenecks
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| `401` | Key missing or wrong format | Include `Authorization: Bearer op_...` header |
+| `403` | Model not in key's allowlist | Add model access in admin panel |
+| `429` | Quota exhausted | Increase quota or use a different key |
+| `502` | All providers down or keys exhausted | Check provider API status; add working provider keys |
+| Slow initial response | Cold start or key decryption first time | The proxy caches decrypted keys — subsequent calls are faster |

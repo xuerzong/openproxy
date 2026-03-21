@@ -17,7 +17,7 @@ export const LoginButton: React.FC<LoginButtonProps> = ({
       )}
       {...restProps}
     >
-      {t('auth.login', { defaultValue: 'Login' })}
+      {t('auth.login')}
     </button>
   )
 }
