@@ -84,84 +84,112 @@ pub async fn proxy_to_provider<F>(
 where
     F: Fn(&ProviderInfo) -> PreparedUpstreamRequest,
 {
+    // Build a window = min(10, total_combos) for the recent-usage history.
+    let total_combos: usize = user.providers.iter().map(|p| p.api_keys.len()).sum();
+    let window = total_combos.min(10);
+
+    // Retrieve the combos used in the last `window` requests for this user.
+    let recent_set = crate::shared::cache::get_recent_combos(&user.api_key_id);
+
+    // Flatten to (provider, key) pairs; non-recent combos come first so they
+    // are preferred, recent ones fall back to the tail.
+    let all: Vec<(&ProviderInfo, _)> = user
+        .providers
+        .iter()
+        .flat_map(|p| p.api_keys.iter().map(move |k| (p, k)))
+        .collect();
+
+    let mut ordered: Vec<(&ProviderInfo, _)> = Vec::with_capacity(all.len());
+    let mut recent_tail: Vec<(&ProviderInfo, _)> = Vec::new();
+    for (p, k) in &all {
+        if recent_set.contains(&(p.ai_provider_id.clone(), k.api_key_hash.clone())) {
+            recent_tail.push((p, k));
+        } else {
+            ordered.push((p, k));
+        }
+    }
+    ordered.extend(recent_tail);
+
+    let total = ordered.len();
     let mut last_error = None;
-    let total_providers = user.providers.len();
 
-    for (idx, provider) in user.providers.iter().enumerate() {
+    for (i, (provider, api_key_entry)) in ordered.iter().enumerate() {
+        let is_last_attempt = i == total.saturating_sub(1);
         let prepared = prepare_request(provider);
-        let total_keys = provider.api_keys.len();
 
-        for (key_idx, api_key_entry) in provider.api_keys.iter().enumerate() {
-            let is_last_attempt = idx == total_providers - 1 && key_idx == total_keys - 1;
+        let mut headers = original_headers.clone();
+        headers.remove("host");
+        headers.remove("origin");
+        headers.remove("referer");
 
-            let mut headers = original_headers.clone();
-            headers.remove("host");
-            headers.remove("origin");
-            headers.remove("referer");
+        let auth_token = format!("Bearer {}", api_key_entry.api_key);
+        headers.insert("Authorization", auth_token.parse().unwrap());
 
-            let auth_token = format!("Bearer {}", api_key_entry.api_key);
-            headers.insert("Authorization", auth_token.parse().unwrap());
+        let next_body_bytes = serde_json::to_vec(&prepared.body_json).unwrap();
+        let next_body = bytes::Bytes::from(next_body_bytes);
 
-            let next_body_bytes = serde_json::to_vec(&prepared.body_json).unwrap();
-            let next_body = bytes::Bytes::from(next_body_bytes);
+        headers.remove(axum::http::header::CONTENT_LENGTH);
 
-            headers.remove(axum::http::header::CONTENT_LENGTH);
-
-            match state
-                .http_client
-                .post(&prepared.target_url)
-                .headers(headers)
-                .body(next_body)
-                .send()
-                .await
-            {
-                Ok(upstream_res) => {
-                    let status = upstream_res.status();
-                    if !status.is_success() {
-                        if !is_last_attempt {
-                            tracing::warn!(
-                                provider = idx + 1,
-                                api_key = key_idx + 1,
-                                status = %status,
-                                "Provider/key failed, trying next"
-                            );
-                            last_error =
-                                Some((status, "Provider unavailable, retrying...".to_string()));
-                            continue;
-                        }
-
-                        return Err(forward_upstream_error(upstream_res).await);
-                    }
-
-                    let mut provider_ctx = usage_ctx.clone();
-                    provider_ctx.ai_provider_id = provider.ai_provider_id.clone();
-
-                    return Ok(SuccessfulUpstreamResponse {
-                        upstream_res,
-                        provider_ctx,
-                    });
-                }
-                Err(error) => {
+        match state
+            .http_client
+            .post(&prepared.target_url)
+            .headers(headers)
+            .body(next_body)
+            .send()
+            .await
+        {
+            Ok(upstream_res) => {
+                let status = upstream_res.status();
+                if !status.is_success() {
                     if !is_last_attempt {
                         tracing::warn!(
-                            provider = idx + 1,
-                            api_key = key_idx + 1,
-                            error = %error,
-                            "Provider/key connection failed, trying next"
+                            combo = i + 1,
+                            status = %status,
+                            "Provider/key failed, trying next"
                         );
-                        last_error = Some((
-                            StatusCode::BAD_GATEWAY,
-                            format!("Connection failed: {}", error),
-                        ));
+                        last_error =
+                            Some((status, "Provider unavailable, retrying...".to_string()));
                         continue;
                     }
 
-                    return Err(ApiResponse::<()>::error(
-                        &format!("All providers failed. Last error: {}", error),
-                        "BAD_GATEWAY",
-                    )
-                    .to_res(StatusCode::BAD_GATEWAY));
+                    return Err(forward_upstream_error(upstream_res).await);
                 }
+
+                // Record this combo so future requests prefer a different one.
+                crate::shared::cache::record_used_combo(
+                    &user.api_key_id,
+                    &provider.ai_provider_id,
+                    &api_key_entry.api_key_hash,
+                    window,
+                );
+
+                let mut provider_ctx = usage_ctx.clone();
+                provider_ctx.ai_provider_id = provider.ai_provider_id.clone();
+
+                return Ok(SuccessfulUpstreamResponse {
+                    upstream_res,
+                    provider_ctx,
+                });
+            }
+            Err(error) => {
+                if !is_last_attempt {
+                    tracing::warn!(
+                        combo = i + 1,
+                        error = %error,
+                        "Provider/key connection failed, trying next"
+                    );
+                    last_error = Some((
+                        StatusCode::BAD_GATEWAY,
+                        format!("Connection failed: {}", error),
+                    ));
+                    continue;
+                }
+
+                return Err(ApiResponse::<()>::error(
+                    &format!("All providers failed. Last error: {}", error),
+                    "BAD_GATEWAY",
+                )
+                .to_res(StatusCode::BAD_GATEWAY));
             }
         }
     }
@@ -236,12 +264,15 @@ mod tests {
 
     #[test]
     fn build_usage_parts_preserves_model_fields_and_stream_flag() {
-        let user = sample_user(vec![(
-            "http://127.0.0.1:1".to_string(),
-            "provider_1".to_string(),
-            "key-1".to_string(),
-            "model-a".to_string(),
-        )]);
+        let user = sample_user(
+            "api-key-build-usage",
+            vec![(
+                "http://127.0.0.1:1".to_string(),
+                "provider_1".to_string(),
+                "key-1".to_string(),
+                "model-a".to_string(),
+            )],
+        );
 
         let (model, ctx) = build_usage_parts(&user, true);
 
@@ -249,7 +280,7 @@ mod tests {
         assert_eq!(model.name, "demo-model");
         assert!(model.is_public);
         assert_eq!(ctx.team_id, "team-id");
-        assert_eq!(ctx.api_key_id, "api-key-id");
+        assert_eq!(ctx.api_key_id, "api-key-build-usage");
         assert!(ctx.is_stream);
         assert!(ctx.ai_provider_id.is_empty());
     }
@@ -300,7 +331,9 @@ mod tests {
         );
         let (success_base_url, success_server) = spawn_test_server(success_app).await;
 
-        let user = sample_user(vec![
+        let user = sample_user(
+            "api-key-retry-test",
+            vec![
             (
                 fail_base_url,
                 "provider_fail".to_string(),
@@ -366,7 +399,9 @@ mod tests {
         );
         let (base_url, server) = spawn_test_server(app).await;
 
-        let user = sample_user(vec![(
+        let user = sample_user(
+            "api-key-error-test",
+            vec![(
             base_url,
             "provider_error".to_string(),
             "error-key".to_string(),
@@ -403,6 +438,99 @@ mod tests {
         server.abort();
     }
 
+    /// Verifies that when a provider+key combo is already in the recent-usage
+    /// cache the proxy tries the *other* (fresh) combo first.
+    ///
+    /// Setup: two providers, both return 200. provider_A is pre-marked as
+    /// recently used. provider_B is fresh. We assert that provider_B is tried
+    /// first (its capture channel gets the request) and the result reports
+    /// provider_B's id.
+    #[tokio::test]
+    async fn proxy_skips_recently_used_combo() {
+        use crate::shared::cache::{clear_recent_combos_for, record_used_combo};
+
+        let uid = "api-key-recent-skip-test";
+        clear_recent_combos_for(uid);
+
+        // Two spy servers, both always succeed.
+        let (tx_a, mut rx_a) = mpsc::unbounded_channel::<String>();
+        let server_a_app = Router::new().route(
+            "/chat",
+            post(move |headers: HeaderMap, Json(_body): Json<Value>| {
+                let tx = tx_a.clone();
+                async move {
+                    let auth = headers
+                        .get("authorization")
+                        .and_then(|v| v.to_str().ok())
+                        .unwrap_or("")
+                        .to_string();
+                    tx.send(auth).unwrap();
+                    (AxumStatusCode::OK, Json(json!({"provider":"a"})))
+                }
+            }),
+        );
+
+        let (tx_b, mut rx_b) = mpsc::unbounded_channel::<String>();
+        let server_b_app = Router::new().route(
+            "/chat",
+            post(move |headers: HeaderMap, Json(_body): Json<Value>| {
+                let tx = tx_b.clone();
+                async move {
+                    let auth = headers
+                        .get("authorization")
+                        .and_then(|v| v.to_str().ok())
+                        .unwrap_or("")
+                        .to_string();
+                    tx.send(auth).unwrap();
+                    (AxumStatusCode::OK, Json(json!({"provider":"b"})))
+                }
+            }),
+        );
+
+        let (url_a, srv_a) = spawn_test_server(server_a_app).await;
+        let (url_b, srv_b) = spawn_test_server(server_b_app).await;
+
+        // provider_a is listed first in the providers vec (would normally be tried first)
+        let user = sample_user(
+            uid,
+            vec![
+                (url_a, "provider_a".to_string(), "key-a".to_string(), "model-a".to_string()),
+                (url_b, "provider_b".to_string(), "key-b".to_string(), "model-b".to_string()),
+            ],
+        );
+
+        // Mark provider_a's combo as recently used (window=2, same as total combos)
+        record_used_combo(uid, "provider_a", "provider_a_hash", 2);
+
+        let state = sample_state();
+        let (_, usage_ctx) = build_usage_parts(&user, false);
+        let mut headers = HeaderMap::new();
+        headers.insert("content-type", HeaderValue::from_static("application/json"));
+
+        let result = proxy_to_provider(
+            &state,
+            &user,
+            &headers,
+            &usage_ctx,
+            |provider| PreparedUpstreamRequest {
+                target_url: format!("{}/chat", provider.model_base_url),
+                body_json: json!({"model": provider.model_model_name}),
+            },
+        )
+        .await
+        .unwrap();
+
+        // provider_b should have been selected (provider_a was recent → deprioritised)
+        assert_eq!(result.provider_ctx.ai_provider_id, "provider_b");
+
+        // server_b received the request, server_a did not
+        assert!(rx_b.try_recv().is_ok(), "provider_b should have been called");
+        assert!(rx_a.try_recv().is_err(), "provider_a should have been skipped");
+
+        srv_a.abort();
+        srv_b.abort();
+    }
+
     async fn spawn_test_server(app: Router) -> (String, tokio::task::JoinHandle<()>) {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let addr = listener.local_addr().unwrap();
@@ -423,10 +551,11 @@ mod tests {
     }
 
     fn sample_user(
+        api_key_id: &str,
         providers: Vec<(String, String, String, String)>,
     ) -> ModelAccessResult {
         ModelAccessResult {
-            api_key_id: "api-key-id".to_string(),
+            api_key_id: api_key_id.to_string(),
             api_key_max_quota: Decimal::ZERO,
             api_key_max_requests: 0,
             api_key_total_quota: Decimal::ZERO,
@@ -449,9 +578,9 @@ mod tests {
                     ProviderInfo {
                         model_model_name,
                         model_base_url,
-                        ai_provider_id,
+                        ai_provider_id: ai_provider_id.clone(),
                         api_keys: vec![crate::models::provider::ApiKeyEntry {
-                            api_key_hash: String::new(),
+                            api_key_hash: format!("{ai_provider_id}_hash"),
                             api_key: model_api_key,
                         }],
                     }
