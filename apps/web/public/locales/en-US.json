@@ -443,5 +443,11 @@
     "title": "404: Page not found",
     "description": "Sorry, we searched everywhere but could not find the page you requested.",
     "backToDashboard": "Back to dashboard"
+  },
+  "auth": {
+    "phoneLogin": "Phone Login",
+    "passwordLogin": "Password Login",
+    "githubLogin": "Continue with GitHub",
+    "googleLogin": "Continue with Google"
   }
 }

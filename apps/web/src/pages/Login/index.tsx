@@ -37,11 +37,8 @@ const Page = () => {
       <div className="flex flex-col items-center justify-center mb-8">
         <Logo className="h-12 w-auto" />
         <span className="text-xs text-primary font-bold">
-          {loginMethod === 'phone' &&
-            showPhoneLogin &&
-            t('auth.phoneLogin', { defaultValue: 'Phone Login' })}
-          {loginMethod === 'password' &&
-            t('auth.passwordLogin', { defaultValue: 'Password Login' })}
+          {loginMethod === 'phone' && showPhoneLogin && t('auth.phoneLogin')}
+          {loginMethod === 'password' && t('auth.passwordLogin')}
         </span>
       </div>
 
@@ -80,11 +77,7 @@ const Page = () => {
         )}
       >
         {loginMethod === 'phone' && showPhoneLogin && (
-          <Tooltip
-            content={t('auth.passwordLogin', {
-              defaultValue: 'Password Login',
-            })}
-          >
+          <Tooltip content={t('auth.passwordLogin')}>
             <button
               className={cn(
                 'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
@@ -100,9 +93,7 @@ const Page = () => {
         )}
 
         {loginMethod === 'password' && showPhoneLogin && (
-          <Tooltip
-            content={t('auth.phoneLogin', { defaultValue: 'Phone Login' })}
-          >
+          <Tooltip content={t('auth.phoneLogin')}>
             <button
               className={cn(
                 'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
@@ -116,55 +107,35 @@ const Page = () => {
             </button>
           </Tooltip>
         )}
-      </div>
 
-      {(loginMethods?.github || loginMethods?.google) && (
-        <>
-          <div className="flex items-center gap-2 my-4">
-            <div className="flex-1 h-px bg-border" />
-            <span className="text-xs text-muted-foreground">
-              {t('auth.orContinueWith', { defaultValue: 'or continue with' })}
-            </span>
-            <div className="flex-1 h-px bg-border" />
-          </div>
-          <div className="flex items-center justify-center gap-3">
-            {loginMethods?.github && (
-              <Tooltip
-                content={t('auth.githubLogin', {
-                  defaultValue: 'Continue with GitHub',
-                })}
-              >
-                <button
-                  className={cn(
-                    'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
-                    'hover:bg-muted'
-                  )}
-                  onClick={() => signInWithSocial('github')}
-                >
-                  <GithubIcon className="w-5 h-5" />
-                </button>
-              </Tooltip>
-            )}
-            {loginMethods?.google && (
-              <Tooltip
-                content={t('auth.googleLogin', {
-                  defaultValue: 'Continue with Google',
-                })}
-              >
-                <button
-                  className={cn(
-                    'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
-                    'hover:bg-muted'
-                  )}
-                  onClick={() => signInWithSocial('google')}
-                >
-                  <GoogleIcon className="w-5 h-5" />
-                </button>
-              </Tooltip>
-            )}
-          </div>
-        </>
-      )}
+        {loginMethods?.github && (
+          <Tooltip content={t('auth.githubLogin')}>
+            <button
+              className={cn(
+                'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
+                'hover:bg-muted'
+              )}
+              onClick={() => signInWithSocial('github')}
+            >
+              <GithubIcon className="w-5 h-5" />
+            </button>
+          </Tooltip>
+        )}
+
+        {loginMethods?.google && (
+          <Tooltip content={t('auth.googleLogin')}>
+            <button
+              className={cn(
+                'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
+                'hover:bg-muted'
+              )}
+              onClick={() => signInWithSocial('google')}
+            >
+              <GoogleIcon className="w-5 h-5" />
+            </button>
+          </Tooltip>
+        )}
+      </div>
     </div>
   )
 }

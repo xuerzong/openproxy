@@ -443,5 +443,11 @@
     "title": "错误404: 页面找不到了",
     "description": "抱歉，我们找遍了全世界，也没有找到你想要的页面",
     "backToDashboard": "返回控制台"
+  },
+  "auth": {
+    "phoneLogin": "手机号登录",
+    "passwordLogin": "密码登录",
+    "githubLogin": "通过 GitHub 登录",
+    "googleLogin": "通过 Google 登录"
   }
 }
