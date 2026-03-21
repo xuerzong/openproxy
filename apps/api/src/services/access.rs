@@ -39,7 +39,6 @@ pub async fn validate_model_access(
     hash_api_key: &str,
     model_id: &str,
 ) -> Result<ModelAccessResult, (u16, &'static str, &'static str)> {
-    // 1. Query all provider candidates alongside key/model/team info in one shot
     let rows = sqlx::query_as::<_, AccessRow>(
         r#"
         WITH api_key_info AS (
@@ -130,33 +129,28 @@ pub async fn validate_model_access(
 
     let first_row = &rows[0];
 
-    // 2. Expiry check
     if let Some(expires_at) = first_row.api_key_expires_at
         && expires_at < Utc::now()
     {
         return Err((402, "API_KEY_EXPIRED", "API key has expired"));
     }
 
-    // 3. Quota check
     if first_row.api_key_max_quota != Decimal::ZERO
         && first_row.api_key_total_quota >= first_row.api_key_max_quota
     {
         return Err((403, "TOTAL_QUOTA_EXHAUSTED", "API key quota exhausted"));
     }
 
-    // 4. Request count check
     if first_row.api_key_max_requests != 0
         && first_row.api_key_total_requests >= first_row.api_key_max_requests
     {
         return Err((402, "REQUEST_LIMIT_EXCEEDED", "Request limit reached"));
     }
 
-    // 5. Team balance check (public models only)
     if first_row.model_is_public && first_row.team_amount <= Decimal::ZERO {
         return Err((402, "INSUFFICIENT_BALANCE", "Insufficient team balance"));
     }
 
-    // 6. Group rows by provider and collect all api keys per provider
     use std::collections::HashMap;
     let mut provider_map: HashMap<String, ProviderCandidate> = HashMap::new();
     for r in &rows {
@@ -169,7 +163,6 @@ pub async fn validate_model_access(
                 api_keys: Vec::new(),
             }
         });
-        // Deduplicate by api_key_id
         if !entry.api_keys.iter().any(|k| k.id == r.provider_api_key_id) {
             entry.api_keys.push(ProviderApiKeyCandidate {
                 id: r.provider_api_key_id.clone(),
@@ -182,7 +175,6 @@ pub async fn validate_model_access(
 
     let mut providers = weighted_random_sort(&provider_candidates);
 
-    // 7. Decrypt all provider API keys
     let rsa_priv_key = env::var("RSA_PRIVATE_KEY")
         .map_err(|_| (500u16, "SERVER_ERROR", "RSA_PRIVATE_KEY not configured"))?;
 
@@ -256,7 +248,6 @@ struct ProviderCandidate {
     api_keys: Vec<ProviderApiKeyCandidate>,
 }
 
-/// Returns providers in weighted-random order.
 fn weighted_random_sort(candidates: &[ProviderCandidate]) -> Vec<ProviderInfo> {
     if candidates.is_empty() {
         return Vec::new();
