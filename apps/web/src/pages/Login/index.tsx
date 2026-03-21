@@ -11,6 +11,9 @@ import { useAuth } from '@/contexts/AuthContext'
 import { authClient } from '@/utils/better-auth'
 import { isOSS } from '@/utils/env'
 import { useTranslation } from 'react-i18next'
+import { GithubIcon } from '@/components/GithubIcon'
+import { GoogleIcon } from '@/components/GoogleIcon'
+import { useLoginMethodsQuery } from '@/hooks/queries/useLoginMethodsQuery'
 import s from './index.module.css'
 
 const Page = () => {
@@ -23,6 +26,11 @@ const Page = () => {
   const [loginMethod, setLoginMethod] = useState<'phone' | 'password'>(
     showPhoneLogin ? 'phone' : 'password'
   )
+  const { data: loginMethods } = useLoginMethodsQuery()
+
+  const signInWithSocial = (provider: 'github' | 'google') => {
+    authClient.signIn.social({ provider, callbackURL: redirect })
+  }
 
   return (
     <div className="w-96 p-4">
@@ -109,6 +117,54 @@ const Page = () => {
           </Tooltip>
         )}
       </div>
+
+      {(loginMethods?.github || loginMethods?.google) && (
+        <>
+          <div className="flex items-center gap-2 my-4">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">
+              {t('auth.orContinueWith', { defaultValue: 'or continue with' })}
+            </span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <div className="flex items-center justify-center gap-3">
+            {loginMethods?.github && (
+              <Tooltip
+                content={t('auth.githubLogin', {
+                  defaultValue: 'Continue with GitHub',
+                })}
+              >
+                <button
+                  className={cn(
+                    'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
+                    'hover:bg-muted'
+                  )}
+                  onClick={() => signInWithSocial('github')}
+                >
+                  <GithubIcon className="w-5 h-5" />
+                </button>
+              </Tooltip>
+            )}
+            {loginMethods?.google && (
+              <Tooltip
+                content={t('auth.googleLogin', {
+                  defaultValue: 'Continue with Google',
+                })}
+              >
+                <button
+                  className={cn(
+                    'h-12 w-12 flex items-center justify-center border border-border rounded-full cursor-pointer',
+                    'hover:bg-muted'
+                  )}
+                  onClick={() => signInWithSocial('google')}
+                >
+                  <GoogleIcon className="w-5 h-5" />
+                </button>
+              </Tooltip>
+            )}
+          </div>
+        </>
+      )}
     </div>
   )
 }

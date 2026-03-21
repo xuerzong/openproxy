@@ -8,6 +8,16 @@ export const betterAuthRouter = new Elysia({
 })
   .use(betterAuthPlugin)
   .mount(auth.handler)
+  .get('/api/auth/login-methods', () => {
+    return {
+      github: Boolean(
+        process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET
+      ),
+      google: Boolean(
+        process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ),
+    }
+  })
   .get(
     '/api/auth/teams',
     async ({ user }) => {
