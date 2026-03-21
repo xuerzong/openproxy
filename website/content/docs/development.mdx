@@ -8,60 +8,102 @@ description: OpenProxy 开发模式与常用命令
 ```text
 openproxy/
 ├── apps/
-│   ├── api/      # Rust proxy
-│   ├── server/   # Bun + Elysia backend
-│   └── web/      # React + Vite frontend
-├── packages/     # 共享包
+│   ├── api/      # Rust + Axum 代理
+│   ├── server/   # Bun + Elysia 后端
+│   └── web/      # React + Vite 前端
+├── packages/
+│   ├── schema/            # 共享 Zod/TypeBox Schema
+│   ├── payment-provider/  # 支付网关抽象
+│   ├── phone-auth/        # 手机 OTP 抽象
+│   └── ui/                # 共享 React 组件
 └── website/      # 文档站（Fumadocs + Next.js）
 ```
 
-## 根目录常用命令
+## 一键启动所有服务
 
 ```bash
+# 根目录执行
 bun run dev
 ```
 
-- 含义：执行 `turbo run dev`
-- 用途：一键拉起所有支持 `dev` 的工作区
+执行 `turbo run dev`，并行拉起所有支持 `dev` 脚本的工作区。
 
 ## 子应用独立启动
 
-### Rust Proxy
+### Rust Proxy（`apps/api`）
 
 ```bash
 cd apps/api
 cargo run
 ```
 
-### Business Server
+需要 `apps/api/.env` 中配置 `DATABASE_URL`、`RSA_PRIVATE_KEY` 和 `PORT`。
+
+### 业务后端（`apps/server`）
 
 ```bash
 cd apps/server
 bun run dev
 ```
 
-### Web（租户端）
+### Web — 租户仪表盘
 
 ```bash
 cd apps/web
 bun run dev:tenant
 ```
 
-### Web（管理端）
+### Web — 管理后台
 
 ```bash
 cd apps/web
 bun run dev:admin
 ```
 
-## 开发建议
+## 推荐启动顺序
 
-- 先启动 `apps/server`，确认鉴权与配置接口可用
-- 再启动 `apps/api`，用 `/health` 验证代理层健康
-- 最后启动 `apps/web`，联调 UI 与后端接口
+1. 先启动 `apps/server`，确认 `http://localhost:3888/api/health` 可访问
+2. 再启动 `apps/api`，用 `curl http://localhost:5060/health` 验证代理层健康
+3. 最后启动 `apps/web`，进行 UI 联调
+
+## 运行测试
+
+### Rust Proxy
+
+```bash
+cd apps/api
+cargo test
+```
+
+所有单元测试和集成测试均在进程内运行，内嵌 HTTP 测试服务器，无需外部依赖。
+
+### Server / packages
+
+```bash
+bun test
+```
+
+## 数据库迁移
+
+```bash
+cd apps/server
+bun run migrate      # 应用待执行的迁移
+```
+
+SQL 迁移文件位于 `apps/server/drizzle/`。表结构变更需通过 Drizzle 生成新的迁移文件。
+
+## 关键环境文件
+
+| 文件 | 用途 |
+| --- | --- |
+| `apps/server/.env` | 鉴权密钥、数据库地址、RSA 密钥对、邮件/OAuth 配置 |
+| `apps/api/.env` | 数据库地址、RSA 私钥、端口 |
+| `apps/web/envs/` | 前端按目标（tenant/admin）分别配置的环境变量文件 |
 
 ## 关键端口
 
-- `apps/server`：`3888`（默认）
-- `apps/api`：`5060`（默认）
-- `apps/web`：`5173`（Vite 开发端口，按实际输出为准）
+| 服务 | 默认端口 |
+| --- | --- |
+| `apps/server` | `3888` |
+| `apps/api` | `5060` |
+| `apps/web` | `5173`（Vite，以终端实际输出为准） |

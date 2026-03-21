@@ -7,37 +7,107 @@ description: OpenProxy 的组件关系与请求链路
 
 `OpenProxy` 采用三层结构：
 
-1. `apps/api`（Rust）负责代理转发、模型适配、鉴权校验与用量写库
-2. `apps/server`（Bun）负责业务管理：用户、密钥、模型、供应商、订单等
-3. `apps/web`（React）提供租户端和管理端界面
+| 层级 | 组件 | 技术栈 | 职责 |
+| --- | --- | --- | --- |
+| 代理层 | `apps/api` | Rust + Axum | 请求转发、鉴权、用量写库 |
+| 业务层 | `apps/server` | Bun + Elysia | 用户、密钥、模型、供应商、计费 |
+| 前端层 | `apps/web` | React + Vite | 租户仪表盘 + 管理后台 |
 
-## 请求流
+`apps/api` 与 `apps/server` 共用同一个 PostgreSQL 数据库。代理层在每次请求时直接从数据库读取供应商/模型/密钥配置，结合进程内缓存加速解密。
+
+## 请求流程
 
 ```text
 Client
-  -> apps/api (Rust)
-      -> 校验 API Key
-      -> 选择模型对应的上游 provider
-      -> 转发到 OpenAI / Anthropic 等上游
-      -> 回写 tokens / cost / latency 到数据库
+  ↓
+apps/api  (Rust, :5060)
+  ├─ 1. 鉴权中间件
+  │      校验 Bearer Token 是否存在于 ai_api_keys 表
+  │      检查额度、请求次数、过期时间、模型访问权限
+  ├─ 2. 供应商选择
+  │      查询该模型绑定的 ai_providers + ai_provider_api_keys
+  │      按权重随机排序（weight 字段）
+  ├─ 3. Key 轮换
+  │      读取近期使用缓存：该 API Key 最近 N 次命中的（供应商, Key）组合
+  │      N = min(10, 供应商×Key 组合总数)
+  │      未近期使用的组合排在前面，近期使用的排在后面作为兜底
+  ├─ 4. 上游转发
+  │      按序尝试每个（供应商, Key）组合
+  │      连接错误或非 2xx → 记录警告，尝试下一个组合
+  │      成功 → 将本次命中的组合写入近期使用缓存
+  └─ 5. 用量回写
+         向数据库写入 tokens（prompt + completion）、费用、延迟、provider_id
 ```
 
-## 关键能力
+## 供应商选择 — 权重随机
 
-- 统一 API：对外提供 OpenAI/Anthropic 风格接口
-- 多供应商路由：同一模型可配置多个后端
-- 失败兜底：上游失败可切换其他 provider
-- 成本追踪：按 token 计费并记录耗时
-- 密钥安全：供应商密钥使用 RSA 加密存储
+每条 `ai_provider` 记录有一个整型 `weight` 字段。请求到达时，所有绑定该模型的供应商按权重随机打乱顺序，权重越高的供应商被选中的概率越大，同时保留一定随机性以避免完全集中到单一供应商。
 
-## 数据与鉴权
+## 多 Key 轮换
 
-- 业务数据由 `apps/server` 维护（Drizzle + PostgreSQL）
-- `apps/api` 与 `apps/server` 共享数据库进行 key/模型/用量协作
-- 登录与会话由 `better-auth` 负责（邮箱、OAuth、短信等）
+每个供应商可在 `ai_provider_api_keys` 中配置多个 API Key。轮换逻辑以用户 API Key（`api_key_id`）为粒度运行：
 
-## 代码组织建议
+1. 统计当前请求中该模型可用的 `(供应商, api_key)` 组合总数。
+2. 取 `window = min(10, 组合总数)`。
+3. 维护一个每用户的进程内环形缓冲区（容量 `window`），记录最近 `window` 次成功请求命中的 `(provider_id, api_key_hash)` 对。
+4. 每次新请求时，将全部组合拆分为：
+   - **非近期**：未在环形缓冲区中 → 优先尝试
+   - **近期**：已在环形缓冲区中 → 作为兜底（所有非近期组合失败后才尝试）
+5. 成功响应后，将本次命中的 `(provider_id, api_key_hash)` 推入环形缓冲区（超出容量时丢弃最旧的记录）。
 
-- 将协议/校验结构放到 `packages/schema`
-- 将支付、手机登录等能力封装在 `packages/*`
-- 前后端都引用共享包，减少重复定义
+这一机制确保同一用户的连续请求尽量分散到不同 Key 和供应商，降低单 Key 触发限速的概率，且不需要额外的数据库操作。
+
+## 供应商 API Key 缓存
+
+供应商 API Key 以 RSA 加密形式存储在数据库中，运行时通过 `tokio::task::spawn_blocking` 异步解密。解密结果缓存在进程全局内存中：
+
+- **数据结构**：`OnceLock<RwLock<HashMap<加密密文, 解密明文>>>`
+- **TTL**：1 小时（整体清除，到期后所有条目一次性失效）
+- **缓存键**：数据库中的原始加密密文字符串
+
+第一次请求（或缓存过期后首次请求）需要进行 RSA 解密；TTL 范围内后续请求直接读取内存。
+
+## 故障切换行为
+
+所有 `(供应商, Key)` 组合按轮换顺序依次尝试：
+
+- **连接错误**（网络不通、超时）：记录警告，尝试下一个组合
+- **HTTP 非 2xx**（如 429 限速、500 内部错误）：记录警告，尝试下一个组合
+- **最后一个组合失败**：将上游的错误响应（或连接失败时的 `502 Bad Gateway`）原样返回给客户端
+
+对调用方完全透明，单次请求可能在多个上游之间回退，最终要么成功返回，要么返回最后一次的错误。
+
+## 数据模型概览
+
+```text
+ai_models                  — 注册的模型（名称、定价、是否公开）
+  └─ ai_providers          — 模型对应的后端（base_url、weight）
+       └─ ai_provider_api_keys  — 每个供应商的 API Key（加密存储）
+
+ai_api_keys                — 用户持有的 API Key（额度、次数、过期）
+  └─ ai_api_key_models     — 每个 Key 的模型级访问控制
+
+usage_logs                 — 每次请求的 tokens、费用、延迟、供应商
+orders / teams / users     — 计费与多租户
+```
+
+## 认证体系
+
+用户侧认证（登录、OAuth、会话管理）完全由 `apps/server` 中的 `better-auth` 负责。支持方式：
+
+- 邮箱 + 密码
+- 魔法链接（邮件）
+- 手机 OTP
+- GitHub OAuth
+- Google OAuth
+
+调用 `apps/api` 时使用的 Bearer Token 是独立的长效 API Key（存储于 `ai_api_keys`），与用户会话 Token 无关。
+
+## 共享包
+
+| 包 | 用途 |
+| --- | --- |
+| `packages/schema` | 前后端共享的 Zod/TypeBox 校验 Schema |
+| `packages/payment-provider` | 支付网关抽象（支持 ZPay stub 与正式版） |
+| `packages/phone-auth` | 手机 OTP 供应商抽象 |
+| `packages/ui` | 共享 React UI 组件 |

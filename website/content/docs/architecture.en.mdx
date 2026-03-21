@@ -7,37 +7,107 @@ description: OpenProxy component layout and request flow
 
 `OpenProxy` uses a three-layer architecture:
 
-1. `apps/api` (Rust): proxy forwarding, model adaptation, API key verification, usage persistence
-2. `apps/server` (Bun): business management (users, keys, models, providers, orders)
-3. `apps/web` (React): tenant and admin interfaces
+| Layer | Component | Technology | Responsibility |
+| --- | --- | --- | --- |
+| Proxy | `apps/api` | Rust + Axum | Request forwarding, auth, usage write-back |
+| Backend | `apps/server` | Bun + Elysia | Users, API keys, models, providers, billing |
+| Frontend | `apps/web` | React + Vite | Tenant dashboard + admin panel |
+
+`apps/api` and `apps/server` share a single PostgreSQL database. The proxy reads provider/model/key configuration directly from the DB on each request, combined with an in-process cache for decrypted keys.
 
 ## Request flow
 
 ```text
 Client
-  -> apps/api (Rust)
-      -> validate API key
-      -> choose upstream provider for model
-      -> forward to OpenAI / Anthropic / other providers
-      -> write tokens / cost / latency to database
+  ↓
+apps/api  (Rust, :5060)
+  ├─ 1. Auth middleware
+  │      validate Bearer token against ai_api_keys table
+  │      check quota, request limit, expiry, model access
+  ├─ 2. Provider selection
+  │      query ai_providers + ai_provider_api_keys for the requested model
+  │      sort providers by weighted random (weight column)
+  ├─ 3. Key rotation
+  │      load recent-usage cache: last N (provider, key) pairs used by this API key
+  │      N = min(10, total provider×key combinations)
+  │      place non-recent pairs first; recent pairs last as fallback
+  ├─ 4. Upstream forwarding
+  │      try each (provider, key) pair in order
+  │      on HTTP error or non-2xx → log warning, try next pair
+  │      on success → record this pair in the recent-usage cache
+  └─ 5. Usage write-back
+         persist tokens (prompt + completion), cost, latency, provider_id to DB
 ```
 
-## Core capabilities
+## Provider selection — weighted random
 
-- Unified API: OpenAI/Anthropic-style interfaces
-- Multi-provider routing: multiple backends per model
-- Failure fallback: switch providers when upstream fails
-- Cost tracking: token-based billing and latency records
-- Key security: provider keys stored with RSA encryption
+Each `ai_provider` row has a `weight` integer. When a request arrives, all providers configured for the requested model are fetched and sorted by a weighted random shuffle so that higher-weight providers are statistically favoured without being strictly sequential. This distributes load proportionally across backends.
 
-## Data and auth
+## Multi-key rotation
 
-- Business data is managed in `apps/server` (Drizzle + PostgreSQL)
-- `apps/api` and `apps/server` share one database for key/model/usage workflows
-- Login/session is handled by `better-auth` (email, OAuth, SMS, etc.)
+Each provider can have multiple API keys stored in `ai_provider_api_keys`. The rotation logic runs per user API key (`api_key_id`) and works as follows:
 
-## Code organization suggestions
+1. Count the total number of `(provider, api_key)` combinations available for the requested model.
+2. Set `window = min(10, total_combinations)`.
+3. Maintain a per-user in-memory ring buffer (size `window`) of the `(provider_id, api_key_hash)` pairs used in the last `window` successful requests.
+4. On each new request, separate the full set of combinations into:
+   - **Non-recent**: not in the ring buffer → tried first
+   - **Recent**: in the ring buffer → used as fallback if all non-recent fail
+5. After a successful response, push the winning `(provider_id, api_key_hash)` into the ring buffer (oldest entry dropped when full).
 
-- Put shared protocol/validation types in `packages/schema`
-- Isolate payment and phone auth into `packages/*`
-- Reuse shared packages across frontend/backend to reduce duplication
+This ensures that consecutive requests from the same user spread across different keys and providers, reducing per-key rate-limit exposure without requiring a database round-trip per rotation step.
+
+## Provider API key cache
+
+Provider API keys are stored RSA-encrypted in the database. Decryption happens at request time via `tokio::task::spawn_blocking` (off the async executor). Decrypted values are cached globally in-process:
+
+- **Storage**: `OnceLock<RwLock<HashMap<encrypted_hash, decrypted_key>>>`
+- **TTL**: 1 hour (bulk eviction — all entries are dropped together when the TTL is exceeded)
+- **Key**: the raw encrypted ciphertext string from the DB
+
+This means the first request after startup (or after a cache reset) incurs RSA decryption; subsequent requests within the TTL window read from memory.
+
+## Failover behaviour
+
+All provider×key combinations are attempted in the rotation order described above. For each combination:
+
+- **Connection error** (network unreachable, timeout): logged as a warning, next combination tried
+- **HTTP non-2xx** (e.g. 429 rate limit, 500 internal error): logged as a warning, next combination tried
+- **Last combination fails**: the upstream error response (or a `502 Bad Gateway` for connection errors) is forwarded verbatim to the client
+
+This means a single request may hit several upstream providers transparently before either succeeding or returning an error to the caller.
+
+## Data model overview
+
+```text
+ai_models              — registered models (name, pricing, is_public)
+  └─ ai_providers      — backends per model (base_url, weight)
+       └─ ai_provider_api_keys  — API keys per provider (encrypted)
+
+ai_api_keys            — user-facing API keys (quota, limits, expiry)
+  └─ ai_api_key_models — model-level access control per key
+
+usage_logs             — per-request token, cost, latency, provider
+orders / teams / users — billing and multi-tenancy
+```
+
+## Authentication
+
+User-facing authentication (login, OAuth, sessions) is handled entirely by `better-auth` in `apps/server`. Supported methods:
+
+- Email + password
+- Magic link (email)
+- Phone OTP
+- GitHub OAuth
+- Google OAuth
+
+The Bearer tokens used to call `apps/api` are separate long-lived API keys managed in `ai_api_keys`, not session tokens.
+
+## Shared packages
+
+| Package | Purpose |
+| --- | --- |
+| `packages/schema` | Zod/TypeBox schemas shared between server and web |
+| `packages/payment-provider` | Payment gateway abstraction (supports ZPay stub and live) |
+| `packages/phone-auth` | Phone OTP provider abstraction |
+| `packages/ui` | Shared React UI components |

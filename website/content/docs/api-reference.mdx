@@ -3,35 +3,77 @@ title: API 参考
 description: OpenProxy 代理层接口与调用示例
 ---
 
-本文档主要说明 `apps/api`（Rust Proxy）对外暴露的接口。
+`apps/api`（Rust 代理）暴露的接口与 OpenAI API 格式兼容。
+任何支持自定义 Base URL 的客户端库或工具均可在无需修改代码的情况下接入 OpenProxy。
 
 ## Base URL
 
-本地默认地址：
-
-```text
-http://localhost:5060
-```
+| 环境 | 地址 |
+| --- | --- |
+| 本地开发 | `http://localhost:5060` |
+| 生产（Docker） | `https://api.example.com`（经反向代理后） |
 
 ## 鉴权方式
 
-除健康检查外，业务接口需要 `Bearer Token`：
+除 `/health` 外，所有接口均需提供由 `apps/server` 后端颁发的 Bearer Token：
 
 ```http
-Authorization: Bearer <your-api-key>
+Authorization: Bearer op_xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
+
+每个 API Key 可在管理后台配置可访问的模型范围、速率限制、用量配额及过期时间。
 
 ## 接口列表
 
-| Method | Path | 说明 |
-| --- | --- | --- |
-| GET | /health | 健康检查 |
-| GET | /v1/models | 获取可用模型列表 |
-| POST | /v1/chat/completions | OpenAI 风格对话接口 |
-| POST | /v1/messages | Anthropic 风格消息接口 |
-| POST | /v1/embeddings | 向量接口 |
+| 方法 | 路径 | 需要鉴权 | 说明 |
+| --- | --- | --- | --- |
+| `GET` | `/health` | 否 | 存活探针 |
+| `GET` | `/v1/models` | 是 | 获取 Key 有权访问的模型列表 |
+| `POST` | `/v1/chat/completions` | 是 | OpenAI 兼容对话（支持流式） |
+| `POST` | `/v1/messages` | 是 | Anthropic 兼容消息接口 |
+| `POST` | `/v1/embeddings` | 是 | 向量嵌入接口 |
 
-## 示例：chat completions
+---
+
+## GET /health
+
+代理存活时返回 `200 OK` 与纯文本响应体。
+
+```bash
+curl http://localhost:5060/health
+# → 200 OK
+```
+
+---
+
+## GET /v1/models
+
+返回当前 API Key 有权访问的所有模型。
+
+```bash
+curl http://localhost:5060/v1/models \
+  -H "Authorization: Bearer <your-api-key>"
+```
+
+**响应示例**
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "id": "gpt-4o", "object": "model", "created": 0, "owned_by": "openai" },
+    { "id": "claude-3-5-sonnet", "object": "model", "created": 0, "owned_by": "anthropic" }
+  ]
+}
+```
+
+---
+
+## POST /v1/chat/completions
+
+OpenAI 兼容的对话补全接口。代理会自动选择 Provider 和上游 Key，转发请求并透明返回响应。
+
+**请求**
 
 ```bash
 curl http://localhost:5060/v1/chat/completions \
@@ -39,19 +81,139 @@ curl http://localhost:5060/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gpt-4o",
-    "messages": [{"role": "user", "content": "Hello"}]
+    "messages": [
+      { "role": "system", "content": "你是一个有用的助手。" },
+      { "role": "user", "content": "你好！" }
+    ],
+    "stream": false
   }'
 ```
 
-## 示例：models
+设置 `"stream": true` 以接收 SSE 流式响应。
+
+**非流式响应**
+
+```json
+{
+  "id": "chatcmpl-xxx",
+  "object": "chat.completion",
+  "created": 1700000000,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "你好！有什么我可以帮助你的吗？" },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 19, "completion_tokens": 12, "total_tokens": 31 }
+}
+```
+
+---
+
+## POST /v1/messages
+
+Anthropic 兼容的消息接口，适用于 `claude-3-5-sonnet` 等模型。
 
 ```bash
-curl http://localhost:5060/v1/models \
-  -H "Authorization: Bearer <your-api-key>"
+curl http://localhost:5060/v1/messages \
+  -H "Authorization: Bearer <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-3-5-sonnet",
+    "max_tokens": 1024,
+    "messages": [
+      { "role": "user", "content": "用一段话解释量子纠缠。" }
+    ]
+  }'
 ```
+
+---
+
+## POST /v1/embeddings
+
+```bash
+curl http://localhost:5060/v1/embeddings \
+  -H "Authorization: Bearer <your-api-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": "食物非常美味。"
+  }'
+```
+
+---
+
+## 客户端库接入示例
+
+### Python（openai）
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="op_xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    base_url="http://localhost:5060/v1",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "你好！"}],
+)
+print(response.choices[0].message.content)
+```
+
+### TypeScript（openai）
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: "op_xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  baseURL: "http://localhost:5060/v1",
+});
+
+const completion = await client.chat.completions.create({
+  model: "gpt-4o",
+  messages: [{ role: "user", content: "你好！" }],
+});
+console.log(completion.choices[0].message.content);
+```
+
+---
+
+## 错误响应
+
+| HTTP 状态码 | 含义 |
+| --- | --- |
+| `401 Unauthorized` | API Key 缺失或无效 |
+| `403 Forbidden` | Key 无权访问所请求的模型 |
+| `400 Bad Request` | 请求体格式错误 |
+| `429 Too Many Requests` | 超出速率限制或配额 |
+| `502 Bad Gateway` | 所有上游 Provider 均请求失败 |
+| `5xx` | 内部错误或上游不可达 |
+
+**错误响应体格式**
+
+```json
+{
+  "error": {
+    "message": "您没有权限访问模型 gpt-4o",
+    "type": "permission_error",
+    "code": 403
+  }
+}
+```
+
+---
 
 ## 错误排查
 
-- `401/403`：检查 API Key 是否有效、是否过期、是否有模型访问权限
-- `5xx`：检查上游 provider 可用性与网络连通性
-- 响应慢：检查上游模型延迟或代理服务资源瓶颈
+| 现象 | 可能原因 | 解决方式 |
+| --- | --- | --- |
+| `401` | Key 缺失或格式错误 | 确认请求头包含 `Authorization: Bearer op_...` |
+| `403` | 模型不在 Key 的访问列表 | 在管理后台为该 Key 添加模型权限 |
+| `429` | 配额已用尽 | 增大配额或更换 Key |
+| `502` | 所有 Provider 不可用或 Key 失效 | 检查 Provider API 状态；添加有效的上游 Key |
+| 首次响应较慢 | 冷启动或首次 Key 解密 | 代理会缓存解密后的 Key，后续调用速度更快 |
