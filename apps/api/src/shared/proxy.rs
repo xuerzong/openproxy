@@ -85,70 +85,83 @@ where
     F: Fn(&ProviderInfo) -> PreparedUpstreamRequest,
 {
     let mut last_error = None;
+    let total_providers = user.providers.len();
 
     for (idx, provider) in user.providers.iter().enumerate() {
-        let mut headers = original_headers.clone();
-        headers.remove("host");
-        headers.remove("origin");
-        headers.remove("referer");
-
-        let auth_token = format!("Bearer {}", provider.model_api_key);
-        headers.insert("Authorization", auth_token.parse().unwrap());
-
         let prepared = prepare_request(provider);
-        let next_body_bytes = serde_json::to_vec(&prepared.body_json).unwrap();
-        let next_body = bytes::Bytes::from(next_body_bytes);
+        let total_keys = provider.api_keys.len();
 
-        headers.remove(axum::http::header::CONTENT_LENGTH);
+        for (key_idx, api_key_entry) in provider.api_keys.iter().enumerate() {
+            let is_last_attempt = idx == total_providers - 1 && key_idx == total_keys - 1;
 
-        match state
-            .http_client
-            .post(&prepared.target_url)
-            .headers(headers)
-            .body(next_body)
-            .send()
-            .await
-        {
-            Ok(upstream_res) => {
-                let status = upstream_res.status();
-                if !status.is_success() {
-                    if idx < user.providers.len() - 1 {
+            let mut headers = original_headers.clone();
+            headers.remove("host");
+            headers.remove("origin");
+            headers.remove("referer");
+
+            let auth_token = format!("Bearer {}", api_key_entry.api_key);
+            headers.insert("Authorization", auth_token.parse().unwrap());
+
+            let next_body_bytes = serde_json::to_vec(&prepared.body_json).unwrap();
+            let next_body = bytes::Bytes::from(next_body_bytes);
+
+            headers.remove(axum::http::header::CONTENT_LENGTH);
+
+            match state
+                .http_client
+                .post(&prepared.target_url)
+                .headers(headers)
+                .body(next_body)
+                .send()
+                .await
+            {
+                Ok(upstream_res) => {
+                    let status = upstream_res.status();
+                    if !status.is_success() {
+                        if !is_last_attempt {
+                            tracing::warn!(
+                                provider = idx + 1,
+                                api_key = key_idx + 1,
+                                status = %status,
+                                "Provider/key failed, trying next"
+                            );
+                            last_error =
+                                Some((status, "Provider unavailable, retrying...".to_string()));
+                            continue;
+                        }
+
+                        return Err(forward_upstream_error(upstream_res).await);
+                    }
+
+                    let mut provider_ctx = usage_ctx.clone();
+                    provider_ctx.ai_provider_id = provider.ai_provider_id.clone();
+
+                    return Ok(SuccessfulUpstreamResponse {
+                        upstream_res,
+                        provider_ctx,
+                    });
+                }
+                Err(error) => {
+                    if !is_last_attempt {
                         tracing::warn!(
                             provider = idx + 1,
-                            status = %status,
-                            "Provider failed, trying next"
+                            api_key = key_idx + 1,
+                            error = %error,
+                            "Provider/key connection failed, trying next"
                         );
-                        last_error = Some((status, "Provider unavailable, retrying...".to_string()));
+                        last_error = Some((
+                            StatusCode::BAD_GATEWAY,
+                            format!("Connection failed: {}", error),
+                        ));
                         continue;
                     }
 
-                    return Err(forward_upstream_error(upstream_res).await);
+                    return Err(ApiResponse::<()>::error(
+                        &format!("All providers failed. Last error: {}", error),
+                        "BAD_GATEWAY",
+                    )
+                    .to_res(StatusCode::BAD_GATEWAY));
                 }
-
-                let mut provider_ctx = usage_ctx.clone();
-                provider_ctx.ai_provider_id = provider.ai_provider_id.clone();
-
-                return Ok(SuccessfulUpstreamResponse {
-                    upstream_res,
-                    provider_ctx,
-                });
-            }
-            Err(error) => {
-                if idx < user.providers.len() - 1 {
-                    tracing::warn!(
-                        provider = idx + 1,
-                        error = %error,
-                        "Provider connection failed, trying next"
-                    );
-                    last_error = Some((StatusCode::BAD_GATEWAY, format!("Connection failed: {}", error)));
-                    continue;
-                }
-
-                return Err(ApiResponse::<()>::error(
-                    &format!("All providers failed. Last error: {}", error),
-                    "BAD_GATEWAY",
-                )
-                .to_res(StatusCode::BAD_GATEWAY));
             }
         }
     }
@@ -405,7 +418,7 @@ mod tests {
             db: PgPoolOptions::new()
                 .connect_lazy("postgres://postgres:postgres@localhost/aiproxy")
                 .unwrap(),
-            http_client: reqwest::Client::new(),
+            http_client: reqwest::Client::builder().no_proxy().build().unwrap(),
         })
     }
 
@@ -436,9 +449,11 @@ mod tests {
                     ProviderInfo {
                         model_model_name,
                         model_base_url,
-                        model_api_key_hash: String::new(),
-                        model_api_key,
                         ai_provider_id,
+                        api_keys: vec![crate::models::provider::ApiKeyEntry {
+                            api_key_hash: String::new(),
+                            api_key: model_api_key,
+                        }],
                     }
                 })
                 .collect(),
