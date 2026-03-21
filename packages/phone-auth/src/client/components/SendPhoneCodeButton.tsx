@@ -67,11 +67,7 @@ export const SendPhoneCodeButton: React.FC<SendPhoneCodeButtonProps> = ({
             !phoneNumberCacheRef.current ||
             !PhoneNumberRegExp.test(phoneNumberCacheRef.current)
           ) {
-            toast.warning(
-              t('auth.fillValidPhoneFirst', {
-                defaultValue: 'Please fill a valid phone number first',
-              })
-            )
+            toast.warning(t('auth.fillValidPhoneFirst'))
             return
           }
           if (sendSMSCountDown.value > 0) {
@@ -97,10 +93,9 @@ export const SendPhoneCodeButton: React.FC<SendPhoneCodeButtonProps> = ({
           <div className={cn(sendCodeLoading && 'opacity-50')}>
             {sendSMSCountDown.value > 0
               ? t('auth.retryAfterSeconds', {
-                  defaultValue: '{{seconds}}s to retry',
                   seconds: Math.round(sendSMSCountDown.value / 1000),
                 })
-              : t('auth.sendCode', { defaultValue: 'Send code' })}
+              : t('auth.sendCode')}
           </div>
         </div>
       </CaptchaTrigger>

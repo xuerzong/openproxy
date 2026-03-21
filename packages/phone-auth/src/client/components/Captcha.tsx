@@ -11,11 +11,7 @@ export const Captcha: React.FC<CaptchaProps> = ({ onValidate }) => {
   const validate = () => {
     const result = (window as any).captchaObj.getValidate()
     if (!result) {
-      alert(
-        t('auth.completeCaptchaFirst', {
-          defaultValue: 'Please complete captcha verification first!',
-        })
-      )
+      alert(t('auth.completeCaptchaFirst'))
       return
     }
     onValidate(result)

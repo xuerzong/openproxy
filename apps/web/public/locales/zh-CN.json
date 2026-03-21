@@ -419,6 +419,7 @@
   "auth": {
     "login": "登录",
     "loginSuccess": "登录成功",
+    "loginFailed": "密码或邮箱错误",
     "phoneLogin": "手机号码登录",
     "passwordLogin": "密码登录",
     "phonePlaceholder": "请输入手机号",
@@ -437,17 +438,13 @@
     "termsPrefix": "注册或登录即代表您已阅读并同意我们的",
     "termsOfService": "用户服务协议",
     "privacyPolicy": "隐私政策",
-    "termsSuffix": "，未注册的手机号将自动注册。"
+    "termsSuffix": "，未注册的手机号将自动注册。",
+    "githubLogin": "通过 GitHub 登录",
+    "googleLogin": "通过 Google 登录"
   },
   "notFound": {
     "title": "错误404: 页面找不到了",
     "description": "抱歉，我们找遍了全世界，也没有找到你想要的页面",
     "backToDashboard": "返回控制台"
-  },
-  "auth": {
-    "phoneLogin": "手机号登录",
-    "passwordLogin": "密码登录",
-    "githubLogin": "通过 GitHub 登录",
-    "googleLogin": "通过 Google 登录"
   }
 }

@@ -419,6 +419,7 @@
   "auth": {
     "login": "Login",
     "loginSuccess": "Login successful",
+    "loginFailed": "Incorrect password or email",
     "phoneLogin": "Phone Login",
     "passwordLogin": "Password Login",
     "phonePlaceholder": "Please input phone number",
@@ -437,17 +438,13 @@
     "termsPrefix": "By signing up or logging in, you agree to our",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
-    "termsSuffix": ". Unregistered phone numbers will be signed up automatically."
+    "termsSuffix": ". Unregistered phone numbers will be signed up automatically.",
+    "githubLogin": "Continue with GitHub",
+    "googleLogin": "Continue with Google"
   },
   "notFound": {
     "title": "404: Page not found",
     "description": "Sorry, we searched everywhere but could not find the page you requested.",
     "backToDashboard": "Back to dashboard"
-  },
-  "auth": {
-    "phoneLogin": "Phone Login",
-    "passwordLogin": "Password Login",
-    "githubLogin": "Continue with GitHub",
-    "googleLogin": "Continue with Google"
   }
 }

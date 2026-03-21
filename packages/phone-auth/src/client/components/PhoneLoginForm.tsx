@@ -41,9 +41,7 @@ export const PhoneLoginForm: React.FC<PhoneLoginFormProps> = ({
       success = false
       setFormErrors((pre) => ({
         ...pre,
-        phoneNumber: t('auth.invalidPhone', {
-          defaultValue: 'Invalid phone number',
-        }),
+        phoneNumber: t('auth.invalidPhone'),
       }))
     } else {
       setFormErrors((pre) => ({ ...pre, phoneNumber: '' }))
@@ -53,9 +51,7 @@ export const PhoneLoginForm: React.FC<PhoneLoginFormProps> = ({
       success = false
       setFormErrors((pre) => ({
         ...pre,
-        code: t('auth.invalidCode', {
-          defaultValue: 'Invalid verification code',
-        }),
+        code: t('auth.invalidCode'),
       }))
     } else {
       setFormErrors((pre) => ({ ...pre, code: '' }))
@@ -75,9 +71,7 @@ export const PhoneLoginForm: React.FC<PhoneLoginFormProps> = ({
             <LoginInput
               className="pl-12"
               isError={!!formErrors.phoneNumber}
-              placeholder={t('auth.phonePlaceholder', {
-                defaultValue: 'Please input phone number',
-              })}
+              placeholder={t('auth.phonePlaceholder')}
               value={formValues.phoneNumber}
               onChange={(e) => {
                 onChangeFormValues('phoneNumber', e.target.value)
@@ -95,9 +89,7 @@ export const PhoneLoginForm: React.FC<PhoneLoginFormProps> = ({
             <LoginInput
               className="pr-[50%]"
               isError={!!formErrors.code}
-              placeholder={t('auth.codePlaceholder', {
-                defaultValue: 'Please input verification code',
-              })}
+              placeholder={t('auth.codePlaceholder')}
               value={formValues.code}
               onChange={(e) => {
                 onChangeFormValues('code', e.target.value)
@@ -139,22 +131,15 @@ export const PhoneLoginForm: React.FC<PhoneLoginFormProps> = ({
               if (error) {
                 toast.error(
                   t('common.operationFailedWithMessage', {
-                    defaultValue: `Operation failed: ${error}`,
                     message: error,
                   })
                 )
                 return
               }
               onSuccess()
-              toast.success(
-                t('common.operationSuccess', { defaultValue: 'Success' })
-              )
+              toast.success(t('common.operationSuccess'))
             } catch {
-              toast.error(
-                t('common.operationFailed', {
-                  defaultValue: 'Operation failed',
-                })
-              )
+              toast.error(t('common.operationFailed'))
             } finally {
               setSubmitLoading(false)
             }
