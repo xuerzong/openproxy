@@ -396,6 +396,8 @@ export const models = pgTable(
         input: string
         output: string
         input_cache_read: string
+        output_tiers?: { cost: string; min?: number; max?: number }[]
+        input_cache_read_tiers?: { cost: string; min?: number; max?: number }[]
       }>()
       .notNull(),
     metadata: jsonb('metadata').default({}).notNull(),

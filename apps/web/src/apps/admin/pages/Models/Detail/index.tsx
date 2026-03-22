@@ -48,7 +48,6 @@ const Page = () => {
         defaultValue: `Model Detail - ${modelId}`,
         id: modelId,
       })}
-      className="h-screen"
     >
       <ModelEditor
         defaultValues={model}

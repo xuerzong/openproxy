@@ -23,7 +23,7 @@ type NumberFieldRootClickEvent = Parameters<
 
 interface NumberInputProps extends NumberFieldRootProps {
   value?: number
-  onChange?: (value: number) => void
+  onChange?: (value: number | undefined) => void
   size?: 'sm' | 'md'
   inputProps?: InputProps
   precision?: number
@@ -84,7 +84,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   }, [propsValue, hasFocused, min, max, precision, resolvedStep])
 
   const emitChange = (nextValue: number | null) => {
-    onChange?.(nextValue ?? 0)
+    onChange?.(nextValue ?? undefined)
   }
 
   const handleValueChange = (nextValue: number | null) => {

@@ -135,6 +135,37 @@ export const ModelEditor = ({
                         input_cache_read: values.pricing?.input_cache_read
                           ? Number(values.pricing?.input_cache_read)
                           : 0,
+                        ...(values.pricing?.output_tiers?.length
+                          ? {
+                              output_tiers: values.pricing.output_tiers.map(
+                                (tier: any) => ({
+                                  cost: Number(tier.cost) || 0,
+                                  ...(tier.min != null
+                                    ? { min: tier.min }
+                                    : {}),
+                                  ...(tier.max != null
+                                    ? { max: tier.max }
+                                    : {}),
+                                })
+                              ),
+                            }
+                          : {}),
+                        ...(values.pricing?.input_cache_read_tiers?.length
+                          ? {
+                              input_cache_read_tiers:
+                                values.pricing.input_cache_read_tiers.map(
+                                  (tier: any) => ({
+                                    cost: Number(tier.cost) || 0,
+                                    ...(tier.min != null
+                                      ? { min: tier.min }
+                                      : {}),
+                                    ...(tier.max != null
+                                      ? { max: tier.max }
+                                      : {}),
+                                  })
+                                ),
+                            }
+                          : {}),
                       },
                       metadata: values.metadata,
                     }
