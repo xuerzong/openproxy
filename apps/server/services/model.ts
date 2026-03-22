@@ -23,7 +23,13 @@ export async function createModel(params: {
   contextWindow?: number
   maxTokens?: number
   styles: string[]
-  pricing: { input: number; output: number; input_cache_read: number }
+  pricing: {
+    input: number
+    output: number
+    input_cache_read: number
+    output_tiers?: { cost: number; min?: number; max?: number }[]
+    input_cache_read_tiers?: { cost: number; min?: number; max?: number }[]
+  }
   tags?: string[]
   metadata?: any
 }) {
@@ -45,6 +51,28 @@ export async function createModel(params: {
     metadata,
   } = params
 
+  const pricingValue: Record<string, any> = {
+    input: new Decimal(pricing.input).toString(),
+    output: new Decimal(pricing.output).toString(),
+    input_cache_read: new Decimal(pricing.input_cache_read).toString(),
+  }
+  if (pricing.output_tiers) {
+    pricingValue.output_tiers = pricing.output_tiers.map((tier) => ({
+      cost: new Decimal(tier.cost).toString(),
+      ...(tier.min != null ? { min: tier.min } : {}),
+      ...(tier.max != null ? { max: tier.max } : {}),
+    }))
+  }
+  if (pricing.input_cache_read_tiers) {
+    pricingValue.input_cache_read_tiers = pricing.input_cache_read_tiers.map(
+      (tier) => ({
+        cost: new Decimal(tier.cost).toString(),
+        ...(tier.min != null ? { min: tier.min } : {}),
+        ...(tier.max != null ? { max: tier.max } : {}),
+      })
+    )
+  }
+
   const values = {
     userId,
     isPublic: isAdmin ? isPublicParam || false : false,
@@ -56,11 +84,7 @@ export async function createModel(params: {
     maxTokens: maxTokens || 0,
     type,
     styles,
-    pricing: {
-      input: new Decimal(pricing.input).toString(),
-      output: new Decimal(pricing.output).toString(),
-      input_cache_read: new Decimal(pricing.input_cache_read).toString(),
-    },
+    pricing: pricingValue,
     tags: tags || [],
     metadata: metadata || {},
   }
@@ -90,7 +114,13 @@ export async function updateModel(params: {
   contextWindow?: number
   maxTokens?: number
   styles: string[]
-  pricing: { input: number; output: number; input_cache_read: number }
+  pricing: {
+    input: number
+    output: number
+    input_cache_read: number
+    output_tiers?: { cost: number; min?: number; max?: number }[]
+    input_cache_read_tiers?: { cost: number; min?: number; max?: number }[]
+  }
   tags?: string[]
   metadata?: any
 }) {
@@ -112,6 +142,28 @@ export async function updateModel(params: {
     metadata,
   } = params
 
+  const pricingValue: Record<string, any> = {
+    input: new Decimal(pricing.input).toString(),
+    output: new Decimal(pricing.output).toString(),
+    input_cache_read: new Decimal(pricing.input_cache_read).toString(),
+  }
+  if (pricing.output_tiers) {
+    pricingValue.output_tiers = pricing.output_tiers.map((tier) => ({
+      cost: new Decimal(tier.cost).toString(),
+      ...(tier.min != null ? { min: tier.min } : {}),
+      ...(tier.max != null ? { max: tier.max } : {}),
+    }))
+  }
+  if (pricing.input_cache_read_tiers) {
+    pricingValue.input_cache_read_tiers = pricing.input_cache_read_tiers.map(
+      (tier) => ({
+        cost: new Decimal(tier.cost).toString(),
+        ...(tier.min != null ? { min: tier.min } : {}),
+        ...(tier.max != null ? { max: tier.max } : {}),
+      })
+    )
+  }
+
   const values = {
     userId,
     isPublic: isAdmin ? isPublicParam || false : false,
@@ -123,11 +175,7 @@ export async function updateModel(params: {
     maxTokens: maxTokens || 0,
     type,
     styles,
-    pricing: {
-      input: new Decimal(pricing.input).toString(),
-      output: new Decimal(pricing.output).toString(),
-      input_cache_read: new Decimal(pricing.input_cache_read).toString(),
-    },
+    pricing: pricingValue,
     tags: tags || [],
     metadata: metadata || {},
   }

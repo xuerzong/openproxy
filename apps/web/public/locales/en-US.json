@@ -111,7 +111,8 @@
     "confirmChanges": "Confirm changes",
     "confirmCreate": "Create",
     "copy": "Copy",
-    "close": "Close"
+    "close": "Close",
+    "add": "Add"
   },
   "theme": {
     "title": "Theme",
@@ -388,6 +389,11 @@
     "maxOutput": "Max Output",
     "publicModel": "Public Model",
     "pricingPerMillion": "Pricing (per million)",
+    "outputTiers": "Output Tiers",
+    "inputCacheReadTiers": "Input Cache Read Tiers",
+    "tierCost": "Cost",
+    "tierMin": "Min tokens",
+    "tierMax": "Max tokens",
     "tabs": {
       "basic": "Basic",
       "providers": "Providers",

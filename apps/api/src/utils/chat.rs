@@ -10,6 +10,32 @@ pub enum UsageStyle {
     Anthropic,
 }
 
+/// Given an optional array of tier objects, resolve the effective price for a token count.
+/// Each tier: { "cost": "<decimal>", "min": <optional i64>, "max": <optional i64> }
+/// If no matching tier is found (or tiers is None), falls back to `base_price`.
+fn resolve_tiered_price(tiers: Option<&Vec<Value>>, base_price: Decimal, tokens: i32) -> Decimal {
+    let tiers = match tiers {
+        Some(t) if !t.is_empty() => t,
+        _ => return base_price,
+    };
+    let tokens_i64 = tokens as i64;
+    for tier in tiers {
+        let min = tier.get("min").and_then(|v| v.as_i64()).unwrap_or(0);
+        let has_max = tier.get("max").is_some_and(|v| !v.is_null());
+        let max = tier.get("max").and_then(|v| v.as_i64()).unwrap_or(i64::MAX);
+        if tokens_i64 >= min && (tokens_i64 <= max || !has_max) {
+            if let Some(cost) = tier
+                .get("cost")
+                .and_then(|v| v.as_str())
+                .and_then(|s| Decimal::from_str(s).ok())
+            {
+                return cost;
+            }
+        }
+    }
+    base_price
+}
+
 pub fn remove_provider_metadata_fields(v: &mut Value) {
     if let Some(obj) = v.as_object_mut() {
         obj.remove("provider_metadata");
@@ -53,6 +79,11 @@ pub fn extract_usage_input_with_tokens(
         .and_then(|s| Decimal::from_str(s).ok())
         .unwrap_or(Decimal::ZERO);
 
+    let output_tiers = pricing_json.get("output_tiers").and_then(|v| v.as_array());
+    let input_cache_read_tiers = pricing_json
+        .get("input_cache_read_tiers")
+        .and_then(|v| v.as_array());
+
     let cache_tokens_i32 = usage.input_cache_read_tokens.max(0);
     let prompt_tokens_without_cache_i32 = match style {
         UsageStyle::OpenAI => (usage.prompt_tokens - cache_tokens_i32).max(0),
@@ -64,9 +95,18 @@ pub fn extract_usage_input_with_tokens(
     let c_tokens = Decimal::from(usage.completion_tokens);
     let divisor = Decimal::from(1_000_000);
 
-    let total_cost =
-        (input_price * p_tokens + input_cache_read_price * cache_tokens + output_price * c_tokens)
-            / divisor;
+    let effective_output_price =
+        resolve_tiered_price(output_tiers, output_price, usage.completion_tokens);
+    let effective_cache_read_price = resolve_tiered_price(
+        input_cache_read_tiers,
+        input_cache_read_price,
+        cache_tokens_i32,
+    );
+
+    let total_cost = (input_price * p_tokens
+        + effective_cache_read_price * cache_tokens
+        + effective_output_price * c_tokens)
+        / divisor;
 
     services::usage::UsageInput {
         cost: total_cost,
@@ -139,8 +179,7 @@ mod tests {
             input_cache_read_tokens: 40,
         };
 
-        let input =
-            extract_usage_input_with_tokens(&usage, &pricing_json(), UsageStyle::Anthropic);
+        let input = extract_usage_input_with_tokens(&usage, &pricing_json(), UsageStyle::Anthropic);
         let expected = (Decimal::from(2) * Decimal::from(100)
             + Decimal::from_str("0.5").unwrap() * Decimal::from(40)
             + Decimal::from(8) * Decimal::from(10))

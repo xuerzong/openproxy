@@ -7,11 +7,20 @@ export const ModelTypeSchema = t.Union([
   t.Literal('embedding'),
 ])
 
+// Tier structure for tiered pricing
+export const PricingTierSchema = t.Object({
+  cost: t.Numeric({ minimum: 0, maximum: 99999 }),
+  min: t.Optional(t.Number({ minimum: 0 })),
+  max: t.Optional(t.Number({ minimum: 0 })),
+})
+
 // Pricing structure
 export const PricingSchema = t.Object({
   input: t.Numeric({ minimum: 0, maximum: 99999 }),
   output: t.Numeric({ minimum: 0, maximum: 99999 }),
   input_cache_read: t.Numeric({ minimum: 0, maximum: 99999 }),
+  output_tiers: t.Optional(t.Array(PricingTierSchema)),
+  input_cache_read_tiers: t.Optional(t.Array(PricingTierSchema)),
 })
 
 // Create model request body

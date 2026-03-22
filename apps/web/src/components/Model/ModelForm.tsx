@@ -7,69 +7,12 @@ import { Form, FormField, type FormInstance } from '@openproxy/ui/Form'
 import { CheckboxGroup } from '@openproxy/ui/Checkbox'
 import { RadioGroup } from '@openproxy/ui/Radio'
 import { ModelIcon } from '../ModelIcon'
+import { PricingInput } from './PricingInput'
 import { useTranslation } from 'react-i18next'
 
 interface ModelFormProps {
   form: FormInstance
   isEdit?: boolean
-}
-
-interface PricingInputProps {
-  value?: { output: string; input: string; input_cache_read: string }
-  onChange?: (value: { output: string; input: string; input_cache_read: string }) => void
-}
-
-const PicingInput: React.FC<PricingInputProps> = ({ value, onChange }) => {
-  const onTriggerChange = (newValue: Partial<PricingInputProps['value']>) => {
-    onChange?.({
-      input: '0',
-      output: '0',
-      input_cache_read: '0',
-      ...(value || {}),
-      ...newValue,
-    })
-  }
-  const input = value && value.input ? Number(value.input) : void 0
-  const output = value && value.output ? Number(value.output) : void 0
-  const inputCacheRead =
-    value && value.input_cache_read ? Number(value.input_cache_read) : void 0
-  return (
-    <div className="flex items-center gap-2">
-      <NumberInput
-        inputProps={{
-          placeholder: '0.00',
-        }}
-        value={input}
-        onChange={(e) => {
-          onTriggerChange({ input: e.toString() })
-        }}
-        min={0}
-        precision={2}
-      />
-      <NumberInput
-        inputProps={{
-          placeholder: '0.00',
-        }}
-        value={output}
-        onChange={(e) => {
-          onTriggerChange({ output: e.toString() })
-        }}
-        min={0}
-        precision={2}
-      />
-      <NumberInput
-        inputProps={{
-          placeholder: '0.00',
-        }}
-        value={inputCacheRead}
-        onChange={(e) => {
-          onTriggerChange({ input_cache_read: e.toString() })
-        }}
-        min={0}
-        precision={2}
-      />
-    </div>
-  )
 }
 
 export const ModelForm: React.FC<ModelFormProps> = ({
@@ -253,7 +196,7 @@ export const ModelForm: React.FC<ModelFormProps> = ({
           defaultValue: 'Pricing (per million)',
         })}
       >
-        <PicingInput />
+        <PricingInput />
       </FormField>
     </Form>
   )

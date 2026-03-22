@@ -111,7 +111,8 @@
     "confirmChanges": "确认更改",
     "confirmCreate": "确定创建",
     "copy": "复制",
-    "close": "关闭"
+    "close": "关闭",
+    "add": "添加"
   },
   "theme": {
     "title": "主题",
@@ -388,6 +389,11 @@
     "maxOutput": "最大输出",
     "publicModel": "公共模型",
     "pricingPerMillion": "价格(每百万)",
+    "outputTiers": "输出阶梯价格",
+    "inputCacheReadTiers": "输入缓存读取阶梯价格",
+    "tierCost": "单价",
+    "tierMin": "最小 Token",
+    "tierMax": "最大 Token",
     "tabs": {
       "basic": "基本信息",
       "providers": "供应商",
