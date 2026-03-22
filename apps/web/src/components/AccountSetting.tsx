@@ -9,7 +9,9 @@ import { toastPromise } from '@/utils/toast'
 import { Dialog } from '@openproxy/ui/Dialog'
 import { Tag } from '@openproxy/ui/Tag'
 import { Loader } from '@openproxy/ui/Loader'
+import { Tooltip } from '@openproxy/ui/Tooltip'
 import { useCountdown } from '@/hooks/useCountDown'
+import { LogOutIcon } from 'lucide-react'
 
 export const AccountSetting = () => {
   const { t } = useTranslation('common')
@@ -531,13 +533,19 @@ const SessionList = () => {
                   </div>
                 </div>
                 {!isCurrent && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRevoke(s.token)}
+                  <Tooltip
+                    content={t('account.revokeSession', {
+                      defaultValue: 'Revoke',
+                    })}
                   >
-                    {t('account.revokeSession', { defaultValue: 'Revoke' })}
-                  </Button>
+                    <Button
+                      variant="danger"
+                      size="icon-xs"
+                      onClick={() => handleRevoke(s.token)}
+                    >
+                      <LogOutIcon />
+                    </Button>
+                  </Tooltip>
                 )}
               </div>
             )
