@@ -357,7 +357,7 @@
   "models": {
     "title": "模型列表",
     "createTitle": "创建模型",
-    "detailTitle": "模型详情 - {{id}}",
+    "detailTitle": "模型详情",
     "addModel": "添加模型",
     "editProvider": "编辑供应商",
     "addProvider": "添加供应商",

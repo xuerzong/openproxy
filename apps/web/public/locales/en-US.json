@@ -357,7 +357,7 @@
   "models": {
     "title": "Models",
     "createTitle": "Create Model",
-    "detailTitle": "Model Detail - {{id}}",
+    "detailTitle": "Model Detail",
     "addModel": "Add Model",
     "editProvider": "Edit Provider",
     "addProvider": "Add Provider",
