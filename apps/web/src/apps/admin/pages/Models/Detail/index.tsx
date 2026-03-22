@@ -1,16 +1,32 @@
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { ModelEditor } from '@/components/Model/ModelEditor'
 import { NotFoundView } from '@/components/NotFoundView'
 import { PageContainer } from '@/components/PageContainer'
 import { Loader } from '@openproxy/ui/Loader'
+import { Select } from '@openproxy/ui/Select'
+import { ModelIcon } from '@/components/ModelIcon'
 import { useModelQuery } from '@/hooks/queries/useModelQuery'
+import { useModelsQuery } from '@/hooks/queries/useModelsQuery'
 import { useTranslation } from 'react-i18next'
+import { useMemo } from 'react'
 
 const Page = () => {
   const { t } = useTranslation('common')
   const params = useParams()
+  const navigate = useNavigate()
   const modelId = params['*'] || ''
   const { data: model, isLoading, refetch } = useModelQuery(modelId)
+  const { data: models } = useModelsQuery()
+
+  const modelOptions = useMemo(
+    () =>
+      (models ?? []).map((m) => ({
+        value: m.id,
+        label: m.name || m.id,
+        icon: <ModelIcon model={m.ownedBy} className="w-4 h-4" />,
+      })),
+    [models]
+  )
 
   if (isLoading) {
     return (
@@ -26,16 +42,21 @@ const Page = () => {
 
   return (
     <PageContainer
-      title={t('models.detailTitle', {
-        defaultValue: `Model Detail - ${modelId}`,
-        id: modelId,
-      })}
+      title={
+        <div className="flex items-center gap-2 whitespace-nowrap">
+          <span>
+            {t('models.detailTitle', { defaultValue: 'Model Detail' })}
+          </span>
+          <Select
+            options={modelOptions}
+            value={modelId}
+            onChange={(value) => navigate(`/models/${value}`)}
+            triggerClassName="min-w-32 font-normal"
+          />
+        </div>
+      }
     >
-      <ModelEditor
-        defaultValues={model}
-        isEdit
-        onRefresh={() => refetch()}
-      />
+      <ModelEditor defaultValues={model} isEdit onRefresh={() => refetch()} />
     </PageContainer>
   )
 }

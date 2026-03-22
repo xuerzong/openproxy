@@ -5,7 +5,7 @@ import { Button } from '@openproxy/ui/Button'
 import { toggleCollapsed } from '@/stores/app'
 
 interface PageContainerProps {
-  title?: string
+  title?: React.ReactNode
   className?: string
 }
 
