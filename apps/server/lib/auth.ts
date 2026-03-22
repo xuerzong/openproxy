@@ -84,6 +84,9 @@ export const auth = betterAuth({
         defaultValue: 'tenant',
       },
     },
+    changeEmail: {
+      enabled: true,
+    },
   },
   emailAndPassword: {
     enabled: true,
