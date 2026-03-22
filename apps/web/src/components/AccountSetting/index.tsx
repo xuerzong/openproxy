@@ -9,6 +9,7 @@ import { toastPromise } from '@/utils/toast'
 import { isOSS } from '@/utils/env'
 import { EmailField } from './EmailField'
 import { PhoneField } from './PhoneField'
+import { PasswordField } from './PasswordField'
 import { SessionList } from './SessionList'
 import { AccountList } from './AccountList'
 
@@ -96,6 +97,7 @@ export const AccountSetting = () => {
 
           <EmailField />
           {isOSS && <PhoneField />}
+          <PasswordField />
         </div>
       </Card>
 

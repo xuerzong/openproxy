@@ -440,7 +440,19 @@
     "ipAddress": "IP Address",
     "userAgent": "Device",
     "noSessions": "No sessions",
-    "noAccounts": "No linked accounts"
+    "noAccounts": "No linked accounts",
+    "password": "Password",
+    "changePassword": "Change Password",
+    "setPassword": "Set Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPasswordPlaceholder": "Enter new password again",
+    "passwordMismatch": "Passwords do not match",
+    "changePasswordSuccess": "Password changed successfully",
+    "setPasswordSuccess": "Password set successfully"
   },
   "team": {
     "defaultName": "Hello",
