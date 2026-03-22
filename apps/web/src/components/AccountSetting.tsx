@@ -12,6 +12,11 @@ import { Loader } from '@openproxy/ui/Loader'
 import { Tooltip } from '@openproxy/ui/Tooltip'
 import { useCountdown } from '@/hooks/useCountDown'
 import { LogOutIcon } from 'lucide-react'
+import { toast } from 'sonner'
+import { isOSS } from '@/utils/env'
+import { CaptchaTrigger } from '@openproxy/phone-auth/client'
+import { PhoneNumberRegExp } from '@openproxy/phone-auth/client/constants'
+import type { CaptchaData } from '@openproxy/phone-auth/client'
 
 export const AccountSetting = () => {
   const { t } = useTranslation('common')
@@ -96,7 +101,7 @@ export const AccountSetting = () => {
           </div>
 
           <EmailField />
-          <PhoneField />
+          {isOSS && <PhoneField />}
         </div>
       </Card>
 
@@ -237,12 +242,15 @@ const PhoneField = () => {
     seconds: 60,
   })
 
-  const handleSendCode = async () => {
+  const handleSendCode = async (captchaData: CaptchaData) => {
     if (!newPhone.trim() || isCounting) return
     setCodeSending(true)
     try {
       const res = await authClient.phoneNumber.sendOtp({
         phoneNumber: newPhone,
+        fetchOptions: {
+          body: { captchaData },
+        },
       })
       if (res.error) {
         throw new Error(
@@ -367,11 +375,17 @@ const PhoneField = () => {
                   defaultValue: 'Please input verification code',
                 })}
               />
-              <Button
-                variant="outline"
-                disabled={!newPhone.trim() || isCounting || codeSending}
-                onClick={() => {
-                  void toastPromise(handleSendCode(), {
+              <CaptchaTrigger
+                onBeforeClick={() => {
+                  if (codeSending || isCounting) return
+                  if (!newPhone.trim() || !PhoneNumberRegExp.test(newPhone)) {
+                    toast.warning(t('auth.fillValidPhoneFirst'))
+                    return
+                  }
+                  return true
+                }}
+                onValidate={(captchaData) => {
+                  void toastPromise(handleSendCode(captchaData), {
                     loading: t('common.processing', {
                       defaultValue: 'Processing...',
                     }),
@@ -387,13 +401,18 @@ const PhoneField = () => {
                   })
                 }}
               >
-                {isCounting
-                  ? t('auth.retryAfterSeconds', {
-                      defaultValue: `${timeLeft}s to retry`,
-                      seconds: timeLeft,
-                    })
-                  : t('account.sendCode', { defaultValue: 'Send Code' })}
-              </Button>
+                <Button
+                  variant="outline"
+                  disabled={!newPhone.trim() || isCounting || codeSending}
+                >
+                  {isCounting
+                    ? t('auth.retryAfterSeconds', {
+                        defaultValue: `${timeLeft}s to retry`,
+                        seconds: timeLeft,
+                      })
+                    : t('account.sendCode', { defaultValue: 'Send Code' })}
+                </Button>
+              </CaptchaTrigger>
             </div>
           </div>
         </div>
