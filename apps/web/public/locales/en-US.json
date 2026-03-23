@@ -460,6 +460,8 @@
     "createDescription": "Create a new team to organize your workspace.",
     "nameLabel": "Team Name",
     "nameRequired": "Team name is required",
+    "nameTooLong": "Team name must be at most 50 characters",
+    "nameInvalid": "Team name can only contain Chinese, English, numbers and spaces",
     "namePlaceholder": "Enter team name",
     "limitReached": "You have reached the maximum number of teams."
   },

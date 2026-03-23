@@ -1,11 +1,26 @@
 import { t } from 'elysia'
+import {
+  TeamNamePattern,
+  TEAM_NAME_MIN,
+  TEAM_NAME_MAX,
+} from '@openproxy/schema/team'
+
+const teamNamePattern = TeamNamePattern.source
 
 export const CreateTeamBodySchema = t.Object({
-  name: t.String({ minLength: 1, maxLength: 50 }),
+  name: t.String({
+    minLength: TEAM_NAME_MIN,
+    maxLength: TEAM_NAME_MAX,
+    pattern: teamNamePattern,
+  }),
 })
 
 export const UpdateCurrentTeamBodySchema = t.Object({
-  name: t.String({ minLength: 1 }),
+  name: t.String({
+    minLength: TEAM_NAME_MIN,
+    maxLength: TEAM_NAME_MAX,
+    pattern: teamNamePattern,
+  }),
   allowJoin: t.Boolean(),
 })
 

@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Form, FormField, useForm } from '@openproxy/ui/Form'
 import { Input } from '@openproxy/ui/Input'
+import { TeamFormSchema } from '@openproxy/schema/team'
 import { useRequest } from '@/contexts/ApiContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useAuth } from '@/contexts/AuthContext'
@@ -25,17 +26,7 @@ export const TeamForm: React.FC<TeamFormProps> = ({ open, onOpenChange }) => {
     defaultValues: {
       name: '',
     },
-    validators: {
-      name: async (value: string) =>
-        !value.trim()
-          ? {
-              success: false as const,
-              message: t('team.nameRequired', {
-                defaultValue: 'Team name is required',
-              }),
-            }
-          : { success: true as const },
-    },
+    zodResolver: TeamFormSchema,
   })
 
   useEffect(() => {

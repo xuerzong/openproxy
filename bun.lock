@@ -24,6 +24,7 @@
         "@elysiajs/html": "^1.4.0",
         "@openproxy/payment-provider": "workspace:*",
         "@openproxy/phone-auth": "workspace:*",
+        "@openproxy/schema": "workspace:*",
         "@react-email/components": "^1.0.3",
         "@react-email/render": "^2.0.1",
         "@sentry/bun": "^10.32.1",
