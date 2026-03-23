@@ -10,6 +10,8 @@ import {
 } from '@server/services/api-key'
 import { CreateApiKeyBodySchema, UpdateApiKeyBodySchema } from '@server/schemas'
 
+import { IS_OSS } from '@server/constants'
+
 export const apiKeysRouter = new Elysia()
   .use(betterAuthPlugin)
   .get(
@@ -30,7 +32,7 @@ export const apiKeysRouter = new Elysia()
     async ({ teamUserId, teamId, team, body, status }) => {
       try {
         const hasCreatedApiKeyCount = await getApiKeyCountByTeamId(teamId)
-        if (hasCreatedApiKeyCount >= team.apiKeyLimit) {
+        if (!IS_OSS && hasCreatedApiKeyCount >= team.apiKeyLimit) {
           return status(422, {
             code: 'API_KEY_LIMIT_EXCEEDED',
             message: `每个用户最多只能创建 ${team.apiKeyLimit} 个 API Key`,

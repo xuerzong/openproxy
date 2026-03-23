@@ -33,6 +33,7 @@ export {
   TeamMemberIdSchema,
   UpdateCurrentTeamBodySchema,
   UpdateCurrentTeamMemberRoleBodySchema,
+  UpgradeTeamPlanBodySchema,
 } from './team'
 
 // Common Schemas

@@ -8,6 +8,13 @@
       "when": 1773929867138,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774279865827,
+      "tag": "0002_smart_lady_vermin",
+      "breakpoints": true
     }
   ]
 }

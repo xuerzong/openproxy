@@ -17,7 +17,7 @@ import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
 import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useQueryClient } from '@tanstack/react-query'
-import { isOSS } from '@/utils/env'
+import { useIsOSS } from '@/hooks/useIsOSS'
 import { queryKeys } from '@/constants/query-keys'
 import { Avatar } from '@openproxy/ui/Avatar'
 import { Skeleton } from '@openproxy/ui/Skeleton'
@@ -40,6 +40,7 @@ export const TeamSwitcher = () => {
   const teamName = currentTeam?.team?.name || '...'
   const teamId = currentTeamId || ''
 
+  const isOSS = useIsOSS()
   const maxTeams = constsQuery.data?.maxTeamsPerUser
   const canCreateTeam = isOSS || !maxTeams || teams.length < maxTeams
 

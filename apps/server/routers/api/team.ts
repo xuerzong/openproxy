@@ -6,6 +6,7 @@ import {
   TeamMemberIdSchema,
   UpdateCurrentTeamBodySchema,
   UpdateCurrentTeamMemberRoleBodySchema,
+  UpgradeTeamPlanBodySchema,
 } from '@server/schemas'
 import {
   TeamServiceError,
@@ -16,6 +17,7 @@ import {
   removeCurrentTeamMember,
   updateCurrentTeam,
   updateCurrentTeamMemberRole,
+  upgradeTeamPlan,
 } from '@server/services/team'
 
 const applyTeamServiceError = (
@@ -121,5 +123,20 @@ export const teamRouter = new Elysia()
     {
       auth: { role: true },
       body: JoinTeamByInviteCodeBodySchema,
+    }
+  )
+  .put(
+    '/team/plan',
+    async ({ user, teamId, body, set }) => {
+      try {
+        return await upgradeTeamPlan(user.id, teamId, body.plan)
+      } catch (error) {
+        return applyTeamServiceError(error, set)
+      }
+    },
+    {
+      auth: { role: true },
+      team: true,
+      body: UpgradeTeamPlanBodySchema,
     }
   )

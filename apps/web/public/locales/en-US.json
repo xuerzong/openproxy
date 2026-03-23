@@ -97,7 +97,8 @@
     "yes": "Yes",
     "no": "No",
     "and": "and",
-    "free": "Free"
+    "free": "Free",
+    "pro": "Pro"
   },
   "actions": {
     "confirm": "Confirm",
@@ -153,6 +154,19 @@
       "allowJoinDisabled": "New users cannot join this team through invite links right now.",
       "namePlaceholder": "Please input team name",
       "inviteLink": "Invite Link"
+    },
+    "plan": {
+      "title": "Team Plan",
+      "description": "Upgrade to Pro to unlock more members and API key slots.",
+      "current": "Current",
+      "membersLimit": "{{count}} members",
+      "apiKeysLimit": "{{count}} API keys",
+      "upgrade": "Upgrade to Pro",
+      "downgrade": "Downgrade to Free",
+      "upgradeSuccess": "Plan updated successfully"
+    },
+    "billing": {
+      "menu": "Billing"
     },
     "members": {
       "menu": "User Management",

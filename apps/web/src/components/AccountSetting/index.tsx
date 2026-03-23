@@ -7,7 +7,7 @@ import { Card } from '../Card'
 import { AvatarPicker } from '../AvatarPicker'
 import { useTranslation } from 'react-i18next'
 import { toastPromise } from '@/utils/toast'
-import { isOSS } from '@/utils/env'
+import { useIsOSS } from '@/hooks/useIsOSS'
 import { EmailField } from './EmailField'
 import { PhoneField } from './PhoneField'
 import { PasswordField } from './PasswordField'
@@ -21,6 +21,7 @@ export const AccountSetting = () => {
   const { session, refreshSession } = useAuth()
   const [name, setName] = useState('')
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
+  const isOSS = useIsOSS()
   const sessionUserName = session?.user.name || ''
 
   useEffect(() => {

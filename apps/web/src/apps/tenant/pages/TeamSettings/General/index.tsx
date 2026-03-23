@@ -172,7 +172,6 @@ const Page = () => {
       setUpdatingAllowJoin(false)
     })
   }
-
   const onDelete = async () => {
     if (deleting || !canDeleteTeam) {
       if (!canDeleteTeam && deleteBlockedReason) {

@@ -37,3 +37,7 @@ export const UpdateCurrentTeamMemberRoleBodySchema = t.Object({
 export const JoinTeamByInviteCodeBodySchema = t.Object({
   inviteCode: t.String({ minLength: 4, maxLength: 16 }),
 })
+
+export const UpgradeTeamPlanBodySchema = t.Object({
+  plan: t.Union([t.Literal('free'), t.Literal('pro')]),
+})

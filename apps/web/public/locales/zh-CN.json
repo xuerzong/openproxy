@@ -97,7 +97,8 @@
     "yes": "是",
     "no": "否",
     "and": "和",
-    "free": "免费"
+    "free": "免费",
+    "pro": "专业版"
   },
   "actions": {
     "confirm": "确定",
@@ -153,6 +154,19 @@
       "allowJoinDisabled": "当前禁止新用户通过邀请链接加入该团队。",
       "namePlaceholder": "请输入团队名称",
       "inviteLink": "邀请链接"
+    },
+    "plan": {
+      "title": "团队套餐",
+      "description": "升级到专业版以解锁更多成员和 API Key 管理名额。",
+      "current": "当前",
+      "membersLimit": "{{count}} 个成员",
+      "apiKeysLimit": "{{count}} 个 API Key",
+      "upgrade": "升级到专业版",
+      "downgrade": "降级到免费版",
+      "upgradeSuccess": "套餐更新成功"
+    },
+    "billing": {
+      "menu": "套餐订阅"
     },
     "members": {
       "menu": "用户管理",

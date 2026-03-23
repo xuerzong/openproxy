@@ -35,6 +35,10 @@ const router = createBrowserRouter([
             path: 'members',
             Component: lazy(() => import('./pages/TeamSettings/Members')),
           },
+          {
+            path: 'billing',
+            Component: lazy(() => import('./pages/TeamSettings/Billing')),
+          },
         ],
       },
       {

@@ -23,10 +23,11 @@ import {
 import type { ChartConfig } from '@openproxy/ui/Chart'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import { useTranslation } from 'react-i18next'
-import { isOSS } from '@/utils/env'
+import { useIsOSS } from '@/hooks/useIsOSS'
 
 const Page = () => {
   const { t } = useTranslation('common')
+  const isOSS = useIsOSS()
   const showBillingActions = isOSS
 
   const translateDashboard = (key: string, defaultValue: string) =>

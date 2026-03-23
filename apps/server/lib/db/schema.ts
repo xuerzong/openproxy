@@ -526,6 +526,7 @@ export const teams = pgTable('teams', {
     .primaryKey(),
   name: varchar('name').notNull(),
   logo: text('logo'),
+  plan: varchar('plan').notNull().default('free'),
   inviteCode: varchar('invite_code')
     .notNull()
     .$defaultFn(() => generateInviteCode()),

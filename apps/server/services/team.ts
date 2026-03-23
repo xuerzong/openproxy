@@ -4,7 +4,12 @@ import { and, count, desc, eq, ilike } from 'drizzle-orm'
 import { generateInviteCode } from '@server/lib/generate'
 import { PayStatus, PayType } from '@server/constants/pay'
 import { createTeamOrder, settleTeamOrder } from '@server/services/order'
-import { IS_OSS, MAX_TEAMS_PER_USER } from '@server/constants'
+import {
+  IS_OSS,
+  MAX_TEAMS_PER_USER,
+  TeamPlanLimits,
+  type TeamPlan,
+} from '@server/constants'
 
 const TEAM_ROLES = ['owner', 'member'] as const
 
@@ -648,7 +653,7 @@ export const joinTeamByInviteCode = async (
   }
 
   const memberCount = await getTeamMemberCount(team.id)
-  if (memberCount >= team.usersLimit) {
+  if (!IS_OSS && memberCount >= team.usersLimit) {
     throw new TeamServiceError('TEAM_FULL', 409)
   }
 
@@ -667,4 +672,48 @@ export const joinTeamByInviteCode = async (
     team,
     member,
   }
+}
+
+export const upgradeTeamPlan = async (
+  userId: string,
+  teamId: string,
+  plan: TeamPlan
+) => {
+  const teamUser = await db.query.teamUsers.findFirst({
+    where: and(
+      eq(dbSchema.teamUsers.teamId, teamId),
+      eq(dbSchema.teamUsers.userId, userId)
+    ),
+  })
+
+  if (!teamUser || teamUser.role !== 'owner') {
+    throw new TeamServiceError('FORBIDDEN', 403)
+  }
+
+  const team = await db.query.teams.findFirst({
+    where: eq(dbSchema.teams.id, teamId),
+  })
+
+  if (!team) {
+    throw new TeamServiceError('NOT_FOUND', 404)
+  }
+
+  if (team.plan === plan) {
+    throw new TeamServiceError('PLAN_ALREADY_ACTIVE', 409)
+  }
+
+  const limits = TeamPlanLimits[plan]
+
+  const [updatedTeam] = await db
+    .update(dbSchema.teams)
+    .set({
+      plan,
+      apiKeyLimit: limits.apiKeyLimit,
+      usersLimit: limits.usersLimit,
+      updatedAt: new Date(),
+    })
+    .where(eq(dbSchema.teams.id, teamId))
+    .returning()
+
+  return updatedTeam ? toCurrentTeamView(updatedTeam) : null
 }
