@@ -6,6 +6,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { Logo } from '@/components/Logo'
 import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { UserAccount } from '@/components/UserAccount'
+import { TeamSwitcher } from '@/components/TeamSwitcher'
 import { useMenuTransition } from '@/hooks/useMenuTransition'
 import { cn } from '@openproxy/ui/utils/cn'
 import { changeCollapsed, toggleCollapsed, useAppStore } from '@/stores/app'
@@ -49,11 +50,15 @@ const MenuItem: React.FC<MenuItemProps> = ({ menu, isActive = false }) => {
 
 interface MainLayoutProps {
   menus: MenuData[]
+  showTeamSwitcher?: boolean
 }
 
 const MENU_TRANSITION_DURATION_MS = 200
 
-export const DashboardLayout: React.FC<MainLayoutProps> = ({ menus }) => {
+export const DashboardLayout: React.FC<MainLayoutProps> = ({
+  menus,
+  showTeamSwitcher,
+}) => {
   const collapsed = useAppStore((state) => state.collapsed)
   const pathname = useLocation().pathname
   const menuGroupKey = menus.map((menu) => menu.key).join('|')
@@ -86,7 +91,7 @@ export const DashboardLayout: React.FC<MainLayoutProps> = ({ menus }) => {
         <div className="flex justify-start text-foreground">
           <Logo className="h-10 w-auto" />
         </div>
-        {/* <TeamSwitcher /> */}
+        {showTeamSwitcher && <TeamSwitcher />}
         <div className="relative flex flex-col gap-1 flex-1">
           <div
             className={cn(

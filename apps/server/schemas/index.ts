@@ -28,6 +28,7 @@ export {
 } from './admin'
 
 export {
+  CreateTeamBodySchema,
   JoinTeamByInviteCodeBodySchema,
   TeamMemberIdSchema,
   UpdateCurrentTeamBodySchema,

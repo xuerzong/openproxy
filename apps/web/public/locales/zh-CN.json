@@ -455,10 +455,13 @@
     "setPasswordSuccess": "密码设置成功"
   },
   "team": {
-    "defaultName": "你好",
     "settings": "团队设置",
     "create": "新建团队",
-    "plan": "免费-2000000名用户"
+    "createDescription": "创建一个新团队来组织你的工作区。",
+    "nameLabel": "团队名称",
+    "nameRequired": "团队名称不能为空",
+    "namePlaceholder": "请输入团队名称",
+    "limitReached": "已达到团队数量上限。"
   },
   "auth": {
     "login": "登录",

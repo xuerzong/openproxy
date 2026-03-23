@@ -1,5 +1,9 @@
 import { t } from 'elysia'
 
+export const CreateTeamBodySchema = t.Object({
+  name: t.String({ minLength: 1, maxLength: 50 }),
+})
+
 export const UpdateCurrentTeamBodySchema = t.Object({
   name: t.String({ minLength: 1 }),
   allowJoin: t.Boolean(),

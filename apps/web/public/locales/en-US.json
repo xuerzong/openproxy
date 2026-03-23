@@ -455,10 +455,13 @@
     "setPasswordSuccess": "Password set successfully"
   },
   "team": {
-    "defaultName": "Hello",
     "settings": "Team Settings",
     "create": "Create Team",
-    "plan": "Free - 2000000 users"
+    "createDescription": "Create a new team to organize your workspace.",
+    "nameLabel": "Team Name",
+    "nameRequired": "Team name is required",
+    "namePlaceholder": "Enter team name",
+    "limitReached": "You have reached the maximum number of teams."
   },
   "auth": {
     "login": "Login",

@@ -4,6 +4,7 @@ import { and, count, desc, eq, ilike } from 'drizzle-orm'
 import { generateInviteCode } from '@server/lib/generate'
 import { PayStatus, PayType } from '@server/constants/pay'
 import { createTeamOrder, settleTeamOrder } from '@server/services/order'
+import { IS_OSS, MAX_TEAMS_PER_USER } from '@server/constants'
 
 const TEAM_ROLES = ['owner', 'member'] as const
 
@@ -105,9 +106,44 @@ export const createTeam = async (userId: string) => {
   return teamId
 }
 
+export const createTeamForUser = async (userId: string, name: string) => {
+  if (!IS_OSS) {
+    const existingTeams = await db.query.teamUsers.findMany({
+      where: eq(dbSchema.teamUsers.userId, userId),
+    })
+    if (existingTeams.length >= MAX_TEAMS_PER_USER) {
+      throw new TeamServiceError('TEAM_LIMIT_REACHED', 409)
+    }
+  }
+
+  const teamId = await db.transaction(async (tx) => {
+    const teamRows = await tx
+      .insert(dbSchema.teams)
+      .values({
+        name: name.trim(),
+      })
+      .returning({ id: dbSchema.teams.id })
+
+    const teamId = teamRows[0]?.id!
+
+    await tx.insert(dbSchema.teamUsers).values({
+      userId,
+      teamId,
+      role: 'owner',
+    })
+
+    return teamId
+  })
+
+  return { teamId }
+}
+
 export const getTeams = (userId: string) => {
   return db.query.teamUsers.findMany({
     where: eq(dbSchema.teamUsers.userId, userId),
+    with: {
+      team: true,
+    },
   })
 }
 

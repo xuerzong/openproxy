@@ -116,7 +116,7 @@ export const DashboardLayout = () => {
   return (
     <AuthRequiredRoute>
       <TeamLayout>
-        <DashboardLayoutRoot menus={menus} />
+        <DashboardLayoutRoot menus={menus} showTeamSwitcher />
       </TeamLayout>
     </AuthRequiredRoute>
   )
