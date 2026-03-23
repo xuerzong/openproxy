@@ -4,16 +4,12 @@ import { useAuth } from '@/contexts/AuthContext'
 import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { Card } from './Card'
 import { useTranslation } from 'react-i18next'
-import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
-import { getAvatarUrl } from '@/utils/avatar'
+import { Avatar } from '@openproxy/ui/Avatar'
 
 export const UserAccount = () => {
   const { t } = useTranslation('common')
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
-  const constsQuery = useConstsQuery()
-  const appDomain = constsQuery.data?.appDomain
-
   if (!session?.user) return null
 
   return (
@@ -45,12 +41,7 @@ export const UserAccount = () => {
     >
       <Card className="relative flex items-center gap-2 p-4 pr-8 select-none cursor-pointer hover:bg-muted">
         <div className="shrink-0 w-8 h-8">
-          <img
-            className="w-8 h-8 rounded-full"
-            src={
-              session?.user.image || getAvatarUrl(session?.user.id, appDomain)
-            }
-          />
+          <Avatar src={session?.user.image} />
         </div>
         <div className="flex flex-col flex-1 min-w-0">
           <span className="text-sm w-full truncate">{session.user.name}</span>

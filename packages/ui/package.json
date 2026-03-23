@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     ".": "./src/index.ts",
+    "./Avatar": "./src/Avatar/index.tsx",
     "./Button": "./src/Button/index.tsx",
     "./Chart": "./src/Chart/index.tsx",
     "./Checkbox": "./src/Checkbox/index.tsx",

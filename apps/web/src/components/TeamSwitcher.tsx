@@ -18,8 +18,8 @@ import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useQueryClient } from '@tanstack/react-query'
 import { isOSS } from '@/utils/env'
-import { getAvatarUrl } from '@/utils/avatar'
 import { queryKeys } from '@/constants/query-keys'
+import { Avatar } from '@openproxy/ui/Avatar'
 
 export const TeamSwitcher = () => {
   const { t } = useTranslation('common')
@@ -38,7 +38,6 @@ export const TeamSwitcher = () => {
   const teamId = currentTeamId || ''
 
   const maxTeams = constsQuery.data?.maxTeamsPerUser
-  const appDomain = constsQuery.data?.appDomain
   const canCreateTeam = isOSS || !maxTeams || teams.length < maxTeams
 
   const onSwitchTeam = async (nextTeamId: string) => {
@@ -55,9 +54,10 @@ export const TeamSwitcher = () => {
     key: t.teamId,
     label: (
       <span className="flex items-center gap-2">
-        <img
-          className="w-5 h-5 rounded-full"
-          src={t.team?.logo || getAvatarUrl(t.teamId, appDomain)}
+        <Avatar
+          src={t.team?.logo}
+          className="w-5 h-5"
+          iconClassName="w-3 h-3"
         />
         <span className="truncate">{t.team?.name || t.teamId}</span>
         {t.teamId === currentTeamId && (
@@ -104,10 +104,7 @@ export const TeamSwitcher = () => {
         sideOffset={8}
       >
         <Card className="relative flex items-center gap-2 p-4 pr-8 select-none cursor-pointer hover:bg-muted">
-          <img
-            className="w-8 h-8 rounded-full"
-            src={currentTeam?.team?.logo || getAvatarUrl(teamId, appDomain)}
-          />
+          <Avatar src={currentTeam?.team?.logo} />
           <div className="flex flex-col flex-1 min-w-0">
             <span className="text-sm w-full truncate">{teamName}</span>
           </div>
