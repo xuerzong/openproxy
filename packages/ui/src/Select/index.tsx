@@ -119,7 +119,7 @@ export const Select: React.FC<SelectProps> = ({
         </RadixSelect.Portal>
       </RadixSelect.Root>
       <Drawer open={breakpoint.md && isOpen} onOpenChange={handleOpenChange}>
-        <div className="h-full overflow-y-auto webkit-scrollbar-hidden">
+        <div className="h-full overflow-y-auto">
           {options.map((option) => (
             <SelectMDItem
               key={option.value}
