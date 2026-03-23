@@ -1,8 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { authClient } from '@/utils/better-auth'
 import { Card } from '../Card'
 import { useTranslation } from 'react-i18next'
 import { Loader } from '@openproxy/ui/Loader'
+import { Button } from '@openproxy/ui/Button'
+import { GithubIcon } from '../GithubIcon'
+import { GoogleIcon } from '../GoogleIcon'
+import { useLoginMethodsQuery } from '@/hooks/queries/useLoginMethodsQuery'
+import { toast } from 'sonner'
 
 interface AccountItem {
   id: string
@@ -11,12 +16,31 @@ interface AccountItem {
   createdAt: Date
 }
 
+const providerConfig = {
+  github: {
+    icon: <GithubIcon className="w-5 h-5" />,
+    label: 'GitHub',
+  },
+  google: {
+    icon: <GoogleIcon className="w-5 h-5" />,
+    label: 'Google',
+  },
+} as const
+
+type SocialProvider = keyof typeof providerConfig
+
+const allProviders: SocialProvider[] = ['github', 'google']
+
 export const AccountList = () => {
   const { t } = useTranslation('common')
   const [accounts, setAccounts] = useState<AccountItem[]>([])
   const [loading, setLoading] = useState(true)
+  const loginMethodsQuery = useLoginMethodsQuery()
+  const loginMethods = loginMethodsQuery.data
 
-  useEffect(() => {
+  const availableProviders = allProviders.filter((p) => loginMethods?.[p])
+
+  const fetchAccounts = useCallback(() => {
     authClient.listAccounts().then((res) => {
       if (res.data) {
         setAccounts(res.data as unknown as AccountItem[])
@@ -24,6 +48,55 @@ export const AccountList = () => {
       setLoading(false)
     })
   }, [])
+
+  useEffect(() => {
+    fetchAccounts()
+  }, [fetchAccounts])
+
+  if (!loading && availableProviders.length === 0) {
+    return null
+  }
+
+  const linkedProviders = new Set(accounts.map((a) => a.provider))
+
+  const handleLink = (provider: SocialProvider) => {
+    authClient.linkSocial({
+      provider,
+      callbackURL: window.location.href,
+    })
+  }
+
+  const handleUnlink = async (provider: SocialProvider) => {
+    const account = accounts.find((a) => a.provider === provider)
+    if (!account) return
+
+    if (accounts.length <= 1) {
+      toast.error(
+        t('account.cannotUnlinkLast', {
+          defaultValue: 'Cannot unlink the only login method',
+        })
+      )
+      return
+    }
+
+    const res = await authClient.unlinkAccount({
+      providerId: provider,
+    })
+
+    if (res.error) {
+      toast.error(
+        t('common.operationFailed', { defaultValue: 'Operation failed' })
+      )
+      return
+    }
+
+    toast.success(
+      t('account.unlinkSuccess', {
+        defaultValue: 'Account unlinked successfully',
+      })
+    )
+    fetchAccounts()
+  }
 
   return (
     <Card>
@@ -42,32 +115,45 @@ export const AccountList = () => {
         <div className="flex justify-center py-8">
           <Loader />
         </div>
-      ) : accounts.length === 0 ? (
-        <div className="text-center text-muted-foreground py-8">
-          {t('account.noAccounts', { defaultValue: 'No linked accounts' })}
-        </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {accounts.map((account) => (
-            <div
-              key={account.id}
-              className="flex items-center justify-between p-3 border border-border rounded-lg"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium capitalize">
-                    {account.provider}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {account.accountId}
-                  </span>
+          {availableProviders.map((provider) => {
+            const config = providerConfig[provider]
+            const linked = linkedProviders.has(provider)
+            const account = accounts.find((a) => a.provider === provider)
+
+            return (
+              <div
+                key={provider}
+                className="flex items-center justify-between p-3 border border-border rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  {config.icon}
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-sm font-medium">{config.label}</span>
+                    {linked && account && (
+                      <span className="text-xs text-muted-foreground">
+                        {account.accountId}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {linked ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleUnlink(provider)}
+                  >
+                    {t('account.unlink', { defaultValue: 'Unlink' })}
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={() => handleLink(provider)}>
+                    {t('account.link', { defaultValue: 'Link' })}
+                  </Button>
+                )}
               </div>
-              <span className="text-xs text-muted-foreground">
-                {new Date(account.createdAt).toLocaleString()}
-              </span>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
     </Card>
