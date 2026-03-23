@@ -495,5 +495,20 @@
     "title": "错误404: 页面找不到了",
     "description": "抱歉，我们找遍了全世界，也没有找到你想要的页面",
     "backToDashboard": "返回控制台"
+  },
+  "avatar": {
+    "label": "头像",
+    "change": "更换",
+    "pickTitle": "选择头像",
+    "pickDescription": "自定义头像风格和选项。",
+    "seed": "种子",
+    "seedPlaceholder": "输入种子文本",
+    "style": "风格",
+    "backgroundColor": "背景颜色",
+    "scale": "缩放",
+    "rotate": "旋转",
+    "radius": "圆角",
+    "flip": "翻转",
+    "poweredBy": "由 DiceBear 提供支持"
   }
 }

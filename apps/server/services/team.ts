@@ -445,6 +445,7 @@ export const updateCurrentTeam = async (
   params: {
     name: string
     allowJoin: boolean
+    logo?: string | null
   }
 ) => {
   await assertTeamOwner(userId, teamId)
@@ -463,6 +464,7 @@ export const updateCurrentTeam = async (
     .update(dbSchema.teams)
     .set({
       name: params.name.trim(),
+      ...(params.logo !== undefined && { logo: params.logo }),
       metadata: stringifyTeamMetadata({
         ...metadata,
         allowJoin: params.allowJoin,

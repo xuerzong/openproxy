@@ -495,5 +495,20 @@
     "title": "404: Page not found",
     "description": "Sorry, we searched everywhere but could not find the page you requested.",
     "backToDashboard": "Back to dashboard"
+  },
+  "avatar": {
+    "label": "Avatar",
+    "change": "Change",
+    "pickTitle": "Choose Avatar",
+    "pickDescription": "Customize your avatar style and options.",
+    "seed": "Seed",
+    "seedPlaceholder": "Enter seed text",
+    "style": "Style",
+    "backgroundColor": "Background Color",
+    "scale": "Scale",
+    "rotate": "Rotate",
+    "radius": "Radius",
+    "flip": "Flip",
+    "poweredBy": "Powered by DiceBear"
   }
 }

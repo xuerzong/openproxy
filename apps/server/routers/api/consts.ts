@@ -4,7 +4,7 @@ import {
   supportedModelStyles,
   supportedPayStatus,
 } from '@server/lib/const'
-import { IS_OSS, MAX_TEAMS_PER_USER } from '@server/constants'
+import { IS_OSS, MAX_TEAMS_PER_USER, APP_DOMAIN } from '@server/constants'
 
 export const constsRouter = new Elysia().get('consts', async () => {
   return {
@@ -13,5 +13,6 @@ export const constsRouter = new Elysia().get('consts', async () => {
     supportedPayStatus,
     isOSS: IS_OSS,
     maxTeamsPerUser: IS_OSS ? null : MAX_TEAMS_PER_USER,
+    appDomain: APP_DOMAIN,
   }
 })

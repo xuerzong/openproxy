@@ -4,11 +4,15 @@ import { useAuth } from '@/contexts/AuthContext'
 import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { Card } from './Card'
 import { useTranslation } from 'react-i18next'
+import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
+import { getAvatarUrl } from '@/utils/avatar'
 
 export const UserAccount = () => {
   const { t } = useTranslation('common')
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
+  const constsQuery = useConstsQuery()
+  const appDomain = constsQuery.data?.appDomain
 
   if (!session?.user) return null
 
@@ -43,7 +47,9 @@ export const UserAccount = () => {
         <div className="shrink-0 w-8 h-8">
           <img
             className="w-8 h-8 rounded-full"
-            src={`https://avatar.vercel.sh/${session?.user.id}`}
+            src={
+              session?.user.image || getAvatarUrl(session?.user.id, appDomain)
+            }
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">

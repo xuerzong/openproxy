@@ -6,6 +6,7 @@ import { AlertTriangleIcon, Trash2Icon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/Card'
 import { CopyButton } from '@/components/CopyButton'
+import { AvatarPicker } from '@/components/AvatarPicker'
 import { useTeamMembersQuery } from '@/apps/tenant/hooks/queries/useTeamMembersQuery'
 import { useTeamsQuery } from '@/apps/tenant/hooks/queries/useTeamsQuery'
 import { Button } from '@openproxy/ui/Button'
@@ -18,6 +19,8 @@ import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
+import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
+import { getAvatarUrl, parseAvatarOptions } from '@/utils/avatar'
 import {
   getToastRequestStatus,
   getToastRequestValue,
@@ -36,14 +39,18 @@ const Page = () => {
   const teamQuery = useTeamQuery()
   const teamMembersQuery = useTeamMembersQuery()
   const teamsQuery = useTeamsQuery()
+  const constsQuery = useConstsQuery()
   const [name, setName] = useState('')
   const [allowJoin, setAllowJoin] = useState(true)
   const [saving, setSaving] = useState(false)
   const [updatingAllowJoin, setUpdatingAllowJoin] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
 
   const team = teamQuery.data?.team
+  const appDomain = constsQuery.data?.appDomain
+  const teamLogo = team?.logo || getAvatarUrl(team?.id || '', appDomain)
   const members = teamMembersQuery.data || []
   const teams = teamsQuery.data || []
   const currentUserId = session?.user.id
@@ -273,6 +280,27 @@ const Page = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-col gap-1">
             <label className="font-medium text-sm">
+              {t('avatar.label', { defaultValue: 'Avatar' })}
+            </label>
+            <div className="flex items-center gap-3">
+              <img
+                className="w-12 h-12 rounded-full border border-border cursor-pointer hover:opacity-80 transition-opacity"
+                src={teamLogo}
+                alt="team avatar"
+                onClick={() => setAvatarPickerOpen(true)}
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAvatarPickerOpen(true)}
+              >
+                {t('avatar.change', { defaultValue: 'Change' })}
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="font-medium text-sm">
               {t('common.id', { defaultValue: 'ID' })}
             </label>
             <Input value={team?.id || ''} disabled />
@@ -443,6 +471,39 @@ const Page = () => {
             onOk={onDelete}
           />
         }
+      />
+
+      <AvatarPicker
+        open={avatarPickerOpen}
+        onOpenChange={setAvatarPickerOpen}
+        defaultSeed={team?.id || ''}
+        defaultOptions={team?.logo ? parseAvatarOptions(team.logo) : undefined}
+        onConfirm={(url) => {
+          if (!team) return
+          void toastApiPromise(
+            request.team.put({
+              name: team.name,
+              allowJoin,
+              logo: url,
+            }),
+            {
+              loading: t('common.processing', {
+                defaultValue: 'Processing...',
+              }),
+              success: t('teamSettings.messages.updateSuccess', {
+                defaultValue: 'Team information updated successfully',
+              }),
+              error: (error) =>
+                t('common.operationFailedWithStatus', {
+                  defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                  status: getToastRequestStatus(error),
+                }),
+              onSuccess: () => {
+                void refreshTeamState()
+              },
+            }
+          )
+        }}
       />
     </div>
   )

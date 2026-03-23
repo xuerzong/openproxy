@@ -22,6 +22,7 @@ export const UpdateCurrentTeamBodySchema = t.Object({
     pattern: teamNamePattern,
   }),
   allowJoin: t.Boolean(),
+  logo: t.Optional(t.Union([t.String({ maxLength: 500 }), t.Null()])),
 })
 
 export const TeamMemberIdSchema = t.Object({
