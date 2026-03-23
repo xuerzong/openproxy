@@ -13,19 +13,15 @@ import { PhoneField } from './PhoneField'
 import { PasswordField } from './PasswordField'
 import { SessionList } from './SessionList'
 import { AccountList } from './AccountList'
-import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
-import { getAvatarUrl, parseAvatarOptions } from '@/utils/avatar'
+import { parseAvatarOptions } from '@/utils/avatar'
+import { Avatar } from '@openproxy/ui/Avatar'
 
 export const AccountSetting = () => {
   const { t } = useTranslation('common')
   const { session, refreshSession } = useAuth()
-  const constsQuery = useConstsQuery()
-  const appDomain = constsQuery.data?.appDomain
   const [name, setName] = useState('')
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
   const sessionUserName = session?.user.name || ''
-  const userImage =
-    session?.user.image || getAvatarUrl(session?.user.id || '', appDomain)
 
   useEffect(() => {
     setName(sessionUserName)
@@ -45,12 +41,17 @@ export const AccountSetting = () => {
               {t('avatar.label', { defaultValue: 'Avatar' })}
             </label>
             <div className="flex items-center gap-3">
-              <img
-                className="w-12 h-12 rounded-full border border-border cursor-pointer hover:opacity-80 transition-opacity"
-                src={userImage}
-                alt="avatar"
+              <button
+                type="button"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => setAvatarPickerOpen(true)}
-              />
+              >
+                <Avatar
+                  src={session?.user.image}
+                  className="w-12 h-12 border border-border"
+                  iconClassName="w-6 h-6"
+                />
+              </button>
               <Button
                 variant="outline"
                 size="sm"

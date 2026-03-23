@@ -19,8 +19,8 @@ import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
-import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
-import { getAvatarUrl, parseAvatarOptions } from '@/utils/avatar'
+import { parseAvatarOptions } from '@/utils/avatar'
+import { Avatar } from '@openproxy/ui/Avatar'
 import {
   getToastRequestStatus,
   getToastRequestValue,
@@ -39,7 +39,6 @@ const Page = () => {
   const teamQuery = useTeamQuery()
   const teamMembersQuery = useTeamMembersQuery()
   const teamsQuery = useTeamsQuery()
-  const constsQuery = useConstsQuery()
   const [name, setName] = useState('')
   const [allowJoin, setAllowJoin] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -49,8 +48,6 @@ const Page = () => {
   const [avatarPickerOpen, setAvatarPickerOpen] = useState(false)
 
   const team = teamQuery.data?.team
-  const appDomain = constsQuery.data?.appDomain
-  const teamLogo = team?.logo || getAvatarUrl(team?.id || '', appDomain)
   const members = teamMembersQuery.data || []
   const teams = teamsQuery.data || []
   const currentUserId = session?.user.id
@@ -283,12 +280,17 @@ const Page = () => {
               {t('avatar.label', { defaultValue: 'Avatar' })}
             </label>
             <div className="flex items-center gap-3">
-              <img
-                className="w-12 h-12 rounded-full border border-border cursor-pointer hover:opacity-80 transition-opacity"
-                src={teamLogo}
-                alt="team avatar"
+              <button
+                type="button"
+                className="cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => setAvatarPickerOpen(true)}
-              />
+              >
+                <Avatar
+                  src={team?.logo}
+                  className="w-12 h-12 border border-border"
+                  iconClassName="w-6 h-6"
+                />
+              </button>
               <Button
                 variant="outline"
                 size="sm"
