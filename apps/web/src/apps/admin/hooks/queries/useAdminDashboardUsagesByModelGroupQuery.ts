@@ -1,3 +1,4 @@
+import { queryKeys } from '@/constants/query-keys'
 import { useRequest } from '@/contexts/ApiContext'
 import { useQuery } from '@tanstack/react-query'
 
@@ -11,7 +12,7 @@ export const useAdminDashboardUsagesByModelGroupQuery = ({
   const request = useRequest()
 
   return useQuery({
-    queryKey: ['admin-dashboard-usages-by-model-group', rangeHours],
+    queryKey: [queryKeys.adminDashboardUsagesByModelGroup, rangeHours],
     queryFn: () =>
       request.admin.dashboard.usagesByModelGroup
         .get({

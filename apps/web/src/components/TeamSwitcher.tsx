@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useQueryClient } from '@tanstack/react-query'
 import { isOSS } from '@/utils/env'
+import { queryKeys } from '@/constants/query-keys'
 
 export const TeamSwitcher = () => {
   const { t } = useTranslation('common')
@@ -42,8 +43,8 @@ export const TeamSwitcher = () => {
     if (nextTeamId === currentTeamId) return
     await changeActiveTeam(nextTeamId)
     await refreshSession()
-    await queryClient.invalidateQueries({ queryKey: ['team'] })
-    await queryClient.invalidateQueries({ queryKey: ['teams'] })
+    await queryClient.invalidateQueries({ queryKey: [queryKeys.team] })
+    await queryClient.invalidateQueries({ queryKey: [queryKeys.teams] })
     navigate('/', { replace: true })
   }
 

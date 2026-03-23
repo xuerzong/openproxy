@@ -1,3 +1,4 @@
+import { queryKeys } from '@/constants/query-keys'
 import { useRequest } from '@/contexts/ApiContext'
 import { useQuery } from '@tanstack/react-query'
 
@@ -16,7 +17,7 @@ export const useUsagesGroupedQuery = ({
     bucketHours && rangeHours ? Math.floor(rangeHours / bucketHours) : undefined
 
   return useQuery({
-    queryKey: ['usagesGrouped', bucketCount, rangeHours],
+    queryKey: [queryKeys.usagesGrouped, bucketCount, rangeHours],
     queryFn: () =>
       request.usagesGrouped
         .get({

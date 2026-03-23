@@ -8,6 +8,7 @@ import { useRequest } from '@/contexts/ApiContext'
 import { changeActiveTeam } from '@/utils/better-auth'
 import { useAuth } from '@/contexts/AuthContext'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
+import { queryKeys } from '@/constants/query-keys'
 
 interface TeamFormProps {
   open: boolean
@@ -73,8 +74,8 @@ export const TeamForm: React.FC<TeamFormProps> = ({ open, onOpenChange }) => {
             await changeActiveTeam((data as { teamId: string }).teamId)
             await refreshSession()
           }
-          await queryClient.invalidateQueries({ queryKey: ['teams'] })
-          await queryClient.invalidateQueries({ queryKey: ['team'] })
+          await queryClient.invalidateQueries({ queryKey: [queryKeys.teams] })
+          await queryClient.invalidateQueries({ queryKey: [queryKeys.team] })
           onClose()
         },
       }).finally(() => {

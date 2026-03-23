@@ -25,6 +25,7 @@ import {
   toastPromise,
   ToastRequestError,
 } from '@/utils/toast'
+import { queryKeys } from '@/constants/query-keys'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -85,9 +86,9 @@ const Page = () => {
 
   const refreshTeamState = async () => {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['team'] }),
-      queryClient.invalidateQueries({ queryKey: ['teams'] }),
-      queryClient.invalidateQueries({ queryKey: ['team-members'] }),
+      queryClient.invalidateQueries({ queryKey: [queryKeys.team] }),
+      queryClient.invalidateQueries({ queryKey: [queryKeys.teams] }),
+      queryClient.invalidateQueries({ queryKey: [queryKeys.teamMembers] }),
     ])
   }
 

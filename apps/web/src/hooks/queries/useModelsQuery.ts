@@ -1,3 +1,4 @@
+import { queryKeys } from '@/constants/query-keys'
 import { useRequest } from '@/contexts/ApiContext'
 import { useQuery } from '@tanstack/react-query'
 
@@ -8,7 +9,7 @@ interface UseModelsQueryParams {
 export const useModelsQuery = (params?: UseModelsQueryParams) => {
   const request = useRequest()
   return useQuery({
-    queryKey: ['listModels', `${params?.isPublic}`],
+    queryKey: [queryKeys.listModels, `${params?.isPublic}`],
     queryFn: () =>
       request.listModels
         .get({ query: { isPublic: params?.isPublic } })

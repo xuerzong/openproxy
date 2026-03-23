@@ -1,3 +1,4 @@
+import { queryKeys } from '@/constants/query-keys'
 import { useQuery } from '@tanstack/react-query'
 
 type LoginMethods = {
@@ -10,6 +11,6 @@ const fetchLoginMethods = (): Promise<LoginMethods> =>
 
 export const useLoginMethodsQuery = () =>
   useQuery({
-    queryKey: ['loginMethods'],
+    queryKey: [queryKeys.loginMethods],
     queryFn: fetchLoginMethods,
   })
