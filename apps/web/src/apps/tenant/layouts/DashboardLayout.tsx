@@ -55,19 +55,6 @@ export const DashboardLayout = () => {
       },
       access: 'public',
     },
-    {
-      key: '/settings',
-      icon: <SettingsIcon className="w-5 h-5" />,
-      label: t('teamSettings.title', { defaultValue: 'Team Settings' }),
-      onClick() {
-        navigate('/settings/general')
-      },
-      access: 'public',
-      showArrow: true,
-      matchPath(pathname: string) {
-        return pathname.startsWith('/settings')
-      },
-    },
   ]
 
   const settingsMenus = useMemo(
