@@ -5,11 +5,23 @@ import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { Card } from './Card'
 import { useTranslation } from 'react-i18next'
 import { Avatar } from '@openproxy/ui/Avatar'
+import { Skeleton } from '@openproxy/ui/Skeleton'
 
 export const UserAccount = () => {
   const { t } = useTranslation('common')
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
+  if (typeof session === 'undefined') {
+    return (
+      <Card className="flex items-center gap-2 p-4">
+        <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+        <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-3 w-10" />
+        </div>
+      </Card>
+    )
+  }
   if (!session?.user) return null
 
   return (

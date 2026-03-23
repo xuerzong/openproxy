@@ -20,6 +20,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { isOSS } from '@/utils/env'
 import { queryKeys } from '@/constants/query-keys'
 import { Avatar } from '@openproxy/ui/Avatar'
+import { Skeleton } from '@openproxy/ui/Skeleton'
 
 export const TeamSwitcher = () => {
   const { t } = useTranslation('common')
@@ -30,6 +31,8 @@ export const TeamSwitcher = () => {
   const teamQuery = useTeamQuery()
   const constsQuery = useConstsQuery()
   const [createOpen, setCreateOpen] = useState(false)
+
+  const isLoading = teamsQuery.isLoading || teamQuery.isLoading
 
   const teams = teamsQuery.data || []
   const currentTeamId = teamQuery.data?.teamId
@@ -96,21 +99,28 @@ export const TeamSwitcher = () => {
 
   return (
     <>
-      <DropdownMenu
-        className="z-10"
-        menus={menus}
-        align="start"
-        side="right"
-        sideOffset={8}
-      >
-        <Card className="relative flex items-center gap-2 p-4 pr-8 select-none cursor-pointer hover:bg-muted">
-          <Avatar src={currentTeam?.team?.logo} />
-          <div className="flex flex-col flex-1 min-w-0">
-            <span className="text-sm w-full truncate">{teamName}</span>
-          </div>
-          <ChevronsUpDownIcon className="absolute top-[50%] right-4 translate-y-[-50%] w-4 h-4" />
+      {isLoading ? (
+        <Card className="flex items-center gap-2 p-4">
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+          <Skeleton className="h-4 w-24" />
         </Card>
-      </DropdownMenu>
+      ) : (
+        <DropdownMenu
+          className="z-10"
+          menus={menus}
+          align="start"
+          side="right"
+          sideOffset={8}
+        >
+          <Card className="relative flex items-center gap-2 p-4 pr-8 select-none cursor-pointer hover:bg-muted">
+            <Avatar src={currentTeam?.team?.logo} />
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="text-sm w-full truncate">{teamName}</span>
+            </div>
+            <ChevronsUpDownIcon className="absolute top-[50%] right-4 translate-y-[-50%] w-4 h-4" />
+          </Card>
+        </DropdownMenu>
+      )}
       <TeamForm open={createOpen} onOpenChange={setCreateOpen} />
     </>
   )
