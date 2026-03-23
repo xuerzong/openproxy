@@ -159,7 +159,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
           <label className="text-sm font-medium">
             {t('avatar.style', { defaultValue: 'Style' })}
           </label>
-          <div className="grid grid-cols-6 gap-2 max-h-48 overflow-y-auto pr-1">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
             {dicebearStyles.map((s) => (
               <button
                 key={s}
@@ -213,7 +213,7 @@ export const AvatarPicker: React.FC<AvatarPickerProps> = ({
         </div>
 
         {/* Options row */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium">
               {t('avatar.scale', { defaultValue: 'Scale' })}
