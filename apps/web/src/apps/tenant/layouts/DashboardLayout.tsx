@@ -52,15 +52,6 @@ export const DashboardLayout = () => {
       access: 'public',
     },
     {
-      key: '/models',
-      icon: <BoxIcon className="w-5 h-5" />,
-      label: t('menu.models', { defaultValue: 'Models' }),
-      onClick() {
-        navigate('/models')
-      },
-      access: 'public',
-    },
-    {
       type: 'separator',
       key: 'library-separator',
     },
@@ -68,6 +59,15 @@ export const DashboardLayout = () => {
       type: 'label',
       key: 'library-label',
       label: t('menu.library', { defaultValue: 'Library' }),
+    },
+    {
+      key: '/models',
+      icon: <BoxIcon className="w-5 h-5" />,
+      label: t('menu.models', { defaultValue: 'Models' }),
+      onClick() {
+        navigate('/models')
+      },
+      access: 'public',
     },
     {
       key: '/folders',
