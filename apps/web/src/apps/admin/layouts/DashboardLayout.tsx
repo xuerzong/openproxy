@@ -2,6 +2,7 @@ import { AdminRequiredRoute } from '@/components/AdminRequiredRoute'
 import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayout'
 import {
   BoxIcon,
+  FolderIcon,
   GaugeIcon,
   StampIcon,
   StoreIcon,
@@ -61,6 +62,14 @@ export const DashboardLayout = () => {
       label: t('menu.aiProviders', { defaultValue: 'AI Providers' }),
       onClick() {
         navigate('/ai-providers')
+      },
+    },
+    {
+      key: '/folders',
+      icon: <FolderIcon className="w-5 h-5" />,
+      label: t('menu.folders', { defaultValue: 'Folders' }),
+      onClick() {
+        navigate('/folders')
       },
     },
   ]

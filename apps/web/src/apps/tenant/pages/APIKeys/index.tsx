@@ -1,20 +1,37 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import dayjs from '@/utils/dayjs'
 import { useRequest } from '@/contexts/ApiContext'
 import copy from 'copy-to-clipboard'
 import { toast } from 'sonner'
 import { APIKeyItem } from '@/components/APIKey/APIKeyItem'
 import { useApiKeysQuery } from '@/apps/tenant/hooks/queries/useApiKeysQuery'
+import { useApiKeyFoldersQuery } from '@/apps/tenant/hooks/queries/useApiKeyFoldersQuery'
 import { Button } from '@openproxy/ui/Button'
-import { PlusIcon } from 'lucide-react'
+import { FolderIcon, PlusIcon } from 'lucide-react'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
-import { APIKeyForm } from '@/components/APIKey/APIKeyForm'
+import {
+  APIKeyForm,
+  NO_FOLDER_OPTION_VALUE,
+} from '@/components/APIKey/APIKeyForm'
+import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useForm } from '@openproxy/ui/Form'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
+import { useSearchParams } from 'react-router'
+import { useIsOSS } from '@/hooks/useIsOSS'
+
+const ALL_FOLDERS_FILTER = '__all__'
+
+const normalizeFolderIdForSubmit = (folderId?: string | null) => {
+  if (!folderId || folderId === NO_FOLDER_OPTION_VALUE) {
+    return null
+  }
+
+  return folderId
+}
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -22,7 +39,44 @@ const Page = () => {
   const request = useRequest()
   const [newApiKey, setNewApiKey] = useState('')
   const [deleteId, setDeleteId] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const teamQuery = useTeamQuery()
+  const isOSS = useIsOSS()
   const apiKeysQuery = useApiKeysQuery()
+  const foldersQuery = useApiKeyFoldersQuery()
+  const folders = foldersQuery.data || []
+  const apiKeyLimit = teamQuery.data?.team?.apiKeyLimit
+  const apiKeyCount = apiKeysQuery.data?.length || 0
+  const isCreateDisabled = !isOSS && !!apiKeyLimit && apiKeyCount >= apiKeyLimit
+  const totalApiKeysLabel =
+    isOSS || !apiKeyLimit ? t('common.unlimited') : String(apiKeyLimit)
+  const folderQuery = searchParams.get('folder')
+  const selectedFolderId =
+    folderQuery && folders.some((folder: any) => folder.id === folderQuery)
+      ? folderQuery
+      : ALL_FOLDERS_FILTER
+  const defaultCreateFolderId =
+    selectedFolderId !== ALL_FOLDERS_FILTER &&
+    folders.some((folder: any) => folder.id === selectedFolderId)
+      ? selectedFolderId
+      : ''
+
+  const setSelectedFolderId = (folderId: string) => {
+    const nextSearchParams = new URLSearchParams(searchParams)
+    if (folderId === ALL_FOLDERS_FILTER) {
+      nextSearchParams.delete('folder')
+    } else {
+      nextSearchParams.set('folder', folderId)
+    }
+    setSearchParams(nextSearchParams)
+  }
+
+  const filteredApiKeys = useMemo(() => {
+    const keys = apiKeysQuery.data || []
+    if (selectedFolderId === ALL_FOLDERS_FILTER) return keys
+    return keys.filter((k: any) => k.folderId === selectedFolderId)
+  }, [apiKeysQuery.data, selectedFolderId])
+
   const [apiKeyForm] = useForm({
     defaultValues: {
       name: '',
@@ -47,68 +101,110 @@ const Page = () => {
       title={t('apiKeys.title', { defaultValue: 'API Keys' })}
       className="h-screen"
     >
+      {folders.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <FolderIcon className="w-4 h-4 text-muted-foreground" />
+          <Button
+            size="sm"
+            variant={
+              selectedFolderId === ALL_FOLDERS_FILTER ? 'default' : 'outline'
+            }
+            onClick={() => setSelectedFolderId(ALL_FOLDERS_FILTER)}
+          >
+            {t('apiKeys.allFolders')}
+          </Button>
+          {folders.map((folder: any) => (
+            <Button
+              key={folder.id}
+              size="sm"
+              variant={selectedFolderId === folder.id ? 'default' : 'outline'}
+              onClick={() => setSelectedFolderId(folder.id)}
+            >
+              {folder.name}
+              {folder.isDefault && (
+                <span className="text-xs opacity-60 ml-1">
+                  ({t('folders.default')})
+                </span>
+              )}
+            </Button>
+          ))}
+        </div>
+      )}
+
       <div className="flex items-center w-full gap-2">
         <div style={{ flex: 1 }}></div>
 
         <Button
           onClick={() => {
-            apiKeyForm.resetValues()
+            apiKeyForm.setValues({
+              name: '',
+              folderId: defaultCreateFolderId,
+            })
             apiKeyForm.resetErrors()
             setOpen(true)
           }}
-          disabled={apiKeysQuery.data?.length === 10}
+          disabled={isCreateDisabled}
         >
           <PlusIcon />
           {t('apiKeys.createWithCount', {
-            defaultValue: 'Create API Key ({{count}}/10)',
-            count: apiKeysQuery.data?.length || 0,
+            count: apiKeyCount,
+            total: totalApiKeysLabel,
           })}
         </Button>
       </div>
       <FlexScrollViewer bordered>
-        {apiKeysQuery.data &&
-          apiKeysQuery.data.map((apiKey, apiKeyIndex) => (
-            <Fragment key={apiKey.id}>
-              <APIKeyItem
-                apiKey={apiKey}
-                onEdit={() => {
-                  apiKeyForm.setValues({
-                    ...apiKey,
-                    modelIds: apiKey.modelIds,
-                    expiresAt: apiKey.expiresAt
-                      ? dayjs(apiKey.expiresAt).format('YYYY-MM-DDTHH:mm')
-                      : void 0,
-                    maxQuota:
-                      Number(apiKey.maxQuota) === 0 ? void 0 : apiKey.maxQuota,
-                    maxRequests:
-                      Number(apiKey.maxRequests) === 0
-                        ? void 0
-                        : apiKey.maxRequests,
-                  })
-                  setOpen(true)
-                }}
-                onDelete={() => {
-                  setDeleteId(apiKey.id)
-                }}
-              />
-              {apiKeyIndex !== apiKeysQuery.data!.length - 1 && (
-                <div className="h-px bg-border w-full" />
-              )}
-            </Fragment>
-          ))}
-        {apiKeysQuery.data && apiKeysQuery.data.length === 0 && (
+        {filteredApiKeys.map((apiKey: any, apiKeyIndex: number) => (
+          <Fragment key={apiKey.id}>
+            <APIKeyItem
+              apiKey={apiKey}
+              onEdit={() => {
+                apiKeyForm.setValues({
+                  ...apiKey,
+                  modelIds: apiKey.modelIds,
+                  folderId: apiKey.folderId || NO_FOLDER_OPTION_VALUE,
+                  expiresAt: apiKey.expiresAt
+                    ? dayjs(apiKey.expiresAt).format('YYYY-MM-DDTHH:mm')
+                    : void 0,
+                  maxQuota:
+                    Number(apiKey.maxQuota) === 0 ? void 0 : apiKey.maxQuota,
+                  maxRequests:
+                    Number(apiKey.maxRequests) === 0
+                      ? void 0
+                      : apiKey.maxRequests,
+                })
+                setOpen(true)
+              }}
+              onDelete={() => {
+                setDeleteId(apiKey.id)
+              }}
+            />
+            {apiKeyIndex !== filteredApiKeys.length - 1 && (
+              <div className="h-px bg-border w-full" />
+            )}
+          </Fragment>
+        ))}
+        {filteredApiKeys.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-6 py-6">
             <img className="w-64" src="/404.svg" />
             <div className="">
               {t('common.emptyState', { defaultValue: 'Nothing here yet' })}
             </div>
             <Button
+              disabled={isCreateDisabled}
               onClick={() => {
+                apiKeyForm.setValues({
+                  name: '',
+                  folderId: defaultCreateFolderId,
+                })
+                apiKeyForm.resetErrors()
                 setOpen(true)
               }}
             >
               <PlusIcon />
-              {t('actions.createNow', { defaultValue: 'Create now' })}
+              {t('apiKeys.createWithCount', {
+                count: apiKeyCount,
+                total: totalApiKeysLabel,
+              })}
             </Button>
           </div>
         )}
@@ -149,6 +245,7 @@ const Page = () => {
                     ? request.apiKeys.put({
                         id: values.id,
                         name: values.name,
+                        folderId: normalizeFolderIdForSubmit(values.folderId),
                         modelIds: Array.from(new Set(modelIds)),
                         maxQuota: values.maxQuota ?? '0.00',
                         maxRequests: values.maxRequests ?? 0,
@@ -158,6 +255,7 @@ const Page = () => {
                       })
                     : request.apiKeys.post({
                         name: values.name,
+                        folderId: normalizeFolderIdForSubmit(values.folderId),
                         modelIds: Array.from(new Set(modelIds)),
                         maxQuota: values.maxQuota ?? void 0,
                         maxRequests: values.maxRequests ?? void 0,

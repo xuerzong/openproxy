@@ -2,7 +2,9 @@ import { AuthRequiredRoute } from '@/components/AuthRequiredRoute'
 import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayout'
 import {
   BoxIcon,
+  CircleUserRoundIcon,
   ChevronLeftIcon,
+  FolderIcon,
   GaugeIcon,
   KeyRoundIcon,
   SettingsIcon,
@@ -13,12 +15,13 @@ import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { TeamLayout } from '@/layouts/TeamLayout'
 import { useTranslation } from 'react-i18next'
+import type { MenuData } from '@/layouts/DashboardLayout'
 
 export const DashboardLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation('common')
-  const mainMenus = [
+  const mainMenus: MenuData[] = [
     {
       key: '/',
       icon: <GaugeIcon className="w-5 h-5" />,
@@ -47,6 +50,15 @@ export const DashboardLayout = () => {
       access: 'public',
     },
     {
+      type: 'separator',
+      key: 'library-separator',
+    },
+    {
+      type: 'label',
+      key: 'library-label',
+      label: t('menu.library', { defaultValue: 'Library' }),
+    },
+    {
       key: '/models',
       icon: <BoxIcon className="w-5 h-5" />,
       label: t('menu.models', { defaultValue: 'Models' }),
@@ -56,17 +68,13 @@ export const DashboardLayout = () => {
       access: 'public',
     },
     {
-      key: '/settings',
-      icon: <SettingsIcon className="w-5 h-5" />,
-      label: t('teamSettings.title', { defaultValue: 'Team Settings' }),
+      key: '/folders',
+      icon: <FolderIcon className="w-5 h-5" />,
+      label: t('menu.folders', { defaultValue: 'Folders' }),
       onClick() {
-        navigate('/settings/general')
+        navigate('/folders')
       },
       access: 'public',
-      showArrow: true,
-      matchPath(pathname: string) {
-        return pathname.startsWith('/settings')
-      },
     },
   ]
 
@@ -109,14 +117,50 @@ export const DashboardLayout = () => {
     [navigate, t]
   )
 
-  const menus = location.pathname.startsWith('/settings')
-    ? settingsMenus
-    : mainMenus
+  const accountSettingsMenus = useMemo(
+    () => [
+      {
+        key: '/account/settings-back',
+        icon: <ChevronLeftIcon className="w-5 h-5" />,
+        label: t('teamSettings.backToWorkspace', {
+          defaultValue: 'Back to Workspace',
+        }),
+        onClick() {
+          navigate('/')
+        },
+        access: 'public',
+      },
+      {
+        key: '/account/settings/general',
+        icon: <CircleUserRoundIcon className="w-5 h-5" />,
+        label: t('settings.general.menu', {
+          defaultValue: 'Basic Information',
+        }),
+        onClick() {
+          navigate('/account/settings/general')
+        },
+        access: 'public',
+      },
+    ],
+    [navigate, t]
+  )
+
+  const isAccountSettingsPage =
+    location.pathname.startsWith('/account/settings')
+
+  const menus = isAccountSettingsPage
+    ? accountSettingsMenus
+    : location.pathname.startsWith('/settings')
+      ? settingsMenus
+      : mainMenus
 
   return (
     <AuthRequiredRoute>
       <TeamLayout>
-        <DashboardLayoutRoot menus={menus} />
+        <DashboardLayoutRoot
+          menus={menus}
+          showTeamSwitcher={!isAccountSettingsPage}
+        />
       </TeamLayout>
     </AuthRequiredRoute>
   )

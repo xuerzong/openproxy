@@ -4,8 +4,8 @@ import { ReactQueryProvider } from '@/contexts/ReactQueryContext'
 import { RouterProvider } from './route'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { Toaster } from 'sonner'
-import { useViewportFix } from '@/hooks/useViewportFix'
-import { useStatusBar } from '@/hooks/useStatusBar'
+import { useViewportFix } from '@/apps/tenant/hooks/useViewportFix'
+import { useStatusBar } from '@/apps/tenant/hooks/useStatusBar'
 
 export const TenantApp: React.FC = () => {
   useViewportFix()

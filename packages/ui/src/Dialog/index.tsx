@@ -49,7 +49,7 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
             <p>{description}</p>
           </div>
 
-          {children}
+          <div className="overflow-y-auto min-h-0">{children}</div>
 
           {footer && <div className="mt-4">{footer}</div>}
         </Drawer>
@@ -74,7 +74,7 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
             style={{ width, zIndex: dialogZIndex }}
             className={cn(
               s.DialogContent,
-              'p-6 bg-background ring-1 ring-foreground/10 rounded-lg max-w-[80vw] max-h-[90vh] min-h-0 shadow-xl'
+              'flex flex-col p-6 bg-background ring-1 ring-foreground/10 rounded-lg max-w-[80vw] max-h-[90vh] min-h-0 shadow-xl'
             )}
           >
             <div className="flex flex-col mb-6">
@@ -88,7 +88,7 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
               <CloseButton />
             </RadixDialog.Close>
 
-            {children}
+            <div className="overflow-y-auto min-h-0">{children}</div>
 
             {footer && <div className="mt-4">{footer}</div>}
           </RadixDialog.Content>

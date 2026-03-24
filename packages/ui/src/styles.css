@@ -62,6 +62,26 @@ input:-webkit-autofill {
   min-height: var(--true-vh, 100vh) !important;
 }
 
-.webkit-scrollbar-hidden::-webkit-scrollbar {
-  display: inline;
+/* Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--foreground), 0.15) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: rgba(var(--foreground), 0.15);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--foreground), 0.25);
 }

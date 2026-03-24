@@ -36,10 +36,20 @@ CREATE TABLE "ai_providers" (
 	CONSTRAINT "ai_providers_name_unique" UNIQUE("name")
 );
 --> statement-breakpoint
+CREATE TABLE "api_key_folders" (
+	"id" varchar PRIMARY KEY NOT NULL,
+	"team_id" varchar NOT NULL,
+	"name" varchar NOT NULL,
+	"is_default" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "api_keys" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"user_id" varchar NOT NULL,
 	"team_id" varchar NOT NULL,
+	"folder_id" varchar,
 	"name" text NOT NULL,
 	"api_key" varchar NOT NULL,
 	"api_key_hash" varchar NOT NULL,
@@ -131,6 +141,7 @@ CREATE TABLE "teams" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"name" varchar NOT NULL,
 	"logo" text,
+	"plan" varchar DEFAULT 'free' NOT NULL,
 	"invite_code" varchar NOT NULL,
 	"amount" numeric(20, 10) DEFAULT '0.00' NOT NULL,
 	"api_key_limit" integer DEFAULT 20 NOT NULL,
@@ -193,8 +204,10 @@ CREATE TABLE "verifications" (
 --> statement-breakpoint
 ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "ai_provider_api_keys" ADD CONSTRAINT "ai_provider_api_keys_ai_provider_id_ai_providers_id_fk" FOREIGN KEY ("ai_provider_id") REFERENCES "public"."ai_providers"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "api_key_folders" ADD CONSTRAINT "api_key_folders_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "api_keys" ADD CONSTRAINT "api_keys_user_id_team_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."team_users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "api_keys" ADD CONSTRAINT "api_keys_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "api_keys" ADD CONSTRAINT "api_keys_folder_id_api_key_folders_id_fk" FOREIGN KEY ("folder_id") REFERENCES "public"."api_key_folders"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "api_keys_to_models" ADD CONSTRAINT "api_keys_to_models_api_key_id_api_keys_id_fk" FOREIGN KEY ("api_key_id") REFERENCES "public"."api_keys"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "api_keys_to_models" ADD CONSTRAINT "api_keys_to_models_model_id_models_id_fk" FOREIGN KEY ("model_id") REFERENCES "public"."models"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "invitations" ADD CONSTRAINT "invitations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -212,6 +225,7 @@ ALTER TABLE "user_configs" ADD CONSTRAINT "user_configs_user_id_users_id_fk" FOR
 CREATE INDEX "accounts_user_id_idx" ON "accounts" USING btree ("user_id");--> statement-breakpoint
 CREATE INDEX "ai_provider_api_keys_ai_provider_id_index" ON "ai_provider_api_keys" USING btree ("ai_provider_id");--> statement-breakpoint
 CREATE INDEX "ai_provider_api_keys_hash_index" ON "ai_provider_api_keys" USING btree ("api_key_hash");--> statement-breakpoint
+CREATE INDEX "api_key_folders_team_id_index" ON "api_key_folders" USING btree ("team_id");--> statement-breakpoint
 CREATE INDEX "api_keys_status_index" ON "api_keys" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "api_keys_hash_index" ON "api_keys" USING btree ("api_key_hash");--> statement-breakpoint
 CREATE INDEX "api_keys_team_id_index" ON "api_keys" USING btree ("team_id");--> statement-breakpoint

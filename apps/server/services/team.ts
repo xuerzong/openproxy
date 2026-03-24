@@ -4,6 +4,12 @@ import { and, count, desc, eq, ilike } from 'drizzle-orm'
 import { generateInviteCode } from '@server/lib/generate'
 import { PayStatus, PayType } from '@server/constants/pay'
 import { createTeamOrder, settleTeamOrder } from '@server/services/order'
+import {
+  IS_OSS,
+  MAX_TEAMS_PER_USER,
+  TeamPlanLimits,
+  type TeamPlan,
+} from '@server/constants'
 
 const TEAM_ROLES = ['owner', 'member'] as const
 
@@ -44,6 +50,19 @@ const stringifyTeamMetadata = (metadata: TeamMetadata) => {
   }
 
   return JSON.stringify(metadata)
+}
+
+const createDefaultApiKeyFolder = async (
+  tx: Parameters<typeof db.transaction>[0] extends (arg: infer T) => any
+    ? T
+    : never,
+  teamId: string
+) => {
+  await tx.insert(dbSchema.apiKeyFolders).values({
+    teamId,
+    name: 'Default',
+    isDefault: true,
+  })
 }
 
 const toAdminTeamView = (
@@ -99,15 +118,54 @@ export const createTeam = async (userId: string) => {
       role: 'owner',
     })
 
+    await createDefaultApiKeyFolder(tx, teamId)
+
     return teamId
   })
 
   return teamId
 }
 
+export const createTeamForUser = async (userId: string, name: string) => {
+  if (!IS_OSS) {
+    const existingTeams = await db.query.teamUsers.findMany({
+      where: eq(dbSchema.teamUsers.userId, userId),
+    })
+    if (existingTeams.length >= MAX_TEAMS_PER_USER) {
+      throw new TeamServiceError('TEAM_LIMIT_REACHED', 409)
+    }
+  }
+
+  const teamId = await db.transaction(async (tx) => {
+    const teamRows = await tx
+      .insert(dbSchema.teams)
+      .values({
+        name: name.trim(),
+      })
+      .returning({ id: dbSchema.teams.id })
+
+    const teamId = teamRows[0]?.id!
+
+    await tx.insert(dbSchema.teamUsers).values({
+      userId,
+      teamId,
+      role: 'owner',
+    })
+
+    await createDefaultApiKeyFolder(tx, teamId)
+
+    return teamId
+  })
+
+  return { teamId }
+}
+
 export const getTeams = (userId: string) => {
   return db.query.teamUsers.findMany({
     where: eq(dbSchema.teamUsers.userId, userId),
+    with: {
+      team: true,
+    },
   })
 }
 
@@ -197,6 +255,7 @@ export const updateAdminTeam = async (params: {
   id: string
   name: string
   inviteCode: string
+  plan?: 'free' | 'pro'
   apiKeyLimit: number
   usersLimit: number
   allowJoin: boolean
@@ -218,6 +277,7 @@ export const updateAdminTeam = async (params: {
     .set({
       name: params.name.trim(),
       inviteCode: params.inviteCode.trim(),
+      ...(params.plan && { plan: params.plan }),
       apiKeyLimit: params.apiKeyLimit,
       usersLimit: params.usersLimit,
       metadata: stringifyTeamMetadata({
@@ -409,6 +469,7 @@ export const updateCurrentTeam = async (
   params: {
     name: string
     allowJoin: boolean
+    logo?: string | null
   }
 ) => {
   await assertTeamOwner(userId, teamId)
@@ -427,6 +488,7 @@ export const updateCurrentTeam = async (
     .update(dbSchema.teams)
     .set({
       name: params.name.trim(),
+      ...(params.logo !== undefined && { logo: params.logo }),
       metadata: stringifyTeamMetadata({
         ...metadata,
         allowJoin: params.allowJoin,
@@ -610,7 +672,7 @@ export const joinTeamByInviteCode = async (
   }
 
   const memberCount = await getTeamMemberCount(team.id)
-  if (memberCount >= team.usersLimit) {
+  if (!IS_OSS && memberCount >= team.usersLimit) {
     throw new TeamServiceError('TEAM_FULL', 409)
   }
 
@@ -629,4 +691,48 @@ export const joinTeamByInviteCode = async (
     team,
     member,
   }
+}
+
+export const upgradeTeamPlan = async (
+  userId: string,
+  teamId: string,
+  plan: TeamPlan
+) => {
+  const teamUser = await db.query.teamUsers.findFirst({
+    where: and(
+      eq(dbSchema.teamUsers.teamId, teamId),
+      eq(dbSchema.teamUsers.userId, userId)
+    ),
+  })
+
+  if (!teamUser || teamUser.role !== 'owner') {
+    throw new TeamServiceError('FORBIDDEN', 403)
+  }
+
+  const team = await db.query.teams.findFirst({
+    where: eq(dbSchema.teams.id, teamId),
+  })
+
+  if (!team) {
+    throw new TeamServiceError('NOT_FOUND', 404)
+  }
+
+  if (team.plan === plan) {
+    throw new TeamServiceError('PLAN_ALREADY_ACTIVE', 409)
+  }
+
+  const limits = TeamPlanLimits[plan]
+
+  const [updatedTeam] = await db
+    .update(dbSchema.teams)
+    .set({
+      plan,
+      apiKeyLimit: limits.apiKeyLimit,
+      usersLimit: limits.usersLimit,
+      updatedAt: new Date(),
+    })
+    .where(eq(dbSchema.teams.id, teamId))
+    .returning()
+
+  return updatedTeam ? toCurrentTeamView(updatedTeam) : null
 }

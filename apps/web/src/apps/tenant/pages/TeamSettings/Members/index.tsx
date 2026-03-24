@@ -18,6 +18,7 @@ import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
 import dayjs from '@/utils/dayjs'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
+import { queryKeys } from '@/constants/query-keys'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -45,9 +46,9 @@ const Page = () => {
 
   const refreshTeamMembers = async () => {
     await Promise.all([
-      queryClient.invalidateQueries({ queryKey: ['team'] }),
-      queryClient.invalidateQueries({ queryKey: ['team-members'] }),
-      queryClient.invalidateQueries({ queryKey: ['teams'] }),
+      queryClient.invalidateQueries({ queryKey: [queryKeys.team] }),
+      queryClient.invalidateQueries({ queryKey: [queryKeys.teamMembers] }),
+      queryClient.invalidateQueries({ queryKey: [queryKeys.teams] }),
     ])
   }
 

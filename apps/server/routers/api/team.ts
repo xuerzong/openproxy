@@ -1,19 +1,23 @@
 import { Elysia } from 'elysia'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
+  CreateTeamBodySchema,
   JoinTeamByInviteCodeBodySchema,
   TeamMemberIdSchema,
   UpdateCurrentTeamBodySchema,
   UpdateCurrentTeamMemberRoleBodySchema,
+  UpgradeTeamPlanBodySchema,
 } from '@server/schemas'
 import {
   TeamServiceError,
+  createTeamForUser,
   deleteCurrentTeam,
   getCurrentTeamMembers,
   joinTeamByInviteCode,
   removeCurrentTeamMember,
   updateCurrentTeam,
   updateCurrentTeamMemberRole,
+  upgradeTeamPlan,
 } from '@server/services/team'
 
 const applyTeamServiceError = (
@@ -30,6 +34,20 @@ const applyTeamServiceError = (
 
 export const teamRouter = new Elysia()
   .use(betterAuthPlugin)
+  .post(
+    '/team',
+    async ({ user, body, set }) => {
+      try {
+        return await createTeamForUser(user.id, body.name)
+      } catch (error) {
+        return applyTeamServiceError(error, set)
+      }
+    },
+    {
+      auth: { role: true },
+      body: CreateTeamBodySchema,
+    }
+  )
   .get(
     '/team/members',
     async ({ teamId }) => {
@@ -105,5 +123,20 @@ export const teamRouter = new Elysia()
     {
       auth: { role: true },
       body: JoinTeamByInviteCodeBodySchema,
+    }
+  )
+  .put(
+    '/team/plan',
+    async ({ user, teamId, body, set }) => {
+      try {
+        return await upgradeTeamPlan(user.id, teamId, body.plan)
+      } catch (error) {
+        return applyTeamServiceError(error, set)
+      }
+    },
+    {
+      auth: { role: true },
+      team: true,
+      body: UpgradeTeamPlanBodySchema,
     }
   )

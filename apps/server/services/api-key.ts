@@ -29,6 +29,7 @@ export async function createApiKey(params: {
   teamId: string
   teamUserId: string
   name: string
+  folderId?: string | null
   expiresAt: Date | null
   maxQuota?: number
   maxRequests?: number
@@ -38,6 +39,7 @@ export async function createApiKey(params: {
     teamId,
     teamUserId,
     name,
+    folderId,
     expiresAt,
     maxQuota,
     maxRequests,
@@ -55,6 +57,7 @@ export async function createApiKey(params: {
         apiKeyHash: await hash(apiKey),
         teamId,
         userId: teamUserId,
+        folderId: folderId || null,
         expiresAt,
         maxQuota: maxQuota?.toString(),
         maxRequests,
@@ -92,13 +95,22 @@ export async function updateApiKey(params: {
   id: string
   teamId: string
   name: string
+  folderId?: string | null
   expiresAt: Date | null
   maxQuota?: number
   maxRequests?: number
   modelIds: string[]
 }) {
-  const { id, teamId, name, expiresAt, maxQuota, maxRequests, modelIds } =
-    params
+  const {
+    id,
+    teamId,
+    name,
+    folderId,
+    expiresAt,
+    maxQuota,
+    maxRequests,
+    modelIds,
+  } = params
 
   const apiKeys = await db
     .select()
@@ -114,6 +126,7 @@ export async function updateApiKey(params: {
       .update(dbSchema.apiKeys)
       .set({
         name,
+        folderId: folderId ?? null,
         expiresAt,
         maxQuota: maxQuota?.toString(),
         maxRequests,

@@ -1,3 +1,4 @@
+import { queryKeys } from '@/constants/query-keys'
 import { useRequest } from '@/contexts/ApiContext'
 import { useQuery } from '@tanstack/react-query'
 
@@ -6,7 +7,7 @@ export const useAdminOrdersQuery = ({ page }: { page: number }) => {
   const offset = Math.max(page - 1, 0) * limit
   const request = useRequest()
   return useQuery({
-    queryKey: ['admin/orders', page],
+    queryKey: [queryKeys.adminOrders, page],
     queryFn: () =>
       request.admin.orders
         .get({ query: { limit, offset } })

@@ -2,6 +2,8 @@
   "menu": {
     "dashboard": "Dashboard",
     "apiKeys": "API Keys",
+    "library": "Library",
+    "folders": "Folders",
     "billing": "Billing",
     "orders": "Orders",
     "models": "Models",
@@ -97,7 +99,8 @@
     "yes": "Yes",
     "no": "No",
     "and": "and",
-    "free": "Free"
+    "free": "Free",
+    "pro": "Pro"
   },
   "actions": {
     "confirm": "Confirm",
@@ -126,7 +129,10 @@
     "enUS": "English"
   },
   "settings": {
-    "title": "Settings"
+    "title": "Settings",
+    "general": {
+      "menu": "Basic Information"
+    }
   },
   "teamSettings": {
     "title": "Team Settings",
@@ -152,7 +158,21 @@
       "allowJoinEnabled": "Users with a valid invite link can join this team.",
       "allowJoinDisabled": "New users cannot join this team through invite links right now.",
       "namePlaceholder": "Please input team name",
-      "inviteLink": "Invite Link"
+      "inviteLink": "Invite Link",
+      "plan": "Plan"
+    },
+    "plan": {
+      "title": "Team Plan",
+      "description": "Upgrade to Pro to unlock more members and API key slots.",
+      "current": "Current",
+      "membersLimit": "{{count}} members",
+      "apiKeysLimit": "{{count}} API keys",
+      "upgrade": "Upgrade to Pro",
+      "downgrade": "Downgrade to Free",
+      "upgradeSuccess": "Plan updated successfully"
+    },
+    "billing": {
+      "menu": "Billing"
     },
     "members": {
       "menu": "User Management",
@@ -324,7 +344,7 @@
     "title": "API Keys",
     "createTitle": "Create API Key",
     "editTitle": "Edit API Key",
-    "createWithCount": "Create API Key ({{count}}/10)",
+    "createWithCount": "Create API Key ({{count}}/{{total}})",
     "newTitle": "New API Key",
     "newHint": "Store this API key in a safe and accessible place. For security reasons, you will not be able to view it again in API key management. If you lose it, you need to create a new one.",
     "deleteWarning": "This API key will be disabled immediately. Requests made with this key will be rejected and may break systems depending on it. Once deleted, you can no longer view or modify this API key.",
@@ -337,7 +357,12 @@
     "modelList": "Model List",
     "maxRequestsOptional": "Max Requests (optional)",
     "maxQuotaOptional": "Max Quota (optional)",
-    "expiresAtOptional": "Expiration Time (optional)"
+    "expiresAtOptional": "Expiration Time (optional)",
+    "folder": "Folder",
+    "noFolder": "No folder",
+    "createFolderFirst": "No folders yet, click to create one",
+    "allFolders": "All",
+    "uncategorized": "Uncategorized"
   },
   "aiProviders": {
     "title": "AI Providers",
@@ -414,13 +439,60 @@
     "phone": "Phone Number",
     "unbound": "Not bound yet",
     "settings": "Account Settings",
-    "logout": "Sign Out"
+    "logout": "Sign Out",
+    "changePhone": "Change Phone",
+    "bindPhone": "Bind Phone",
+    "changeEmail": "Change Email",
+    "bindEmail": "Bind Email",
+    "newPhone": "New Phone Number",
+    "newEmail": "New Email Address",
+    "verificationCode": "Verification Code",
+    "sendCode": "Send Code",
+    "verifyAndUpdate": "Verify & Update",
+    "changePhoneSuccess": "Phone number updated successfully",
+    "changeEmailSuccess": "Verification email sent, please check your inbox",
+    "sessions": "Sessions",
+    "sessionsDescription": "All active sessions for your account",
+    "currentSession": "Current",
+    "revokeSession": "Revoke",
+    "revokeOtherSessions": "Revoke Other Sessions",
+    "revokeSessionSuccess": "Session revoked",
+    "revokeOtherSessionsSuccess": "All other sessions revoked",
+    "linkedAccounts": "Linked Accounts",
+    "linkedAccountsDescription": "All login methods linked to your account",
+    "provider": "Provider",
+    "createdAt": "Created At",
+    "ipAddress": "IP Address",
+    "userAgent": "Device",
+    "noSessions": "No sessions",
+    "noAccounts": "No linked accounts",
+    "link": "Link",
+    "unlink": "Unlink",
+    "unlinkSuccess": "Account unlinked successfully",
+    "cannotUnlinkLast": "Cannot unlink the only login method",
+    "password": "Password",
+    "changePassword": "Change Password",
+    "setPassword": "Set Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "currentPasswordPlaceholder": "Enter current password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmPasswordPlaceholder": "Enter new password again",
+    "passwordMismatch": "Passwords do not match",
+    "changePasswordSuccess": "Password changed successfully",
+    "setPasswordSuccess": "Password set successfully"
   },
   "team": {
-    "defaultName": "Hello",
     "settings": "Team Settings",
     "create": "Create Team",
-    "plan": "Free - 2000000 users"
+    "createDescription": "Create a new team to organize your workspace.",
+    "nameLabel": "Team Name",
+    "nameRequired": "Team name is required",
+    "nameTooLong": "Team name must be at most 50 characters",
+    "nameInvalid": "Team name can only contain Chinese, English, numbers and spaces",
+    "namePlaceholder": "Enter team name",
+    "limitReached": "You have reached the maximum number of teams."
   },
   "auth": {
     "login": "Login",
@@ -452,5 +524,41 @@
     "title": "404: Page not found",
     "description": "Sorry, we searched everywhere but could not find the page you requested.",
     "backToDashboard": "Back to dashboard"
+  },
+  "avatar": {
+    "label": "Avatar",
+    "change": "Change",
+    "pickTitle": "Choose Avatar",
+    "pickDescription": "Customize your avatar style and options.",
+    "seed": "Seed",
+    "seedPlaceholder": "Enter seed text",
+    "style": "Style",
+    "backgroundColor": "Background Color",
+    "scale": "Scale",
+    "rotate": "Rotate",
+    "radius": "Radius",
+    "flip": "Flip",
+    "poweredBy": "Powered by DiceBear"
+  },
+  "folders": {
+    "title": "Folders",
+    "create": "Create Folder",
+    "createWithQuota": "Create Folder ({{used}} / {{total}})",
+    "createTitle": "Create Folder",
+    "editTitle": "Edit Folder",
+    "quotaLabel": "Folder quota",
+    "quotaValue": "{{used}} / {{total}} folders",
+    "nameLabel": "Folder Name",
+    "namePlaceholder": "Please input folder name",
+    "setDefault": "Set as Default",
+    "default": "Default",
+    "deleteSuccess": "Folder deleted successfully",
+    "deleteWarning": "Deleting this folder will unlink all API keys in it. The API keys themselves will not be deleted.",
+    "adminTitle": "Folder Management",
+    "adminDeleteWarning": "Are you sure you want to delete this folder? API keys inside it will be unlinked.",
+    "teamIdPlaceholder": "Enter Team ID to search",
+    "search": "Search",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At"
   }
 }

@@ -27,8 +27,12 @@
 
 ## Database
 
-- Migrations: `bun run drizzle` to generate, `bun run migrate` to apply.
+- Generate migrations: `bun run drizzle generate --name=<descriptive-name>` (e.g. `--name=add-api-key-folders`).
+- Apply migrations: `bun run drizzle migrate` (or `bun run migrate`).
 - Migration files in `drizzle/` folder.
+- Always use `--name` flag when generating to keep migration filenames descriptive.
+- Every newly created team must get a `Default` API key folder with `isDefault=true` inside the same transaction as team creation.
+- Default API key folders are system folders: they cannot be deleted, and delete flows should still promote another folder to default if historical data ends up without one.
 
 ## Environment
 

@@ -5,6 +5,9 @@ import { getModels } from '@server/lib/db/models'
 import { generateModelSuffix } from '@server/lib/generate'
 import Decimal from 'decimal.js'
 
+type ModelInsert = typeof dbSchema.models.$inferInsert
+type ModelPricing = ModelInsert['pricing']
+
 export async function getModelsWithPermission(userId?: string) {
   const models = await getModels({ userId })
   return models
@@ -51,7 +54,7 @@ export async function createModel(params: {
     metadata,
   } = params
 
-  const pricingValue: Record<string, any> = {
+  const pricingValue: ModelPricing = {
     input: new Decimal(pricing.input).toString(),
     output: new Decimal(pricing.output).toString(),
     input_cache_read: new Decimal(pricing.input_cache_read).toString(),
@@ -73,8 +76,7 @@ export async function createModel(params: {
     )
   }
 
-  const values = {
-    userId,
+  const values: Omit<ModelInsert, 'id' | 'createdAt' | 'updatedAt'> = {
     isPublic: isAdmin ? isPublicParam || false : false,
     name,
     description: description || '',
@@ -142,7 +144,7 @@ export async function updateModel(params: {
     metadata,
   } = params
 
-  const pricingValue: Record<string, any> = {
+  const pricingValue: ModelPricing = {
     input: new Decimal(pricing.input).toString(),
     output: new Decimal(pricing.output).toString(),
     input_cache_read: new Decimal(pricing.input_cache_read).toString(),
@@ -164,8 +166,7 @@ export async function updateModel(params: {
     )
   }
 
-  const values = {
-    userId,
+  const values: Omit<ModelInsert, 'id' | 'createdAt' | 'updatedAt'> = {
     isPublic: isAdmin ? isPublicParam || false : false,
     name,
     description: description || '',
