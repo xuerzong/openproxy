@@ -22,7 +22,7 @@ const Page = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const isOSS = useIsOSS()
-  const showPhoneLogin = isOSS
+  const showPhoneLogin = !isOSS
   const redirect = searchParams.get('redirect') || '/'
   const [loginMethod, setLoginMethod] = useState<'phone' | 'password'>(
     showPhoneLogin ? 'phone' : 'password'
