@@ -145,7 +145,10 @@ export const DashboardLayout = () => {
     [navigate, t]
   )
 
-  const menus = location.pathname.startsWith('/account/settings')
+  const isAccountSettingsPage =
+    location.pathname.startsWith('/account/settings')
+
+  const menus = isAccountSettingsPage
     ? accountSettingsMenus
     : location.pathname.startsWith('/settings')
       ? settingsMenus
@@ -154,7 +157,10 @@ export const DashboardLayout = () => {
   return (
     <AuthRequiredRoute>
       <TeamLayout>
-        <DashboardLayoutRoot menus={menus} showTeamSwitcher />
+        <DashboardLayoutRoot
+          menus={menus}
+          showTeamSwitcher={!isAccountSettingsPage}
+        />
       </TeamLayout>
     </AuthRequiredRoute>
   )
