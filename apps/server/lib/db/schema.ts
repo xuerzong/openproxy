@@ -218,6 +218,9 @@ export const apiKeys = pgTable(
     teamId: varchar('team_id')
       .notNull()
       .references(() => teams.id, { onDelete: 'cascade' }),
+    folderId: varchar('folder_id').references(() => apiKeyFolders.id, {
+      onDelete: 'set null',
+    }),
     name: text('name').notNull(),
     apiKey: varchar('api_key').notNull(),
     apiKeyHash: varchar('api_key_hash').notNull(),
@@ -257,6 +260,10 @@ export const apiKeysRelations = relations(apiKeys, ({ many, one }) => ({
   team: one(teams, {
     fields: [apiKeys.teamId],
     references: [teams.id],
+  }),
+  folder: one(apiKeyFolders, {
+    fields: [apiKeys.folderId],
+    references: [apiKeyFolders.id],
   }),
   apiKeysToModels: many(apiKeysToModels),
 }))
@@ -549,6 +556,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   orders: many(orders),
   usages: many(usages),
   apiKeys: many(apiKeys),
+  apiKeyFolders: many(apiKeyFolders),
 }))
 
 export const teamUsers = pgTable('team_users', {
@@ -578,3 +586,38 @@ export const teamUsersRelations = relations(teamUsers, ({ one }) => ({
     fields: [teamUsers.userId],
   }),
 }))
+
+export const apiKeyFolders = pgTable(
+  'api_key_folders',
+  {
+    id: varchar('id')
+      .notNull()
+      .$defaultFn(() => generateDBId())
+      .primaryKey(),
+    teamId: varchar('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade' }),
+    name: varchar('name').notNull(),
+    isDefault: boolean('is_default').notNull().default(false),
+    createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [index('api_key_folders_team_id_index').on(table.teamId)]
+)
+
+export const apiKeyFoldersRelations = relations(
+  apiKeyFolders,
+  ({ one, many }) => ({
+    team: one(teams, {
+      fields: [apiKeyFolders.teamId],
+      references: [teams.id],
+    }),
+    apiKeys: many(apiKeys),
+  })
+)
+
+export type ApiKeyFolder = typeof apiKeyFolders.$inferSelect

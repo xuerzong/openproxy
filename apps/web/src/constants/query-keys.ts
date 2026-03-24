@@ -18,12 +18,14 @@ export const queryKeys = {
   usagesTotal: 'usagesTotal',
   usagesGrouped: 'usagesGrouped',
   apiKeys: 'apiKeys',
+  apiKeyFolders: 'apiKeyFolders',
 
   // Admin
   adminTeams: 'admin/teams',
   adminTeamsCount: 'admin/teams/count',
   adminTeamsDetail: 'admin/teams/detail',
   adminTeamsMembers: 'admin/teams/members',
+  adminApiKeyFolders: 'admin/apiKeyFolders',
   adminOrders: 'admin/orders',
   adminOrdersCount: 'admin/orders/count',
   adminDashboardStats: 'admin-dashboard-stats',

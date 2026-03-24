@@ -5,6 +5,12 @@ export {
   ApiKeyIdParamSchema,
 } from './api-key'
 
+// API Key Folder Schemas
+export {
+  CreateApiKeyFolderBodySchema,
+  UpdateApiKeyFolderBodySchema,
+} from './api-key-folder'
+
 // Model Schemas
 export {
   ModelTypeSchema,

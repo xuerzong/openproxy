@@ -27,8 +27,10 @@
 
 ## Database
 
-- Migrations: `bun run drizzle` to generate, `bun run migrate` to apply.
+- Generate migrations: `bun run drizzle generate --name=<descriptive-name>` (e.g. `--name=add-api-key-folders`).
+- Apply migrations: `bun run drizzle migrate` (or `bun run migrate`).
 - Migration files in `drizzle/` folder.
+- Always use `--name` flag when generating to keep migration filenames descriptive.
 
 ## Environment
 

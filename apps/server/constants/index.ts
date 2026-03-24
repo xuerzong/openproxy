@@ -15,8 +15,8 @@ export const UserExperienceQuota = '1.00' // RMB
 export const MAX_TEAMS_PER_USER = 5
 
 export const TeamPlanLimits = {
-  free: { usersLimit: 1, apiKeyLimit: 20 },
-  pro: { usersLimit: 10, apiKeyLimit: 100 },
+  free: { usersLimit: 1, apiKeyLimit: 20, folderLimit: 1 },
+  pro: { usersLimit: 10, apiKeyLimit: 100, folderLimit: 5 },
 } as const
 
 export type TeamPlan = keyof typeof TeamPlanLimits

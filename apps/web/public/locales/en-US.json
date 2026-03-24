@@ -2,6 +2,7 @@
   "menu": {
     "dashboard": "Dashboard",
     "apiKeys": "API Keys",
+    "folders": "Folders",
     "billing": "Billing",
     "orders": "Orders",
     "models": "Models",
@@ -351,7 +352,12 @@
     "modelList": "Model List",
     "maxRequestsOptional": "Max Requests (optional)",
     "maxQuotaOptional": "Max Quota (optional)",
-    "expiresAtOptional": "Expiration Time (optional)"
+    "expiresAtOptional": "Expiration Time (optional)",
+    "folder": "Folder",
+    "noFolder": "No folder",
+    "createFolderFirst": "No folders yet, click to create one",
+    "allFolders": "All",
+    "uncategorized": "Uncategorized"
   },
   "aiProviders": {
     "title": "AI Providers",
@@ -528,5 +534,23 @@
     "radius": "Radius",
     "flip": "Flip",
     "poweredBy": "Powered by DiceBear"
+  },
+  "folders": {
+    "title": "Folders",
+    "create": "Create Folder",
+    "createTitle": "Create Folder",
+    "editTitle": "Edit Folder",
+    "nameLabel": "Folder Name",
+    "namePlaceholder": "Please input folder name",
+    "setDefault": "Set as Default",
+    "default": "Default",
+    "deleteSuccess": "Folder deleted successfully",
+    "deleteWarning": "Deleting this folder will unlink all API keys in it. The API keys themselves will not be deleted.",
+    "adminTitle": "Folder Management",
+    "adminDeleteWarning": "Are you sure you want to delete this folder? API keys inside it will be unlinked.",
+    "teamIdPlaceholder": "Enter Team ID to search",
+    "search": "Search",
+    "createdAt": "Created At",
+    "updatedAt": "Updated At"
   }
 }

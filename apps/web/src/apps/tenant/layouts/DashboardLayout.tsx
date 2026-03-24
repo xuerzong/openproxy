@@ -4,6 +4,7 @@ import {
   BoxIcon,
   ChevronLeftIcon,
   CreditCardIcon,
+  FolderIcon,
   GaugeIcon,
   KeyRoundIcon,
   SettingsIcon,
@@ -37,6 +38,15 @@ export const DashboardLayout = () => {
       label: t('menu.apiKeys', { defaultValue: 'API Keys' }),
       onClick() {
         navigate('/apiKeys')
+      },
+      access: 'public',
+    },
+    {
+      key: '/folders',
+      icon: <FolderIcon className="w-5 h-5" />,
+      label: t('menu.folders', { defaultValue: 'Folders' }),
+      onClick() {
+        navigate('/folders')
       },
       access: 'public',
     },

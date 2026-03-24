@@ -1,12 +1,13 @@
-import { Fragment, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import dayjs from '@/utils/dayjs'
 import { useRequest } from '@/contexts/ApiContext'
 import copy from 'copy-to-clipboard'
 import { toast } from 'sonner'
 import { APIKeyItem } from '@/components/APIKey/APIKeyItem'
 import { useApiKeysQuery } from '@/apps/tenant/hooks/queries/useApiKeysQuery'
+import { useApiKeyFoldersQuery } from '@/apps/tenant/hooks/queries/useApiKeyFoldersQuery'
 import { Button } from '@openproxy/ui/Button'
-import { PlusIcon } from 'lucide-react'
+import { FolderIcon, PlusIcon } from 'lucide-react'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
 import { APIKeyForm } from '@/components/APIKey/APIKeyForm'
@@ -22,7 +23,19 @@ const Page = () => {
   const request = useRequest()
   const [newApiKey, setNewApiKey] = useState('')
   const [deleteId, setDeleteId] = useState('')
+  const [selectedFolderId, setSelectedFolderId] = useState<string>('__all__')
   const apiKeysQuery = useApiKeysQuery()
+  const foldersQuery = useApiKeyFoldersQuery()
+  const folders = foldersQuery.data || []
+
+  const filteredApiKeys = useMemo(() => {
+    const keys = apiKeysQuery.data || []
+    if (selectedFolderId === '__all__') return keys
+    if (selectedFolderId === '__none__')
+      return keys.filter((k: any) => !k.folderId)
+    return keys.filter((k: any) => k.folderId === selectedFolderId)
+  }, [apiKeysQuery.data, selectedFolderId])
+
   const [apiKeyForm] = useForm({
     defaultValues: {
       name: '',
@@ -47,6 +60,41 @@ const Page = () => {
       title={t('apiKeys.title', { defaultValue: 'API Keys' })}
       className="h-screen"
     >
+      {folders.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <FolderIcon className="w-4 h-4 text-muted-foreground" />
+          <Button
+            size="sm"
+            variant={selectedFolderId === '__all__' ? 'default' : 'outline'}
+            onClick={() => setSelectedFolderId('__all__')}
+          >
+            {t('apiKeys.allFolders')}
+          </Button>
+          {folders.map((folder: any) => (
+            <Button
+              key={folder.id}
+              size="sm"
+              variant={selectedFolderId === folder.id ? 'default' : 'outline'}
+              onClick={() => setSelectedFolderId(folder.id)}
+            >
+              {folder.name}
+              {folder.isDefault && (
+                <span className="text-xs opacity-60 ml-1">
+                  ({t('folders.default')})
+                </span>
+              )}
+            </Button>
+          ))}
+          <Button
+            size="sm"
+            variant={selectedFolderId === '__none__' ? 'default' : 'outline'}
+            onClick={() => setSelectedFolderId('__none__')}
+          >
+            {t('apiKeys.uncategorized')}
+          </Button>
+        </div>
+      )}
+
       <div className="flex items-center w-full gap-2">
         <div style={{ flex: 1 }}></div>
 
@@ -66,37 +114,37 @@ const Page = () => {
         </Button>
       </div>
       <FlexScrollViewer bordered>
-        {apiKeysQuery.data &&
-          apiKeysQuery.data.map((apiKey, apiKeyIndex) => (
-            <Fragment key={apiKey.id}>
-              <APIKeyItem
-                apiKey={apiKey}
-                onEdit={() => {
-                  apiKeyForm.setValues({
-                    ...apiKey,
-                    modelIds: apiKey.modelIds,
-                    expiresAt: apiKey.expiresAt
-                      ? dayjs(apiKey.expiresAt).format('YYYY-MM-DDTHH:mm')
-                      : void 0,
-                    maxQuota:
-                      Number(apiKey.maxQuota) === 0 ? void 0 : apiKey.maxQuota,
-                    maxRequests:
-                      Number(apiKey.maxRequests) === 0
-                        ? void 0
-                        : apiKey.maxRequests,
-                  })
-                  setOpen(true)
-                }}
-                onDelete={() => {
-                  setDeleteId(apiKey.id)
-                }}
-              />
-              {apiKeyIndex !== apiKeysQuery.data!.length - 1 && (
-                <div className="h-px bg-border w-full" />
-              )}
-            </Fragment>
-          ))}
-        {apiKeysQuery.data && apiKeysQuery.data.length === 0 && (
+        {filteredApiKeys.map((apiKey: any, apiKeyIndex: number) => (
+          <Fragment key={apiKey.id}>
+            <APIKeyItem
+              apiKey={apiKey}
+              onEdit={() => {
+                apiKeyForm.setValues({
+                  ...apiKey,
+                  modelIds: apiKey.modelIds,
+                  folderId: apiKey.folderId || '',
+                  expiresAt: apiKey.expiresAt
+                    ? dayjs(apiKey.expiresAt).format('YYYY-MM-DDTHH:mm')
+                    : void 0,
+                  maxQuota:
+                    Number(apiKey.maxQuota) === 0 ? void 0 : apiKey.maxQuota,
+                  maxRequests:
+                    Number(apiKey.maxRequests) === 0
+                      ? void 0
+                      : apiKey.maxRequests,
+                })
+                setOpen(true)
+              }}
+              onDelete={() => {
+                setDeleteId(apiKey.id)
+              }}
+            />
+            {apiKeyIndex !== filteredApiKeys.length - 1 && (
+              <div className="h-px bg-border w-full" />
+            )}
+          </Fragment>
+        ))}
+        {filteredApiKeys.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-6 py-6">
             <img className="w-64" src="/404.svg" />
             <div className="">
@@ -149,6 +197,7 @@ const Page = () => {
                     ? request.apiKeys.put({
                         id: values.id,
                         name: values.name,
+                        folderId: values.folderId || null,
                         modelIds: Array.from(new Set(modelIds)),
                         maxQuota: values.maxQuota ?? '0.00',
                         maxRequests: values.maxRequests ?? 0,
@@ -158,6 +207,7 @@ const Page = () => {
                       })
                     : request.apiKeys.post({
                         name: values.name,
+                        folderId: values.folderId || null,
                         modelIds: Array.from(new Set(modelIds)),
                         maxQuota: values.maxQuota ?? void 0,
                         maxRequests: values.maxRequests ?? void 0,
