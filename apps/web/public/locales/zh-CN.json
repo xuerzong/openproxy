@@ -340,7 +340,7 @@
     "title": "密钥管理",
     "createTitle": "创建 API Key",
     "editTitle": "编辑 API Key",
-    "createWithCount": "创建 API Key ({{count}}/10)",
+    "createWithCount": "创建 API Key ({{count}}/{{total}})",
     "newTitle": "新的 API Key",
     "newHint": "请将此 API key 保存在安全且易于访问的地方。出于安全原因，你将无法在管理界面再次查看它。如果丢失，需要重新创建。",
     "deleteWarning": "该 API key 将立即被禁用。使用此密钥发出的请求将被拒绝，可能导致依赖它的系统异常。一旦删除，你将无法再查看或修改此 API key。",

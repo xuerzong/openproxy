@@ -14,12 +14,14 @@ import {
   APIKeyForm,
   NO_FOLDER_OPTION_VALUE,
 } from '@/components/APIKey/APIKeyForm'
+import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useForm } from '@openproxy/ui/Form'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 import { useSearchParams } from 'react-router'
+import { useIsOSS } from '@/hooks/useIsOSS'
 
 const ALL_FOLDERS_FILTER = '__all__'
 
@@ -38,9 +40,16 @@ const Page = () => {
   const [newApiKey, setNewApiKey] = useState('')
   const [deleteId, setDeleteId] = useState('')
   const [searchParams, setSearchParams] = useSearchParams()
+  const teamQuery = useTeamQuery()
+  const isOSS = useIsOSS()
   const apiKeysQuery = useApiKeysQuery()
   const foldersQuery = useApiKeyFoldersQuery()
   const folders = foldersQuery.data || []
+  const apiKeyLimit = teamQuery.data?.team?.apiKeyLimit
+  const apiKeyCount = apiKeysQuery.data?.length || 0
+  const isCreateDisabled = !isOSS && !!apiKeyLimit && apiKeyCount >= apiKeyLimit
+  const totalApiKeysLabel =
+    isOSS || !apiKeyLimit ? t('common.unlimited') : String(apiKeyLimit)
   const folderQuery = searchParams.get('folder')
   const selectedFolderId =
     folderQuery && folders.some((folder: any) => folder.id === folderQuery)
@@ -134,12 +143,12 @@ const Page = () => {
             apiKeyForm.resetErrors()
             setOpen(true)
           }}
-          disabled={apiKeysQuery.data?.length === 10}
+          disabled={isCreateDisabled}
         >
           <PlusIcon />
           {t('apiKeys.createWithCount', {
-            defaultValue: 'Create API Key ({{count}}/10)',
-            count: apiKeysQuery.data?.length || 0,
+            count: apiKeyCount,
+            total: totalApiKeysLabel,
           })}
         </Button>
       </div>
@@ -181,6 +190,7 @@ const Page = () => {
               {t('common.emptyState', { defaultValue: 'Nothing here yet' })}
             </div>
             <Button
+              disabled={isCreateDisabled}
               onClick={() => {
                 apiKeyForm.setValues({
                   name: '',
@@ -191,7 +201,10 @@ const Page = () => {
               }}
             >
               <PlusIcon />
-              {t('actions.createNow', { defaultValue: 'Create now' })}
+              {t('apiKeys.createWithCount', {
+                count: apiKeyCount,
+                total: totalApiKeysLabel,
+              })}
             </Button>
           </div>
         )}
