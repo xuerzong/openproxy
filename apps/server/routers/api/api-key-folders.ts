@@ -6,6 +6,7 @@ import {
   createApiKeyFolder,
   updateApiKeyFolder,
   deleteApiKeyFolder,
+  ApiKeyFolderServiceError,
 } from '@server/services/api-key-folder'
 import {
   CreateApiKeyFolderBodySchema,
@@ -70,11 +71,19 @@ export const apiKeyFoldersRouter = new Elysia()
   .delete(
     'apiKeyFolders/:id',
     async ({ teamId, params, status }) => {
-      const folder = await deleteApiKeyFolder(params.id, teamId)
-      if (!folder) {
-        return status(404, { message: 'Folder not found' })
+      try {
+        const folder = await deleteApiKeyFolder(params.id, teamId)
+        if (!folder) {
+          return status(404, { message: 'Folder not found' })
+        }
+        return folder
+      } catch (error) {
+        if (error instanceof ApiKeyFolderServiceError) {
+          return status(error.status, { message: error.message })
+        }
+
+        throw error
       }
-      return folder
     },
     { auth: { role: true }, team: true }
   )

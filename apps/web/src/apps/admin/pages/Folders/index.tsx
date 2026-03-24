@@ -85,15 +85,16 @@ const Page = () => {
                 key: 'operation',
                 label: t('common.operation'),
                 width: 100,
-                render: (_: any, row: any) => (
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={() => setDeleteId(row.id)}
-                  >
-                    <Trash2Icon className="w-4 h-4" />
-                  </Button>
-                ),
+                render: (_: any, row: any) =>
+                  row.isDefault ? null : (
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      onClick={() => setDeleteId(row.id)}
+                    >
+                      <Trash2Icon className="w-4 h-4" />
+                    </Button>
+                  ),
               },
             ]}
           />

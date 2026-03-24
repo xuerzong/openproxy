@@ -1,6 +1,51 @@
-import { and, count, desc, eq } from 'drizzle-orm'
+import { and, asc, count, desc, eq } from 'drizzle-orm'
 import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
+
+export class ApiKeyFolderServiceError extends Error {
+  constructor(
+    message: string,
+    public status: number
+  ) {
+    super(message)
+    this.name = 'ApiKeyFolderServiceError'
+  }
+}
+
+const ensureTeamDefaultFolder = async (
+  tx: Parameters<typeof db.transaction>[0] extends (arg: infer T) => any
+    ? T
+    : never,
+  teamId: string
+) => {
+  const existingDefaultFolder = await tx.query.apiKeyFolders.findFirst({
+    where: and(
+      eq(dbSchema.apiKeyFolders.teamId, teamId),
+      eq(dbSchema.apiKeyFolders.isDefault, true)
+    ),
+  })
+
+  if (existingDefaultFolder) {
+    return existingDefaultFolder
+  }
+
+  const fallbackFolder = await tx.query.apiKeyFolders.findFirst({
+    where: eq(dbSchema.apiKeyFolders.teamId, teamId),
+    orderBy: asc(dbSchema.apiKeyFolders.createdAt),
+  })
+
+  if (!fallbackFolder) {
+    return null
+  }
+
+  const [folder] = await tx
+    .update(dbSchema.apiKeyFolders)
+    .set({ isDefault: true, updatedAt: new Date() })
+    .where(eq(dbSchema.apiKeyFolders.id, fallbackFolder.id))
+    .returning()
+
+  return folder ?? null
+}
 
 export async function getApiKeyFoldersByTeamId(teamId: string) {
   return db.query.apiKeyFolders.findMany({
@@ -88,17 +133,36 @@ export async function updateApiKeyFolder(params: {
 }
 
 export async function deleteApiKeyFolder(id: string, teamId: string) {
-  const [folder] = await db
-    .delete(dbSchema.apiKeyFolders)
-    .where(
-      and(
+  return db.transaction(async (tx) => {
+    const folder = await tx.query.apiKeyFolders.findFirst({
+      where: and(
         eq(dbSchema.apiKeyFolders.id, id),
         eq(dbSchema.apiKeyFolders.teamId, teamId)
-      )
-    )
-    .returning()
+      ),
+    })
 
-  return folder
+    if (!folder) {
+      return null
+    }
+
+    if (folder.isDefault) {
+      throw new ApiKeyFolderServiceError('DEFAULT_FOLDER_DELETE_FORBIDDEN', 409)
+    }
+
+    const [deletedFolder] = await tx
+      .delete(dbSchema.apiKeyFolders)
+      .where(
+        and(
+          eq(dbSchema.apiKeyFolders.id, id),
+          eq(dbSchema.apiKeyFolders.teamId, teamId)
+        )
+      )
+      .returning()
+
+    await ensureTeamDefaultFolder(tx, teamId)
+
+    return deletedFolder
+  })
 }
 
 // Admin functions
@@ -110,10 +174,26 @@ export async function getApiKeyFoldersByTeamIdAdmin(teamId: string) {
 }
 
 export async function deleteApiKeyFolderAdmin(id: string) {
-  const [folder] = await db
-    .delete(dbSchema.apiKeyFolders)
-    .where(eq(dbSchema.apiKeyFolders.id, id))
-    .returning()
+  return db.transaction(async (tx) => {
+    const folder = await tx.query.apiKeyFolders.findFirst({
+      where: eq(dbSchema.apiKeyFolders.id, id),
+    })
 
-  return folder
+    if (!folder) {
+      return null
+    }
+
+    if (folder.isDefault) {
+      throw new ApiKeyFolderServiceError('DEFAULT_FOLDER_DELETE_FORBIDDEN', 409)
+    }
+
+    const [deletedFolder] = await tx
+      .delete(dbSchema.apiKeyFolders)
+      .where(eq(dbSchema.apiKeyFolders.id, id))
+      .returning()
+
+    await ensureTeamDefaultFolder(tx, folder.teamId)
+
+    return deletedFolder
+  })
 }

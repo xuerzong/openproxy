@@ -1,6 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
+  ApiKeyFolderServiceError,
   getApiKeyFoldersByTeamIdAdmin,
   deleteApiKeyFolderAdmin,
 } from '@server/services/api-key-folder'
@@ -22,12 +23,21 @@ export const adminApiKeyFoldersRouter = new Elysia({
   .delete(
     '/folders/:id',
     async ({ params, set }) => {
-      const folder = await deleteApiKeyFolderAdmin(params.id)
-      if (!folder) {
-        set.status = 404
-        return 'Folder not found'
+      try {
+        const folder = await deleteApiKeyFolderAdmin(params.id)
+        if (!folder) {
+          set.status = 404
+          return 'Folder not found'
+        }
+        return folder
+      } catch (error) {
+        if (error instanceof ApiKeyFolderServiceError) {
+          set.status = error.status
+          return error.message
+        }
+
+        throw error
       }
-      return folder
     },
     {
       auth: { role: 'admin' },

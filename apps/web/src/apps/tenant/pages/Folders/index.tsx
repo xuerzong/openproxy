@@ -57,14 +57,16 @@ const Page = () => {
                       </Button>
                     }
                   />
-                  <DeleteFolderDialog
-                    folderId={folder.id}
-                    trigger={
-                      <Button variant="outline" size="sm">
-                        {t('actions.delete')}
-                      </Button>
-                    }
-                  />
+                  {!folder.isDefault && (
+                    <DeleteFolderDialog
+                      folderId={folder.id}
+                      trigger={
+                        <Button variant="outline" size="sm">
+                          {t('actions.delete')}
+                        </Button>
+                      }
+                    />
+                  )}
                 </div>
               </div>
               {idx !== foldersQuery.data!.length - 1 && (
