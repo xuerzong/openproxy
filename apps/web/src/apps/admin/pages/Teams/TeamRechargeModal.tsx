@@ -123,7 +123,7 @@ export const TeamRechargeModal: React.FC<TeamRechargeModalProps> = ({
             precision={2}
             step={10}
             value={amount}
-            onChange={setAmount}
+            onChange={(value) => setAmount(value ?? 0)}
           />
         </div>
       </div>
