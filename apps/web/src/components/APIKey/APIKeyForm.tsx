@@ -11,6 +11,8 @@ import { useTranslation } from 'react-i18next'
 import { useApiKeyFoldersQuery } from '@/apps/tenant/hooks/queries/useApiKeyFoldersQuery'
 import { EditFolderDialog } from '../APIKeyFolder/EditFolderDialog'
 
+export const NO_FOLDER_OPTION_VALUE = '__no_folder__'
+
 interface APIKeyFormProps {
   form: FormInstance
 }
@@ -45,7 +47,10 @@ export const APIKeyForm: React.FC<APIKeyFormProps> = ({ form }) => {
             <Select
               placeholder={t('common.selectPlaceholder')}
               options={[
-                { value: '', label: t('apiKeys.noFolder') },
+                {
+                  value: NO_FOLDER_OPTION_VALUE,
+                  label: t('apiKeys.noFolder'),
+                },
                 ...folderOptions,
               ]}
             />

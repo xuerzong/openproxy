@@ -10,7 +10,10 @@ import { Button } from '@openproxy/ui/Button'
 import { FolderIcon, PlusIcon } from 'lucide-react'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
-import { APIKeyForm } from '@/components/APIKey/APIKeyForm'
+import {
+  APIKeyForm,
+  NO_FOLDER_OPTION_VALUE,
+} from '@/components/APIKey/APIKeyForm'
 import { useForm } from '@openproxy/ui/Form'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
@@ -19,7 +22,14 @@ import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 import { useSearchParams } from 'react-router'
 
 const ALL_FOLDERS_FILTER = '__all__'
-const UNCATEGORIZED_FILTER = '__none__'
+
+const normalizeFolderIdForSubmit = (folderId?: string | null) => {
+  if (!folderId || folderId === NO_FOLDER_OPTION_VALUE) {
+    return null
+  }
+
+  return folderId
+}
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -31,10 +41,13 @@ const Page = () => {
   const apiKeysQuery = useApiKeysQuery()
   const foldersQuery = useApiKeyFoldersQuery()
   const folders = foldersQuery.data || []
-  const selectedFolderId = searchParams.get('folder') || ALL_FOLDERS_FILTER
+  const folderQuery = searchParams.get('folder')
+  const selectedFolderId =
+    folderQuery && folders.some((folder: any) => folder.id === folderQuery)
+      ? folderQuery
+      : ALL_FOLDERS_FILTER
   const defaultCreateFolderId =
     selectedFolderId !== ALL_FOLDERS_FILTER &&
-    selectedFolderId !== UNCATEGORIZED_FILTER &&
     folders.some((folder: any) => folder.id === selectedFolderId)
       ? selectedFolderId
       : ''
@@ -52,8 +65,6 @@ const Page = () => {
   const filteredApiKeys = useMemo(() => {
     const keys = apiKeysQuery.data || []
     if (selectedFolderId === ALL_FOLDERS_FILTER) return keys
-    if (selectedFolderId === UNCATEGORIZED_FILTER)
-      return keys.filter((k: any) => !k.folderId)
     return keys.filter((k: any) => k.folderId === selectedFolderId)
   }, [apiKeysQuery.data, selectedFolderId])
 
@@ -108,15 +119,6 @@ const Page = () => {
               )}
             </Button>
           ))}
-          <Button
-            size="sm"
-            variant={
-              selectedFolderId === UNCATEGORIZED_FILTER ? 'default' : 'outline'
-            }
-            onClick={() => setSelectedFolderId(UNCATEGORIZED_FILTER)}
-          >
-            {t('apiKeys.uncategorized')}
-          </Button>
         </div>
       )}
 
@@ -150,7 +152,7 @@ const Page = () => {
                 apiKeyForm.setValues({
                   ...apiKey,
                   modelIds: apiKey.modelIds,
-                  folderId: apiKey.folderId || '',
+                  folderId: apiKey.folderId || NO_FOLDER_OPTION_VALUE,
                   expiresAt: apiKey.expiresAt
                     ? dayjs(apiKey.expiresAt).format('YYYY-MM-DDTHH:mm')
                     : void 0,
@@ -230,7 +232,7 @@ const Page = () => {
                     ? request.apiKeys.put({
                         id: values.id,
                         name: values.name,
-                        folderId: values.folderId || null,
+                        folderId: normalizeFolderIdForSubmit(values.folderId),
                         modelIds: Array.from(new Set(modelIds)),
                         maxQuota: values.maxQuota ?? '0.00',
                         maxRequests: values.maxRequests ?? 0,
@@ -240,7 +242,7 @@ const Page = () => {
                       })
                     : request.apiKeys.post({
                         name: values.name,
-                        folderId: values.folderId || null,
+                        folderId: normalizeFolderIdForSubmit(values.folderId),
                         modelIds: Array.from(new Set(modelIds)),
                         maxQuota: values.maxQuota ?? void 0,
                         maxRequests: values.maxRequests ?? void 0,
