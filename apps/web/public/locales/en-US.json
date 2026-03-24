@@ -2,6 +2,7 @@
   "menu": {
     "dashboard": "Dashboard",
     "apiKeys": "API Keys",
+    "library": "Library",
     "folders": "Folders",
     "billing": "Billing",
     "orders": "Orders",

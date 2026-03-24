@@ -23,6 +23,7 @@ When adding or modifying any visible text (labels, tooltips, placeholders, error
 - Data fetching: use `@tanstack/react-query` hooks in `src/hooks/queries/`.
 - Styles: TailwindCSS utility classes + CSS modules (`*.module.css`) when needed.
 - Path aliases: `@/` → `src/`, `@openproxy/` → workspace packages.
+- Sidebar menus in `src/layouts/DashboardLayout.tsx` may include non-clickable `label` and `separator` entries to create grouped navigation sections.
 
 ## Project Structure
 

@@ -2,6 +2,7 @@
   "menu": {
     "dashboard": "控制台",
     "apiKeys": "API Keys",
+    "library": "资源",
     "folders": "文件夹",
     "billing": "充值",
     "orders": "订单管理",

@@ -11,17 +11,32 @@ import { useMenuTransition } from '@/hooks/useMenuTransition'
 import { cn } from '@openproxy/ui/utils/cn'
 import { changeCollapsed, toggleCollapsed, useAppStore } from '@/stores/app'
 
-type MenuData = {
+type MenuItemData = {
+  type?: 'item'
   key: string
   icon?: React.ReactNode
   label: string
+  access?: string
   onClick?: () => void
   matchPath?: (pathname: string) => boolean
   showArrow?: boolean
 }
 
+type MenuLabelData = {
+  type: 'label'
+  key: string
+  label: string
+}
+
+type MenuSeparatorData = {
+  type: 'separator'
+  key: string
+}
+
+export type MenuData = MenuItemData | MenuLabelData | MenuSeparatorData
+
 interface MenuItemProps {
-  menu: MenuData
+  menu: MenuItemData
   isActive?: boolean
 }
 
@@ -105,17 +120,28 @@ export const DashboardLayout: React.FC<MainLayoutProps> = ({
               }
             )}
           >
-            {displayedMenus.map((menu) => (
-              <MenuItem
-                key={menu.key}
-                menu={menu}
-                isActive={
-                  menu.matchPath
-                    ? menu.matchPath(pathname)
-                    : menu.key === pathname
-                }
-              />
-            ))}
+            {displayedMenus.map((menu) =>
+              menu.type === 'separator' ? (
+                <div key={menu.key} className="my-2 h-px bg-border" />
+              ) : menu.type === 'label' ? (
+                <div
+                  key={menu.key}
+                  className="px-4 pb-1 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground/80"
+                >
+                  {menu.label}
+                </div>
+              ) : (
+                <MenuItem
+                  key={menu.key}
+                  menu={menu}
+                  isActive={
+                    menu.matchPath
+                      ? menu.matchPath(pathname)
+                      : menu.key === pathname
+                  }
+                />
+              )
+            )}
           </div>
         </div>
 

@@ -16,13 +16,14 @@ import { useLocation, useNavigate } from 'react-router'
 import { TeamLayout } from '@/layouts/TeamLayout'
 import { useTranslation } from 'react-i18next'
 import { useIsOSS } from '@/hooks/useIsOSS'
+import type { MenuData } from '@/layouts/DashboardLayout'
 
 export const DashboardLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation('common')
   const isOSS = useIsOSS()
-  const mainMenus = [
+  const mainMenus: MenuData[] = [
     {
       key: '/',
       icon: <GaugeIcon className="w-5 h-5" />,
@@ -42,15 +43,6 @@ export const DashboardLayout = () => {
       access: 'public',
     },
     {
-      key: '/folders',
-      icon: <FolderIcon className="w-5 h-5" />,
-      label: t('menu.folders', { defaultValue: 'Folders' }),
-      onClick() {
-        navigate('/folders')
-      },
-      access: 'public',
-    },
-    {
       key: '/orders',
       icon: <StampIcon className="w-5 h-5" />,
       label: t('menu.orders', { defaultValue: 'Orders' }),
@@ -65,6 +57,24 @@ export const DashboardLayout = () => {
       label: t('menu.models', { defaultValue: 'Models' }),
       onClick() {
         navigate('/models')
+      },
+      access: 'public',
+    },
+    {
+      type: 'separator',
+      key: 'library-separator',
+    },
+    {
+      type: 'label',
+      key: 'library-label',
+      label: t('menu.library', { defaultValue: 'Library' }),
+    },
+    {
+      key: '/folders',
+      icon: <FolderIcon className="w-5 h-5" />,
+      label: t('menu.folders', { defaultValue: 'Folders' }),
+      onClick() {
+        navigate('/folders')
       },
       access: 'public',
     },
