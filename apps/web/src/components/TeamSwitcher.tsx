@@ -38,6 +38,7 @@ export const TeamSwitcher = () => {
   const currentTeamId = teamQuery.data?.teamId
   const currentTeam = teams.find((t) => t.teamId === currentTeamId)
   const teamName = currentTeam?.team?.name || '...'
+  const currentPlan = currentTeam?.team?.plan || 'free'
   const teamId = currentTeamId || ''
 
   const isOSS = useIsOSS()
@@ -117,6 +118,15 @@ export const TeamSwitcher = () => {
             <Avatar src={currentTeam?.team?.logo} />
             <div className="flex flex-col flex-1 min-w-0">
               <span className="text-sm w-full truncate">{teamName}</span>
+              {!isOSS && (
+                <span
+                  className={`text-xs font-bold uppercase ${currentPlan === 'pro' ? 'text-primary' : ''}`}
+                >
+                  {currentPlan === 'pro'
+                    ? t('common.pro', { defaultValue: 'Pro' })
+                    : t('common.free', { defaultValue: 'Free' })}
+                </span>
+              )}
             </div>
             <ChevronsUpDownIcon className="absolute top-[50%] right-4 translate-y-[-50%] w-4 h-4" />
           </Card>

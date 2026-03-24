@@ -6,16 +6,11 @@ import { Card } from './Card'
 import { useTranslation } from 'react-i18next'
 import { Avatar } from '@openproxy/ui/Avatar'
 import { Skeleton } from '@openproxy/ui/Skeleton'
-import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
-import { useIsOSS } from '@/hooks/useIsOSS'
 
 export const UserAccount = () => {
   const { t } = useTranslation('common')
   const { session, signOut } = useAuth()
   const navigate = useNavigate()
-  const teamQuery = useTeamQuery()
-  const isOSS = useIsOSS()
-  const plan = teamQuery.data?.team?.plan
   if (typeof session === 'undefined') {
     return (
       <Card className="flex items-center gap-2 p-4">
@@ -62,15 +57,6 @@ export const UserAccount = () => {
         </div>
         <div className="flex flex-col flex-1 min-w-0">
           <span className="text-sm w-full truncate">{session.user.name}</span>
-          {!isOSS && (
-            <span
-              className={`text-xs font-bold uppercase ${plan === 'pro' ? 'text-primary' : ''}`}
-            >
-              {plan === 'pro'
-                ? t('common.pro', { defaultValue: 'Pro' })
-                : t('common.free', { defaultValue: 'Free' })}
-            </span>
-          )}
         </div>
         <ChevronRight className="absolute top-[50%] right-4 translate-y-[-50%] w-4 h-4" />
       </Card>
