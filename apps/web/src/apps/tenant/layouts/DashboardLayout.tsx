@@ -2,6 +2,7 @@ import { AuthRequiredRoute } from '@/components/AuthRequiredRoute'
 import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayout'
 import {
   BoxIcon,
+  CircleUserRoundIcon,
   ChevronLeftIcon,
   FolderIcon,
   GaugeIcon,
@@ -116,9 +117,39 @@ export const DashboardLayout = () => {
     [navigate, t]
   )
 
-  const menus = location.pathname.startsWith('/settings')
-    ? settingsMenus
-    : mainMenus
+  const accountSettingsMenus = useMemo(
+    () => [
+      {
+        key: '/account/settings-back',
+        icon: <ChevronLeftIcon className="w-5 h-5" />,
+        label: t('teamSettings.backToWorkspace', {
+          defaultValue: 'Back to Workspace',
+        }),
+        onClick() {
+          navigate('/')
+        },
+        access: 'public',
+      },
+      {
+        key: '/account/settings/general',
+        icon: <CircleUserRoundIcon className="w-5 h-5" />,
+        label: t('settings.general.menu', {
+          defaultValue: 'Basic Information',
+        }),
+        onClick() {
+          navigate('/account/settings/general')
+        },
+        access: 'public',
+      },
+    ],
+    [navigate, t]
+  )
+
+  const menus = location.pathname.startsWith('/account/settings')
+    ? accountSettingsMenus
+    : location.pathname.startsWith('/settings')
+      ? settingsMenus
+      : mainMenus
 
   return (
     <AuthRequiredRoute>

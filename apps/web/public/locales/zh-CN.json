@@ -129,7 +129,10 @@
     "enUS": "English"
   },
   "settings": {
-    "title": "设置"
+    "title": "设置",
+    "general": {
+      "menu": "基础信息"
+    }
   },
   "teamSettings": {
     "title": "团队设置",
