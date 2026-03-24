@@ -5,29 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1773929867138,
+      "when": 1774320735673,
       "tag": "0000_init",
       "breakpoints": true
     },
     {
-      "idx": 2,
+      "idx": 1,
       "version": "7",
-      "when": 1774279865827,
-      "tag": "0002_smart_lady_vermin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1774310211155,
-      "tag": "0003_add-api-key-folders",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1774320000000,
-      "tag": "0004_ensure_single_default_api_key_folder",
+      "when": 1774320748997,
+      "tag": "0001_ensure_single_default_api_key_folder",
       "breakpoints": true
     }
   ]

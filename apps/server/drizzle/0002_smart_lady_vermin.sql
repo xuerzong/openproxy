@@ -1,1 +1,0 @@
-ALTER TABLE "teams" ADD COLUMN "plan" varchar DEFAULT 'free' NOT NULL;

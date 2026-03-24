@@ -1,6 +1,6 @@
 {
-  "id": "715d0572-af06-4d41-a9a9-e5bab44e912d",
-  "prevId": "1b2f893b-8ed5-401f-a68b-a15eb3b8feba",
+  "id": "cf472b09-aa48-446b-b4c9-01cae48f1f13",
+  "prevId": "32aa4bb2-5744-4ed8-9094-aa09badd4c9c",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -358,6 +358,22 @@
             }
           ],
           "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "api_key_folders_team_default_unique": {
+          "name": "api_key_folders_team_default_unique",
+          "columns": [
+            {
+              "expression": "team_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"api_key_folders\".\"is_default\" = true",
           "concurrently": false,
           "method": "btree",
           "with": {}
