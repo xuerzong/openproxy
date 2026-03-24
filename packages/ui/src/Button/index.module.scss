@@ -11,6 +11,14 @@
   &[data-size='icon-xs'],
   &[data-size='xs'] {
     svg {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+  }
+
+  &[data-size='icon-sm'],
+  &[data-size='sm'] {
+    svg {
       width: 1rem;
       height: 1rem;
     }

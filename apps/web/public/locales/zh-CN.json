@@ -540,6 +540,8 @@
     "create": "创建文件夹",
     "createTitle": "创建文件夹",
     "editTitle": "编辑文件夹",
+    "quotaLabel": "文件夹配额",
+    "quotaValue": "{{used}} / {{total}} 个文件夹",
     "nameLabel": "文件夹名称",
     "namePlaceholder": "请输入文件夹名称",
     "setDefault": "设为默认",

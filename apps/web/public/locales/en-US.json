@@ -540,6 +540,8 @@
     "create": "Create Folder",
     "createTitle": "Create Folder",
     "editTitle": "Edit Folder",
+    "quotaLabel": "Folder quota",
+    "quotaValue": "{{used}} / {{total}} folders",
     "nameLabel": "Folder Name",
     "namePlaceholder": "Please input folder name",
     "setDefault": "Set as Default",

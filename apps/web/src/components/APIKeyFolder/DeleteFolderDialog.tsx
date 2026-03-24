@@ -6,22 +6,35 @@ import { useApiKeyFoldersQuery } from '@/apps/tenant/hooks/queries/useApiKeyFold
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 interface DeleteFolderDialogProps {
-  trigger: React.ReactElement<{ onClick?: () => void }>
+  trigger?: React.ReactElement<{ onClick?: () => void }>
   folderId: string
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export const DeleteFolderDialog: React.FC<DeleteFolderDialogProps> = ({
   trigger,
   folderId,
+  open: controlledOpen,
+  onOpenChange,
 }) => {
   const { t } = useTranslation('common')
   const request = useRequest()
   const foldersQuery = useApiKeyFoldersQuery()
-  const [open, setOpen] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
+  const open = controlledOpen ?? uncontrolledOpen
+
+  const setOpen = (nextOpen: boolean) => {
+    onOpenChange?.(nextOpen)
+
+    if (controlledOpen === undefined) {
+      setUncontrolledOpen(nextOpen)
+    }
+  }
 
   return (
     <>
-      {cloneElement(trigger, { onClick: () => setOpen(true) })}
+      {trigger ? cloneElement(trigger, { onClick: () => setOpen(true) }) : null}
 
       <Dialog
         open={open}

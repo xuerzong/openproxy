@@ -1,5 +1,5 @@
-import { cloneElement } from 'react'
 import { useState } from 'react'
+import { cloneElement } from 'react'
 import { Dialog } from '@openproxy/ui/Dialog'
 import { useForm } from '@openproxy/ui/Form'
 import { Button } from '@openproxy/ui/Button'
@@ -10,21 +10,34 @@ import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 import { FolderForm } from './FolderForm'
 
 interface EditFolderDialogProps {
-  trigger: React.ReactElement<{ onClick?: () => void }>
+  trigger?: React.ReactElement<{ onClick?: () => void }>
   folderId?: string
   defaultValues?: { name: string; isDefault: boolean }
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export const EditFolderDialog: React.FC<EditFolderDialogProps> = ({
   trigger,
   folderId,
   defaultValues,
+  open: controlledOpen,
+  onOpenChange,
 }) => {
   const { t } = useTranslation('common')
   const request = useRequest()
   const foldersQuery = useApiKeyFoldersQuery()
-  const [open, setOpen] = useState(false)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false)
   const isEdit = Boolean(folderId)
+  const open = controlledOpen ?? uncontrolledOpen
+
+  const setOpen = (nextOpen: boolean) => {
+    onOpenChange?.(nextOpen)
+
+    if (controlledOpen === undefined) {
+      setUncontrolledOpen(nextOpen)
+    }
+  }
 
   const [form] = useForm({
     defaultValues: { name: '', isDefault: false },
@@ -74,7 +87,7 @@ export const EditFolderDialog: React.FC<EditFolderDialogProps> = ({
 
   return (
     <>
-      {cloneElement(trigger, { onClick: handleOpen })}
+      {trigger ? cloneElement(trigger, { onClick: handleOpen }) : null}
 
       <Dialog
         open={open}
