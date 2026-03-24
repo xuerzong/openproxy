@@ -16,6 +16,10 @@ import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
+import { useSearchParams } from 'react-router'
+
+const ALL_FOLDERS_FILTER = '__all__'
+const UNCATEGORIZED_FILTER = '__none__'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -23,15 +27,32 @@ const Page = () => {
   const request = useRequest()
   const [newApiKey, setNewApiKey] = useState('')
   const [deleteId, setDeleteId] = useState('')
-  const [selectedFolderId, setSelectedFolderId] = useState<string>('__all__')
+  const [searchParams, setSearchParams] = useSearchParams()
   const apiKeysQuery = useApiKeysQuery()
   const foldersQuery = useApiKeyFoldersQuery()
   const folders = foldersQuery.data || []
+  const selectedFolderId = searchParams.get('folder') || ALL_FOLDERS_FILTER
+  const defaultCreateFolderId =
+    selectedFolderId !== ALL_FOLDERS_FILTER &&
+    selectedFolderId !== UNCATEGORIZED_FILTER &&
+    folders.some((folder: any) => folder.id === selectedFolderId)
+      ? selectedFolderId
+      : ''
+
+  const setSelectedFolderId = (folderId: string) => {
+    const nextSearchParams = new URLSearchParams(searchParams)
+    if (folderId === ALL_FOLDERS_FILTER) {
+      nextSearchParams.delete('folder')
+    } else {
+      nextSearchParams.set('folder', folderId)
+    }
+    setSearchParams(nextSearchParams)
+  }
 
   const filteredApiKeys = useMemo(() => {
     const keys = apiKeysQuery.data || []
-    if (selectedFolderId === '__all__') return keys
-    if (selectedFolderId === '__none__')
+    if (selectedFolderId === ALL_FOLDERS_FILTER) return keys
+    if (selectedFolderId === UNCATEGORIZED_FILTER)
       return keys.filter((k: any) => !k.folderId)
     return keys.filter((k: any) => k.folderId === selectedFolderId)
   }, [apiKeysQuery.data, selectedFolderId])
@@ -65,8 +86,10 @@ const Page = () => {
           <FolderIcon className="w-4 h-4 text-muted-foreground" />
           <Button
             size="sm"
-            variant={selectedFolderId === '__all__' ? 'default' : 'outline'}
-            onClick={() => setSelectedFolderId('__all__')}
+            variant={
+              selectedFolderId === ALL_FOLDERS_FILTER ? 'default' : 'outline'
+            }
+            onClick={() => setSelectedFolderId(ALL_FOLDERS_FILTER)}
           >
             {t('apiKeys.allFolders')}
           </Button>
@@ -87,8 +110,10 @@ const Page = () => {
           ))}
           <Button
             size="sm"
-            variant={selectedFolderId === '__none__' ? 'default' : 'outline'}
-            onClick={() => setSelectedFolderId('__none__')}
+            variant={
+              selectedFolderId === UNCATEGORIZED_FILTER ? 'default' : 'outline'
+            }
+            onClick={() => setSelectedFolderId(UNCATEGORIZED_FILTER)}
           >
             {t('apiKeys.uncategorized')}
           </Button>
@@ -100,7 +125,10 @@ const Page = () => {
 
         <Button
           onClick={() => {
-            apiKeyForm.resetValues()
+            apiKeyForm.setValues({
+              name: '',
+              folderId: defaultCreateFolderId,
+            })
             apiKeyForm.resetErrors()
             setOpen(true)
           }}
@@ -152,6 +180,11 @@ const Page = () => {
             </div>
             <Button
               onClick={() => {
+                apiKeyForm.setValues({
+                  name: '',
+                  folderId: defaultCreateFolderId,
+                })
+                apiKeyForm.resetErrors()
                 setOpen(true)
               }}
             >

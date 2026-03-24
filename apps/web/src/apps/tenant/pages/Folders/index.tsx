@@ -18,9 +18,11 @@ import { useTranslation } from 'react-i18next'
 import { EditFolderDialog } from '@/components/APIKeyFolder/EditFolderDialog'
 import { DeleteFolderDialog } from '@/components/APIKeyFolder/DeleteFolderDialog'
 import { DropdownMenu, type DropdownMenuItem } from '@openproxy/ui/DropdownMenu'
+import { useNavigate } from 'react-router'
 
 const Page = () => {
   const { t } = useTranslation('common')
+  const navigate = useNavigate()
   const foldersQuery = useApiKeyFoldersQuery()
   const teamQuery = useTeamQuery()
   const constsQuery = useConstsQuery()
@@ -131,7 +133,22 @@ const Page = () => {
             {folders.map((folder) => (
               <div
                 key={folder.id}
-                className="flex h-full flex-col rounded-lg border border-border bg-background/95 p-4"
+                className="flex h-full cursor-pointer flex-col rounded-lg border border-border bg-background/95 p-4 transition-colors hover:bg-muted/40"
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  const params = new URLSearchParams()
+                  params.set('folder', folder.id)
+                  navigate(`/apiKeys?${params.toString()}`)
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    const params = new URLSearchParams()
+                    params.set('folder', folder.id)
+                    navigate(`/apiKeys?${params.toString()}`)
+                  }
+                }}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
@@ -154,15 +171,24 @@ const Page = () => {
                       {new Date(folder.createdAt).toLocaleDateString()}
                     </div>
                   </div>
-                  <DropdownMenu
-                    menus={getFolderMenus(folder)}
-                    align="end"
-                    side="bottom"
+                  <div
+                    onClick={(event) => {
+                      event.stopPropagation()
+                    }}
+                    onKeyDown={(event) => {
+                      event.stopPropagation()
+                    }}
                   >
-                    <Button variant="ghost" size="icon-xs">
-                      <MoreHorizontalIcon />
-                    </Button>
-                  </DropdownMenu>
+                    <DropdownMenu
+                      menus={getFolderMenus(folder)}
+                      align="end"
+                      side="bottom"
+                    >
+                      <Button variant="ghost" size="icon-xs">
+                        <MoreHorizontalIcon />
+                      </Button>
+                    </DropdownMenu>
+                  </div>
                 </div>
               </div>
             ))}
