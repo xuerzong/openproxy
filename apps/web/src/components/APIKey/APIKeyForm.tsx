@@ -8,8 +8,8 @@ import { NumberInput } from '@openproxy/ui/NumberInput'
 import { Select } from '@openproxy/ui/Select'
 import { Button } from '@openproxy/ui/Button'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router'
 import { useApiKeyFoldersQuery } from '@/apps/tenant/hooks/queries/useApiKeyFoldersQuery'
+import { EditFolderDialog } from '../APIKeyFolder/EditFolderDialog'
 
 interface APIKeyFormProps {
   form: FormInstance
@@ -17,7 +17,6 @@ interface APIKeyFormProps {
 
 export const APIKeyForm: React.FC<APIKeyFormProps> = ({ form }) => {
   const { t } = useTranslation('common')
-  const navigate = useNavigate()
   const [modelsOpen, setModelsOpen] = useState(false)
   const modelIds = form.values.modelIds || []
   const foldersQuery = useApiKeyFoldersQuery()
@@ -51,15 +50,18 @@ export const APIKeyForm: React.FC<APIKeyFormProps> = ({ form }) => {
               ]}
             />
           ) : (
-            <Button
-              variant="outline"
-              type="button"
-              className="w-full justify-start text-muted-foreground"
-              onClick={() => navigate('/folders')}
-            >
-              <FolderPlusIcon className="w-4 h-4" />
-              {t('apiKeys.createFolderFirst')}
-            </Button>
+            <EditFolderDialog
+              trigger={
+                <Button
+                  variant="outline"
+                  type="button"
+                  className="w-full justify-start text-muted-foreground"
+                >
+                  <FolderPlusIcon className="w-4 h-4" />
+                  {t('apiKeys.createFolderFirst')}
+                </Button>
+              }
+            />
           )}
         </FormField>
 

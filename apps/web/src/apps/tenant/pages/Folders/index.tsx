@@ -1,48 +1,28 @@
-import { useState } from 'react'
-import { useRequest } from '@/contexts/ApiContext'
-import { toast } from 'sonner'
 import { useApiKeyFoldersQuery } from '@/apps/tenant/hooks/queries/useApiKeyFoldersQuery'
 import { Button } from '@openproxy/ui/Button'
 import { FolderIcon, PlusIcon, StarIcon } from 'lucide-react'
-import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
-import { Input } from '@openproxy/ui/Input'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTranslation } from 'react-i18next'
-import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
-import { Switch } from '@openproxy/ui/Switch'
+import { EditFolderDialog } from '@/components/APIKeyFolder/EditFolderDialog'
+import { DeleteFolderDialog } from '@/components/APIKeyFolder/DeleteFolderDialog'
 
 const Page = () => {
   const { t } = useTranslation('common')
-  const [open, setOpen] = useState(false)
-  const [editId, setEditId] = useState('')
-  const [name, setName] = useState('')
-  const [isDefault, setIsDefault] = useState(false)
-  const [deleteId, setDeleteId] = useState('')
-  const request = useRequest()
   const foldersQuery = useApiKeyFoldersQuery()
-
-  const isEdit = Boolean(editId)
-
-  const resetForm = () => {
-    setEditId('')
-    setName('')
-    setIsDefault(false)
-  }
 
   return (
     <PageContainer title={t('folders.title')} className="h-screen">
       <div className="flex items-center w-full gap-2">
         <div style={{ flex: 1 }}></div>
-        <Button
-          onClick={() => {
-            resetForm()
-            setOpen(true)
-          }}
-        >
-          <PlusIcon />
-          {t('folders.create')}
-        </Button>
+        <EditFolderDialog
+          trigger={
+            <Button>
+              <PlusIcon />
+              {t('folders.create')}
+            </Button>
+          }
+        />
       </div>
       <FlexScrollViewer bordered>
         {foldersQuery.data &&
@@ -65,25 +45,26 @@ const Page = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setEditId(folder.id)
-                      setName(folder.name)
-                      setIsDefault(folder.isDefault)
-                      setOpen(true)
+                  <EditFolderDialog
+                    folderId={folder.id}
+                    defaultValues={{
+                      name: folder.name,
+                      isDefault: folder.isDefault,
                     }}
-                  >
-                    {t('actions.edit')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDeleteId(folder.id)}
-                  >
-                    {t('actions.delete')}
-                  </Button>
+                    trigger={
+                      <Button variant="outline" size="sm">
+                        {t('actions.edit')}
+                      </Button>
+                    }
+                  />
+                  <DeleteFolderDialog
+                    folderId={folder.id}
+                    trigger={
+                      <Button variant="outline" size="sm">
+                        {t('actions.delete')}
+                      </Button>
+                    }
+                  />
                 </div>
               </div>
               {idx !== foldersQuery.data!.length - 1 && (
@@ -96,131 +77,17 @@ const Page = () => {
             <div className="text-muted-foreground">
               {t('common.emptyState')}
             </div>
-            <Button
-              onClick={() => {
-                resetForm()
-                setOpen(true)
-              }}
-            >
-              <PlusIcon />
-              {t('actions.createNow')}
-            </Button>
+            <EditFolderDialog
+              trigger={
+                <Button>
+                  <PlusIcon />
+                  {t('actions.createNow')}
+                </Button>
+              }
+            />
           </div>
         )}
       </FlexScrollViewer>
-
-      <Dialog
-        open={open}
-        title={isEdit ? t('folders.editTitle') : t('folders.createTitle')}
-        onOpenChange={(open) => {
-          setOpen(open)
-          if (!open) resetForm()
-        }}
-        footer={
-          <div className="flex items-center justify-end gap-4">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setOpen(false)
-                resetForm()
-              }}
-            >
-              {t('actions.cancel')}
-            </Button>
-            <Button
-              onClick={() => {
-                if (!name.trim()) {
-                  toast.error(t('common.pleaseInput'))
-                  return
-                }
-                const resp = isEdit
-                  ? request.apiKeyFolders.put({
-                      id: editId,
-                      name: name.trim(),
-                      isDefault,
-                    })
-                  : request.apiKeyFolders.post({
-                      name: name.trim(),
-                      isDefault,
-                    })
-
-                void toastApiPromise(resp, {
-                  loading: t('common.processing'),
-                  success: t('common.operationSuccess'),
-                  error: (error) =>
-                    t('common.operationFailedWithStatus', {
-                      status: getToastRequestStatus(error),
-                    }),
-                  onSuccess: () => {
-                    void foldersQuery.refetch()
-                    setOpen(false)
-                    resetForm()
-                  },
-                })
-              }}
-            >
-              {isEdit
-                ? t('actions.confirmChanges')
-                : t('actions.confirmCreate')}
-            </Button>
-          </div>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <div>
-            <label className="text-sm font-medium mb-1.5 block">
-              {t('folders.nameLabel')}
-            </label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={t('folders.namePlaceholder')}
-              maxLength={32}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <label className="text-sm font-medium">
-              {t('folders.setDefault')}
-            </label>
-            <Switch checked={isDefault} onCheckedChange={setIsDefault} />
-          </div>
-        </div>
-      </Dialog>
-
-      <Dialog
-        open={Boolean(deleteId)}
-        onOpenChange={(open) => {
-          if (!open) setDeleteId('')
-        }}
-        title={t('actions.confirmDelete')}
-        footer={
-          <DialogFooter
-            okText={t('actions.confirmDelete')}
-            okButtonProps={{ variant: 'danger' }}
-            onOk={() => {
-              void toastApiPromise(
-                request.apiKeyFolders({ id: deleteId }).delete(),
-                {
-                  loading: t('common.processing'),
-                  success: t('folders.deleteSuccess'),
-                  error: (error) =>
-                    t('common.operationFailedWithStatus', {
-                      status: getToastRequestStatus(error),
-                    }),
-                  onSuccess: () => {
-                    setDeleteId('')
-                    void foldersQuery.refetch()
-                  },
-                }
-              )
-            }}
-            cancelText={t('actions.cancel')}
-            onCancel={() => setDeleteId('')}
-          />
-        }
-      >
-        <div>{t('folders.deleteWarning')}</div>
-      </Dialog>
     </PageContainer>
   )
 }

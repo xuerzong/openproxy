@@ -606,7 +606,12 @@ export const apiKeyFolders = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (table) => [index('api_key_folders_team_id_index').on(table.teamId)]
+  (table) => [
+    index('api_key_folders_team_id_index').on(table.teamId),
+    uniqueIndex('api_key_folders_team_default_unique')
+      .on(table.teamId)
+      .where(sql`${table.isDefault} = true`),
+  ]
 )
 
 export const apiKeyFoldersRelations = relations(

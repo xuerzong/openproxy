@@ -25,24 +25,26 @@ export async function createApiKeyFolder(params: {
 }) {
   const { teamId, name, isDefault = false } = params
 
-  if (isDefault) {
-    await db
-      .update(dbSchema.apiKeyFolders)
-      .set({ isDefault: false })
-      .where(
-        and(
-          eq(dbSchema.apiKeyFolders.teamId, teamId),
-          eq(dbSchema.apiKeyFolders.isDefault, true)
+  return db.transaction(async (tx) => {
+    if (isDefault) {
+      await tx
+        .update(dbSchema.apiKeyFolders)
+        .set({ isDefault: false, updatedAt: new Date() })
+        .where(
+          and(
+            eq(dbSchema.apiKeyFolders.teamId, teamId),
+            eq(dbSchema.apiKeyFolders.isDefault, true)
+          )
         )
-      )
-  }
+    }
 
-  const [folder] = await db
-    .insert(dbSchema.apiKeyFolders)
-    .values({ teamId, name, isDefault })
-    .returning()
+    const [folder] = await tx
+      .insert(dbSchema.apiKeyFolders)
+      .values({ teamId, name, isDefault })
+      .returning()
 
-  return folder!
+    return folder!
+  })
 }
 
 export async function updateApiKeyFolder(params: {
@@ -53,34 +55,36 @@ export async function updateApiKeyFolder(params: {
 }) {
   const { id, teamId, name, isDefault } = params
 
-  if (isDefault) {
-    await db
+  return db.transaction(async (tx) => {
+    if (isDefault) {
+      await tx
+        .update(dbSchema.apiKeyFolders)
+        .set({ isDefault: false, updatedAt: new Date() })
+        .where(
+          and(
+            eq(dbSchema.apiKeyFolders.teamId, teamId),
+            eq(dbSchema.apiKeyFolders.isDefault, true)
+          )
+        )
+    }
+
+    const [folder] = await tx
       .update(dbSchema.apiKeyFolders)
-      .set({ isDefault: false })
+      .set({
+        name,
+        isDefault: isDefault ?? false,
+        updatedAt: new Date(),
+      })
       .where(
         and(
-          eq(dbSchema.apiKeyFolders.teamId, teamId),
-          eq(dbSchema.apiKeyFolders.isDefault, true)
+          eq(dbSchema.apiKeyFolders.id, id),
+          eq(dbSchema.apiKeyFolders.teamId, teamId)
         )
       )
-  }
+      .returning()
 
-  const [folder] = await db
-    .update(dbSchema.apiKeyFolders)
-    .set({
-      name,
-      isDefault: isDefault ?? false,
-      updatedAt: new Date(),
-    })
-    .where(
-      and(
-        eq(dbSchema.apiKeyFolders.id, id),
-        eq(dbSchema.apiKeyFolders.teamId, teamId)
-      )
-    )
-    .returning()
-
-  return folder
+    return folder
+  })
 }
 
 export async function deleteApiKeyFolder(id: string, teamId: string) {
