@@ -39,6 +39,10 @@ const Page = () => {
     !isOSS && !!folderLimit && folders.length >= folderLimit
   const totalFoldersLabel =
     isOSS || !folderLimit ? t('common.unlimited') : String(folderLimit)
+  const createFolderLabel = t('folders.createWithQuota', {
+    used: folders.length,
+    total: totalFoldersLabel,
+  })
 
   const editingFolder =
     editingFolderId == null
@@ -79,31 +83,19 @@ const Page = () => {
 
   return (
     <PageContainer title={t('folders.title')} className="h-screen">
-      <div className="flex flex-col gap-3 w-full md:flex-row md:items-center md:justify-between">
-        <div className="min-w-0">
-          <div className="text-sm font-medium text-foreground">
-            {t('folders.quotaLabel')}
-          </div>
-          <div className="text-xs text-muted-foreground mt-1">
-            {t('folders.quotaValue', {
-              used: folders.length,
-              total: totalFoldersLabel,
-            })}
-          </div>
-        </div>
-
+      <div className="flex w-full justify-end">
         <div className="flex items-center gap-2 self-end md:self-auto">
           <EditFolderDialog
             trigger={
               <Button disabled={isCreateDisabled}>
                 <PlusIcon />
-                {t('folders.create')}
+                {createFolderLabel}
               </Button>
             }
           />
         </div>
       </div>
-      <FlexScrollViewer bordered>
+      <FlexScrollViewer>
         <EditFolderDialog
           folderId={editingFolder?.id}
           defaultValues={
@@ -135,7 +127,7 @@ const Page = () => {
         ) : null}
 
         {folders.length > 0 && (
-          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {folders.map((folder) => (
               <div
                 key={folder.id}
@@ -185,7 +177,7 @@ const Page = () => {
               trigger={
                 <Button disabled={isCreateDisabled}>
                   <PlusIcon />
-                  {t('actions.createNow')}
+                  {createFolderLabel}
                 </Button>
               }
             />

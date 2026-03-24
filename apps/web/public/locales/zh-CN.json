@@ -538,6 +538,7 @@
   "folders": {
     "title": "文件夹",
     "create": "创建文件夹",
+    "createWithQuota": "创建文件夹 ({{used}} / {{total}})",
     "createTitle": "创建文件夹",
     "editTitle": "编辑文件夹",
     "quotaLabel": "文件夹配额",

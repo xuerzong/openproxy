@@ -538,6 +538,7 @@
   "folders": {
     "title": "Folders",
     "create": "Create Folder",
+    "createWithQuota": "Create Folder ({{used}} / {{total}})",
     "createTitle": "Create Folder",
     "editTitle": "Edit Folder",
     "quotaLabel": "Folder quota",
