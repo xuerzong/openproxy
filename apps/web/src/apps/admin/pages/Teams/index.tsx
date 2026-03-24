@@ -74,6 +74,13 @@ const Page = () => {
               width: 220,
             },
             {
+              key: 'plan',
+              label: t('teams.form.plan', { defaultValue: 'Plan' }),
+              width: 100,
+              align: 'center',
+              render: (text: string) => (text || 'free').toUpperCase(),
+            },
+            {
               key: 'inviteCode',
               label: t('teams.table.inviteCode', {
                 defaultValue: 'Invite Code',

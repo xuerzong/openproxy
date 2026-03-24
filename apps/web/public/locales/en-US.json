@@ -155,7 +155,8 @@
       "allowJoinEnabled": "Users with a valid invite link can join this team.",
       "allowJoinDisabled": "New users cannot join this team through invite links right now.",
       "namePlaceholder": "Please input team name",
-      "inviteLink": "Invite Link"
+      "inviteLink": "Invite Link",
+      "plan": "Plan"
     },
     "plan": {
       "title": "Team Plan",

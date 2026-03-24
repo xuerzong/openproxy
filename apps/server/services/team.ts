@@ -255,6 +255,7 @@ export const updateAdminTeam = async (params: {
   id: string
   name: string
   inviteCode: string
+  plan?: 'free' | 'pro'
   apiKeyLimit: number
   usersLimit: number
   allowJoin: boolean
@@ -276,6 +277,7 @@ export const updateAdminTeam = async (params: {
     .set({
       name: params.name.trim(),
       inviteCode: params.inviteCode.trim(),
+      ...(params.plan && { plan: params.plan }),
       apiKeyLimit: params.apiKeyLimit,
       usersLimit: params.usersLimit,
       metadata: stringifyTeamMetadata({

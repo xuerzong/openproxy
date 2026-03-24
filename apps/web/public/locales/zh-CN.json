@@ -155,7 +155,8 @@
       "allowJoinEnabled": "拥有有效邀请链接的用户可以加入该团队。",
       "allowJoinDisabled": "当前禁止新用户通过邀请链接加入该团队。",
       "namePlaceholder": "请输入团队名称",
-      "inviteLink": "邀请链接"
+      "inviteLink": "邀请链接",
+      "plan": "套餐"
     },
     "plan": {
       "title": "团队套餐",

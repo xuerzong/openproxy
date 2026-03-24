@@ -10,6 +10,7 @@ import { Form, FormField, useForm } from '@openproxy/ui/Form'
 import { Input, Textarea } from '@openproxy/ui/Input'
 import { Loader } from '@openproxy/ui/Loader'
 import { NumberInput } from '@openproxy/ui/NumberInput'
+import { Select } from '@openproxy/ui/Select'
 import { Switch } from '@openproxy/ui/Switch'
 import { Tag } from '@openproxy/ui/Tag'
 import { Table } from '@openproxy/ui/Table'
@@ -39,6 +40,7 @@ const Page = () => {
       id: '',
       name: '',
       inviteCode: '',
+      plan: 'free',
       apiKeyLimit: 1,
       usersLimit: 1,
       allowJoin: true,
@@ -51,6 +53,7 @@ const Page = () => {
       id: team.id,
       name: team.name,
       inviteCode: team.inviteCode,
+      plan: team.plan || 'free',
       apiKeyLimit: team.apiKeyLimit,
       usersLimit: team.usersLimit,
       allowJoin: team.allowJoin !== false,
@@ -314,6 +317,20 @@ const Page = () => {
                 })}
               </Button>
             </div>
+
+            <FormField
+              name="plan"
+              label={t('teams.form.plan', {
+                defaultValue: 'Plan',
+              })}
+            >
+              <Select
+                options={[
+                  { value: 'free', label: 'Free' },
+                  { value: 'pro', label: 'Pro' },
+                ]}
+              />
+            </FormField>
 
             <FormField
               name="apiKeyLimit"

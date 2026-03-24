@@ -3,7 +3,6 @@ import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayou
 import {
   BoxIcon,
   ChevronLeftIcon,
-  CreditCardIcon,
   FolderIcon,
   GaugeIcon,
   KeyRoundIcon,
@@ -15,14 +14,12 @@ import { useMemo } from 'react'
 import { useLocation, useNavigate } from 'react-router'
 import { TeamLayout } from '@/layouts/TeamLayout'
 import { useTranslation } from 'react-i18next'
-import { useIsOSS } from '@/hooks/useIsOSS'
 import type { MenuData } from '@/layouts/DashboardLayout'
 
 export const DashboardLayout = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { t } = useTranslation('common')
-  const isOSS = useIsOSS()
   const mainMenus: MenuData[] = [
     {
       key: '/',
@@ -115,23 +112,8 @@ export const DashboardLayout = () => {
         },
         access: 'public',
       },
-      ...(!isOSS
-        ? [
-            {
-              key: '/settings/billing',
-              icon: <CreditCardIcon className="w-5 h-5" />,
-              label: t('teamSettings.billing.menu', {
-                defaultValue: 'Billing',
-              }),
-              onClick() {
-                navigate('/settings/billing')
-              },
-              access: 'public' as const,
-            },
-          ]
-        : []),
     ],
-    [navigate, t, isOSS]
+    [navigate, t]
   )
 
   const menus = location.pathname.startsWith('/settings')
