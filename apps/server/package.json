@@ -5,7 +5,6 @@
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development bun --watch index.ts",
-    "dev:admin": "NODE_ENV=development bun --watch index.ts",
     "start": "bun run index.ts",
     "test": "bun test",
     "migrate": "bun run scripts/migrate.ts",

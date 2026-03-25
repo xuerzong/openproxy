@@ -35,3 +35,8 @@ Examples of changes that require an `AGENTS.md` update:
 
 - Shared test automation lives in `.github/workflows/test.yml`.
 - The test workflow currently runs Bun tests for `apps/server` and Rust tests for `apps/api`.
+
+## Development
+
+- Root `bun run dev` starts `apps/server` `dev` together with `apps/web` `dev:admin` and `dev:tenant`.
+- `website` is not included in the root development command.

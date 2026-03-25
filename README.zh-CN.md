@@ -130,7 +130,7 @@ bun run migrate
 ### 5. 启动开发服务
 
 ```bash
-# 根目录一键启动所有服务（Turborepo）
+# 根目录一键启动 server 开发服务，以及 web 的 admin 和 tenant（Turborepo）
 bun run dev
 
 # 或分别启动：

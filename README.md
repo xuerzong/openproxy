@@ -130,7 +130,7 @@ bun run migrate
 ### 5. Start development services
 
 ```bash
-# From repo root — starts all services via Turborepo
+# From repo root — starts server dev plus web admin and tenant via Turborepo
 bun run dev
 
 # Or individually:
