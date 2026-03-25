@@ -27,6 +27,7 @@
       "costYuan": "花费(元)",
       "tokenInput": "Token 输入",
       "tokenOutput": "Token 输出",
+      "streamOutput": "是否是 Stream 输出",
       "responseSeconds": "响应时间(s)",
       "completedSeconds": "完成时间(s)",
       "providerName": "供应商"

@@ -27,6 +27,7 @@
       "costYuan": "Cost (CNY)",
       "tokenInput": "Token Input",
       "tokenOutput": "Token Output",
+      "streamOutput": "Stream Output",
       "responseSeconds": "Response Time (s)",
       "completedSeconds": "Completion Time (s)",
       "providerName": "Provider"
