@@ -383,8 +383,10 @@
   "models": {
     "title": "模型列表",
     "createTitle": "创建模型",
+    "copyCreateTitle": "基于副本创建模型",
     "detailTitle": "模型详情",
     "addModel": "添加模型",
+    "copyCreateAction": "复制新建",
     "editProvider": "编辑供应商",
     "addProvider": "添加供应商",
     "deleteModel": "删除模型",

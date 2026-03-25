@@ -383,8 +383,10 @@
   "models": {
     "title": "Models",
     "createTitle": "Create Model",
+    "copyCreateTitle": "Create Model From Copy",
     "detailTitle": "Model Detail",
     "addModel": "Add Model",
+    "copyCreateAction": "Copy As New",
     "editProvider": "Edit Provider",
     "addProvider": "Add Provider",
     "deleteModel": "Delete Model",
