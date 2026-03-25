@@ -22,9 +22,11 @@ openproxy/
 │   ├── api/        # Rust proxy service (axum) — forwards AI requests, tracks usage
 │   ├── server/     # Bun/Elysia backend — auth, key management, admin API
 │   └── web/        # React frontend (Vite) — tenant dashboard + admin panel
+├── docker/
+│   ├── docker-compose.yml        # Deployment compose using published images
+│   └── docker-compose.dokploy.yml  # Dokploy compose for building images from source
 ├── packages/
 │   └── schema/     # Shared Zod/TypeBox schemas
-└── docker-compose.yml
 ```
 
 ### How requests flow
@@ -143,6 +145,7 @@ cd apps/web   && bun run dev:admin    # admin panel on :5173
 ## Docker Compose Deployment
 
 It is recommended to use `docker/docker-compose.yml` for one-click deployment, including server, api, web-tenant, web-admin, and postgresql.
+Use `docker/docker-compose.dokploy.yml` for Dokploy deployments that build the server and web images from the source tree.
 
 ### Steps
 
@@ -192,7 +195,7 @@ server {
 }
 ```
 
-For more details, see `docker/docker-compose.yml` and `docker/.env.example`.
+For more details, see `docker/docker-compose.yml`, `docker/docker-compose.dokploy.yml`, and `docker/.env.example`.
 
 ## API Reference
 
