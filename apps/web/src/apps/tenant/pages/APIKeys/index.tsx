@@ -59,7 +59,9 @@ const Page = () => {
     selectedFolderId !== ALL_FOLDERS_FILTER &&
     folders.some((folder: any) => folder.id === selectedFolderId)
       ? selectedFolderId
-      : ''
+      : folders.find((folder: any) => folder.isDefault)?.id ||
+        folders[0]?.id ||
+        ''
 
   const setSelectedFolderId = (folderId: string) => {
     const nextSearchParams = new URLSearchParams(searchParams)
@@ -80,6 +82,7 @@ const Page = () => {
   const [apiKeyForm] = useForm({
     defaultValues: {
       name: '',
+      folderId: '',
     },
     validators: {
       name: async (value) => {
@@ -90,6 +93,18 @@ const Page = () => {
           }
         }
         return { success: true }
+      },
+      folderId: async (value, values: any) => {
+        if (values.id || normalizeFolderIdForSubmit(value)) {
+          return { success: true }
+        }
+
+        return {
+          success: false,
+          message: t('common.selectPlaceholder', {
+            defaultValue: 'Please select',
+          }),
+        }
       },
     },
   })
@@ -240,6 +255,19 @@ const Page = () => {
               onClick={() => {
                 apiKeyForm.onSubmit((values) => {
                   const { modelIds = [] } = values
+                  const createFolderId = normalizeFolderIdForSubmit(
+                    values.folderId
+                  )
+
+                  if (!values.id && !createFolderId) {
+                    apiKeyForm.setFieldError(
+                      'folderId',
+                      t('common.selectPlaceholder', {
+                        defaultValue: 'Please select',
+                      })
+                    )
+                    return
+                  }
 
                   const resp = values.id
                     ? request.apiKeys.put({
@@ -255,7 +283,7 @@ const Page = () => {
                       })
                     : request.apiKeys.post({
                         name: values.name,
-                        folderId: normalizeFolderIdForSubmit(values.folderId),
+                        folderId: createFolderId!,
                         modelIds: Array.from(new Set(modelIds)),
                         maxQuota: values.maxQuota ?? void 0,
                         maxRequests: values.maxRequests ?? void 0,
@@ -296,7 +324,7 @@ const Page = () => {
           </div>
         }
       >
-        <APIKeyForm form={apiKeyForm} />
+        <APIKeyForm form={apiKeyForm} allowNoFolder={isEdit} />
       </Dialog>
 
       <Dialog

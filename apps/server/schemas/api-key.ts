@@ -3,7 +3,7 @@ import { t } from 'elysia'
 // API Key create request body
 export const CreateApiKeyBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 32 }),
-  folderId: t.Optional(t.Nullable(t.String())),
+  folderId: t.String({ minLength: 1 }),
   expiresAt: t.Nullable(t.Date()),
   maxQuota: t.Optional(t.Numeric({ minimum: 0 })),
   maxRequests: t.Optional(t.Number({ minimum: 0 })),
