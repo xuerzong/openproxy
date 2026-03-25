@@ -1,0 +1,67 @@
+name: Test
+
+on:
+  pull_request:
+    paths:
+      - 'apps/server/**'
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/test.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/server/**'
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'bun.lock'
+      - '.github/workflows/test.yml'
+  workflow_dispatch:
+
+jobs:
+  server-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.5
+
+      - name: Install JavaScript dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run server unit tests
+        working-directory: apps/server
+        run: bun test
+
+  api-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            apps/api/target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('apps/api/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Run api tests
+        working-directory: apps/api
+        run: cargo test --locked

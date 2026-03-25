@@ -33,6 +33,7 @@ src/
 - Run tests: `cargo test`
 - Place unit tests in the same file using `#[cfg(test)] mod tests { ... }`.
 - Use `tokio::net::TcpListener` + `axum::Router` for integration test servers.
+- Prefer self-contained unit tests that generate their own fixtures and keys instead of depending on `.env`.
 
 ## Environment
 

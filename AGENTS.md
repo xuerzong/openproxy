@@ -30,3 +30,8 @@ Examples of changes that require an `AGENTS.md` update:
 - New architectural decision (e.g. "use ring-buffer cache for rotation")
 - New i18n namespace or locale file added
 - New build / test command added
+
+## CI
+
+- Shared test automation lives in `.github/workflows/test.yml`.
+- The test workflow currently runs Bun tests for `apps/server` and Rust tests for `apps/api`.
