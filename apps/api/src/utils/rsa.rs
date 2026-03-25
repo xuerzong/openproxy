@@ -52,14 +52,28 @@ impl RsaCrypto {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
+    use rsa::pkcs8::{EncodePrivateKey, EncodePublicKey, LineEnding};
+
+    fn generate_test_keys() -> (String, String) {
+        let mut rng = rand::thread_rng();
+        let private_key =
+            RsaPrivateKey::new(&mut rng, 2048).expect("private key generation failed");
+        let public_key = RsaPublicKey::from(&private_key);
+
+        let public_key_pem = public_key
+            .to_public_key_pem(LineEnding::LF)
+            .expect("public key pem encoding failed");
+        let private_key_pem = private_key
+            .to_pkcs8_pem(LineEnding::LF)
+            .expect("private key pem encoding failed")
+            .to_string();
+
+        (public_key_pem, private_key_pem)
+    }
 
     #[test]
     fn test_rsa_encrypt_decrypt_flow() {
-        dotenvy::dotenv().ok();
-
-        let public_key = env::var("RSA_PUBLIC_KEY").expect("RSA_PUBLIC_KEY must be set in env");
-        let private_key = env::var("RSA_PRIVATE_KEY").expect("RSA_PRIVATE_KEY must be set in env");
+        let (public_key, private_key) = generate_test_keys();
 
         let original_text = "sk-your-own-api-key";
 
@@ -78,8 +92,7 @@ mod tests {
 
     #[test]
     fn test_decrypt_invalid_ciphertext_returns_error() {
-        dotenvy::dotenv().ok();
-        let private_key = env::var("RSA_PRIVATE_KEY").expect("RSA_PRIVATE_KEY must be set in env");
+        let (_, private_key) = generate_test_keys();
 
         let invalid_encrypted_base64 = "aW52YWxpZC1jaXBoZXJ0ZXh0";
         let result = RsaCrypto::decrypt(invalid_encrypted_base64, &private_key);
