@@ -1,9 +1,17 @@
 import { publicEncrypt, privateDecrypt, constants } from 'node:crypto'
 
-const publicKey = process.env.RSA_PUBLIC_KEY!.replace(/\\n/g, '\n')
-const privateKey = process.env.RSA_PRIVATE_KEY!.replace(/\\n/g, '\n')
+const getEnvKey = (name: 'RSA_PUBLIC_KEY' | 'RSA_PRIVATE_KEY') => {
+  const value = process.env[name]
+
+  if (!value) {
+    throw new Error(`${name} is not configured`)
+  }
+
+  return value.replace(/\\n/g, '\n')
+}
 
 export function rsaEncrypt(data: string) {
+  const publicKey = getEnvKey('RSA_PUBLIC_KEY')
   const buffer = Buffer.from(data, 'utf8') as unknown as Uint8Array
   const encrypted = publicEncrypt(
     {
@@ -17,6 +25,7 @@ export function rsaEncrypt(data: string) {
 }
 
 export function rsaDecrypt(encryptedData: string) {
+  const privateKey = getEnvKey('RSA_PRIVATE_KEY')
   const buffer = Buffer.from(encryptedData, 'base64') as unknown as Uint8Array
   const decrypted = privateDecrypt(
     {

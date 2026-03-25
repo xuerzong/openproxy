@@ -38,3 +38,10 @@
 
 - `.env` with `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `RSA_PRIVATE_KEY`, `RSA_PUBLIC_KEY`.
 - OAuth providers enabled by env: `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
+
+## Testing
+
+- Use Bun native tests via `bun test` or `bun run test`.
+- Place unit tests next to the module they cover using `*.test.ts`.
+- Prefer testing pure utilities in isolation; avoid database and external network dependencies in unit tests.
+- CI runs server tests from `.github/workflows/test.yml`.
