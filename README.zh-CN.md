@@ -22,9 +22,11 @@ openproxy/
 │   ├── api/        # Rust 代理服务，转发 AI 请求并统计用量
 │   ├── server/     # Bun/Elysia 后端，认证、Key 管理、管理 API
 │   └── web/        # React 前端，租户与管理后台
+├── docker/
+│   ├── docker-compose.yml        # 使用已发布镜像的部署 compose
+│   └── docker-compose.dokploy.yml  # 用于 Dokploy 源码构建部署的 compose
 ├── packages/
 │   └── schema/     # 共享 schema
-└── docker-compose.yml
 ```
 
 ### 请求流程
@@ -130,7 +132,7 @@ bun run migrate
 ### 5. 启动开发服务
 
 ```bash
-# 根目录一键启动所有服务（Turborepo）
+# 根目录一键启动 server 开发服务，以及 web 的 admin 和 tenant（Turborepo）
 bun run dev
 
 # 或分别启动：
@@ -143,6 +145,7 @@ cd apps/web   && bun run dev:admin    # 管理后台 :5173
 ## Docker Compose 部署
 
 推荐使用 `docker/docker-compose.yml` 一键部署，包含 server、api、web-tenant、web-admin 及 postgresql。
+如果要在 Dokploy 中基于源码构建 server 和 web 镜像，可使用 `docker/docker-compose.dokploy.yml`。
 
 ### 步骤
 
@@ -192,7 +195,7 @@ server {
 }
 ```
 
-更多配置详见 `docker/docker-compose.yml` 和 `docker/.env.example`。
+更多配置详见 `docker/docker-compose.yml`、`docker/docker-compose.dokploy.yml` 和 `docker/.env.example`。
 
 ## API 参考
 
