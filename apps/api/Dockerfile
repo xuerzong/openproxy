@@ -5,8 +5,6 @@ WORKDIR /app
 
 # 1. 此时 Context 是 apps/api，所以直接拷贝当前目录下的锁文件
 COPY Cargo.toml Cargo.lock ./
-# 拷贝 sqlx 离线数据文件夹
-COPY .sqlx ./.sqlx
 
 # 2. 预编译依赖
 RUN mkdir src && echo "fn main() {}" > src/main.rs
