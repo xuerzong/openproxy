@@ -1,7 +1,7 @@
 services:
   server:
     build:
-      context: .
+      context: ..
       dockerfile: apps/server/Dockerfile
     ports:
       - "5080:3888"
@@ -29,7 +29,7 @@ services:
 
   web-tenant:
     build:
-      context: .
+      context: ..
       dockerfile: apps/web/Dockerfile
       args:
         BUILD_MODE: tenant
@@ -41,7 +41,7 @@ services:
 
   web-admin:
     build:
-      context: .
+      context: ..
       dockerfile: apps/web/Dockerfile
       args:
         BUILD_MODE: admin
