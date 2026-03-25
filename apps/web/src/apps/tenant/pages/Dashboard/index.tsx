@@ -28,7 +28,7 @@ import { useIsOSS } from '@/hooks/useIsOSS'
 const Page = () => {
   const { t } = useTranslation('common')
   const isOSS = useIsOSS()
-  const showBillingActions = isOSS
+  const showBillingActions = !isOSS
 
   const translateDashboard = (key: string, defaultValue: string) =>
     t(`dashboard.${key}`, { defaultValue })
