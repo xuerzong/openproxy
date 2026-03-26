@@ -4,11 +4,14 @@ import { NotFoundView } from '@/components/NotFoundView'
 import { PageContainer } from '@/components/PageContainer'
 import { Loader } from '@openproxy/ui/Loader'
 import { Select } from '@openproxy/ui/Select'
+import { Button } from '@openproxy/ui/Button'
 import { ModelIcon } from '@/components/ModelIcon'
 import { useModelQuery } from '@/apps/admin/hooks/queries/useModelQuery'
 import { useModelsQuery } from '@/hooks/queries/useModelsQuery'
 import { useTranslation } from 'react-i18next'
 import { useMemo } from 'react'
+import { CopyIcon } from 'lucide-react'
+import { getDuplicatedModelInitialValues } from '@/components/Model/getDuplicatedModelInitialValues'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -26,6 +29,11 @@ const Page = () => {
         icon: <ModelIcon model={m.ownedBy} className="w-4 h-4" />,
       })),
     [models]
+  )
+
+  const duplicatedModelInitialValues = useMemo(
+    () => getDuplicatedModelInitialValues(model),
+    [model]
   )
 
   if (isLoading) {
@@ -53,6 +61,19 @@ const Page = () => {
             onChange={(value) => navigate(`/models/${value}`)}
             triggerClassName="min-w-32 font-normal"
           />
+          <Button
+            variant="outline"
+            onClick={() => {
+              navigate('/models/new', {
+                state: { defaultValues: duplicatedModelInitialValues },
+              })
+            }}
+          >
+            <CopyIcon className="w-4 h-4" />
+            {t('models.copyCreateAction', {
+              defaultValue: 'Copy As New',
+            })}
+          </Button>
         </div>
       }
     >

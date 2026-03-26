@@ -127,7 +127,7 @@ export const AccountSetting = () => {
           </div>
 
           <EmailField />
-          {isOSS && <PhoneField />}
+          {!isOSS && <PhoneField />}
           <PasswordField />
         </div>
       </Card>

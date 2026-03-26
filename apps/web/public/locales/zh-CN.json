@@ -27,6 +27,7 @@
       "costYuan": "花费(元)",
       "tokenInput": "Token 输入",
       "tokenOutput": "Token 输出",
+      "streamOutput": "是否是 Stream 输出",
       "responseSeconds": "响应时间(s)",
       "completedSeconds": "完成时间(s)",
       "providerName": "供应商"
@@ -382,8 +383,10 @@
   "models": {
     "title": "模型列表",
     "createTitle": "创建模型",
+    "copyCreateTitle": "基于副本创建模型",
     "detailTitle": "模型详情",
     "addModel": "添加模型",
+    "copyCreateAction": "复制新建",
     "editProvider": "编辑供应商",
     "addProvider": "添加供应商",
     "deleteModel": "删除模型",

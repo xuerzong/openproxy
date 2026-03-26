@@ -9,6 +9,7 @@ import { BillingModal } from '@/components/BillingModal'
 import { Table } from '@openproxy/ui/Table'
 import { Pagination } from '@openproxy/ui/Pagination'
 import { Button } from '@openproxy/ui/Button'
+import { Tag } from '@openproxy/ui/Tag'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
@@ -194,6 +195,17 @@ const Page = () => {
               label: translateDashboard('table.tokenOutput', 'Token Output'),
               align: 'right',
               width: 160,
+            },
+            {
+              key: 'isStream',
+              label: t('dashboard.table.streamOutput'),
+              width: 140,
+              align: 'center',
+              render: (text) => (
+                <Tag color={text ? 'green' : 'yellow'}>
+                  {text ? t('common.yes') : t('common.no')}
+                </Tag>
+              ),
             },
             {
               key: 'responseTime',

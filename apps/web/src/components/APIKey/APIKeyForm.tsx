@@ -15,9 +15,13 @@ export const NO_FOLDER_OPTION_VALUE = '__no_folder__'
 
 interface APIKeyFormProps {
   form: FormInstance
+  allowNoFolder?: boolean
 }
 
-export const APIKeyForm: React.FC<APIKeyFormProps> = ({ form }) => {
+export const APIKeyForm: React.FC<APIKeyFormProps> = ({
+  form,
+  allowNoFolder = false,
+}) => {
   const { t } = useTranslation('common')
   const [modelsOpen, setModelsOpen] = useState(false)
   const modelIds = form.values.modelIds || []
@@ -42,15 +46,23 @@ export const APIKeyForm: React.FC<APIKeyFormProps> = ({ form }) => {
           />
         </FormField>
 
-        <FormField name="folderId" label={t('apiKeys.folder')}>
+        <FormField
+          name="folderId"
+          label={t('apiKeys.folder')}
+          requiredMask={!allowNoFolder}
+        >
           {hasFolders ? (
             <Select
               placeholder={t('common.selectPlaceholder')}
               options={[
-                {
-                  value: NO_FOLDER_OPTION_VALUE,
-                  label: t('apiKeys.noFolder'),
-                },
+                ...(allowNoFolder
+                  ? [
+                      {
+                        value: NO_FOLDER_OPTION_VALUE,
+                        label: t('apiKeys.noFolder'),
+                      },
+                    ]
+                  : []),
                 ...folderOptions,
               ]}
             />

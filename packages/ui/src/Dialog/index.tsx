@@ -49,7 +49,7 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
             <p>{description}</p>
           </div>
 
-          <div className="overflow-y-auto min-h-0">{children}</div>
+          <div className="overflow-y-auto min-h-0 px-1 -mx-1">{children}</div>
 
           {footer && <div className="mt-4">{footer}</div>}
         </Drawer>
@@ -88,7 +88,7 @@ export const Dialog: React.FC<React.PropsWithChildren<DialogProps>> = ({
               <CloseButton />
             </RadixDialog.Close>
 
-            <div className="overflow-y-auto min-h-0">{children}</div>
+            <div className="overflow-y-auto min-h-0 px-1 -mx-1">{children}</div>
 
             {footer && <div className="mt-4">{footer}</div>}
           </RadixDialog.Content>

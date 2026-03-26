@@ -5,6 +5,22 @@ import { generateApiKey, generateDeApiKey } from '@server/lib/generate'
 import { hash } from '@server/lib/utils/hash'
 import Decimal from 'decimal.js'
 
+async function assertFolderBelongsToTeam(teamId: string, folderId: string) {
+  const folder = await db.query.apiKeyFolders.findFirst({
+    where: and(
+      eq(dbSchema.apiKeyFolders.id, folderId),
+      eq(dbSchema.apiKeyFolders.teamId, teamId)
+    ),
+    columns: {
+      id: true,
+    },
+  })
+
+  if (!folder) {
+    throw new Error('API key folder not found')
+  }
+}
+
 export async function getApiKeysByTeamId(teamId: string) {
   const apiKeys = await db.query.apiKeys.findMany({
     where: and(eq(dbSchema.apiKeys.teamId, teamId)),
@@ -29,7 +45,7 @@ export async function createApiKey(params: {
   teamId: string
   teamUserId: string
   name: string
-  folderId?: string | null
+  folderId: string
   expiresAt: Date | null
   maxQuota?: number
   maxRequests?: number
@@ -48,6 +64,8 @@ export async function createApiKey(params: {
 
   const apiKey = generateApiKey()
 
+  await assertFolderBelongsToTeam(teamId, folderId)
+
   await db.transaction(async (tx) => {
     const apiKeys = await tx
       .insert(dbSchema.apiKeys)
@@ -57,7 +75,7 @@ export async function createApiKey(params: {
         apiKeyHash: await hash(apiKey),
         teamId,
         userId: teamUserId,
-        folderId: folderId || null,
+        folderId,
         expiresAt,
         maxQuota: maxQuota?.toString(),
         maxRequests,
@@ -119,6 +137,10 @@ export async function updateApiKey(params: {
 
   if (apiKeys.length === 0) {
     throw new Error('权限不足')
+  }
+
+  if (folderId) {
+    await assertFolderBelongsToTeam(teamId, folderId)
   }
 
   await db.transaction(async (tx) => {

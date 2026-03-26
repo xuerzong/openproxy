@@ -11,7 +11,8 @@ import { toast } from 'sonner'
 
 interface AccountItem {
   id: string
-  provider: string
+  providerId?: string
+  provider?: string
   accountId: string
   createdAt: Date
 }
@@ -30,6 +31,10 @@ const providerConfig = {
 type SocialProvider = keyof typeof providerConfig
 
 const allProviders: SocialProvider[] = ['github', 'google']
+
+const getAccountProvider = (account: AccountItem): string => {
+  return account.providerId || account.provider || ''
+}
 
 export const AccountList = () => {
   const { t } = useTranslation('common')
@@ -57,7 +62,7 @@ export const AccountList = () => {
     return null
   }
 
-  const linkedProviders = new Set(accounts.map((a) => a.provider))
+  const linkedProviders = new Set(accounts.map(getAccountProvider))
 
   const handleLink = (provider: SocialProvider) => {
     authClient.linkSocial({
@@ -67,7 +72,7 @@ export const AccountList = () => {
   }
 
   const handleUnlink = async (provider: SocialProvider) => {
-    const account = accounts.find((a) => a.provider === provider)
+    const account = accounts.find((a) => getAccountProvider(a) === provider)
     if (!account) return
 
     if (accounts.length <= 1) {
@@ -120,7 +125,9 @@ export const AccountList = () => {
           {availableProviders.map((provider) => {
             const config = providerConfig[provider]
             const linked = linkedProviders.has(provider)
-            const account = accounts.find((a) => a.provider === provider)
+            const account = accounts.find(
+              (a) => getAccountProvider(a) === provider
+            )
 
             return (
               <div
