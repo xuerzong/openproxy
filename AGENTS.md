@@ -15,6 +15,7 @@ packages/       → Shared packages (schema, ui, phone-auth, payment-provider)
 - Commits follow Conventional Commits: `feat(scope):`, `fix(scope):`, `chore(scope):`, `docs:`.
 - Do not add unnecessary abstractions, comments, or error handling for impossible states.
 - Keep changes minimal and focused on the task.
+- Shared date and datetime inputs should be implemented in `packages/ui` as a single `DatePicker` built from Radix `Popover` and `react-day-picker`; do not introduce new native `datetime-local` fields when a reusable picker is needed.
 
 ## Convention Maintenance — MANDATORY
 

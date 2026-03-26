@@ -4,7 +4,7 @@ import { Loader } from '../Loader'
 import { cn } from '../utils/cn'
 import s from './index.module.scss'
 
-const buttonVariants = cva(
+export const buttonVariants = cva(
   cn(
     'inline-flex items-center justify-center gap-2 rounded-md border border-transparent bg-clip-padding text-sm font-medium whitespace-nowrap shrink-0 outline-none cursor-pointer select-none transition-colors duration-300',
     'disabled:bg-muted! disabled:text-foreground/75 disabled:cursor-not-allowed'

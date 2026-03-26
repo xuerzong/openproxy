@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { BoxesIcon, FolderPlusIcon } from 'lucide-react'
 import { ModelTable } from '../Model/ModelTable'
 import { Drawer } from '@openproxy/ui/Drawer'
+import { DatePicker } from '@openproxy/ui/DatePicker'
 import { Form, FormField, type FormInstance } from '@openproxy/ui/Form'
 import { Input } from '@openproxy/ui/Input'
 import { NumberInput } from '@openproxy/ui/NumberInput'
@@ -132,11 +133,9 @@ export const APIKeyForm: React.FC<APIKeyFormProps> = ({
 
         <FormField
           name="expiresAt"
-          label={t('apiKeys.expiresAtOptional', {
-            defaultValue: 'Expiration Time (optional)',
-          })}
+          label={t('apiKeys.expiresAtOptional')}
         >
-          <Input type="datetime-local" />
+          <DatePicker placeholder={t('common.selectPlaceholder')} />
         </FormField>
       </Form>
 
