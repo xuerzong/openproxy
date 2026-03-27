@@ -10,6 +10,7 @@ import { Button } from '@openproxy/ui/Button'
 import { FolderIcon, PlusIcon } from 'lucide-react'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
+import { Loader } from '@openproxy/ui/Loader'
 import {
   APIKeyForm,
   NO_FOLDER_OPTION_VALUE,
@@ -44,6 +45,8 @@ const Page = () => {
   const isOSS = useIsOSS()
   const apiKeysQuery = useApiKeysQuery()
   const foldersQuery = useApiKeyFoldersQuery()
+  const loading =
+    teamQuery.isLoading || apiKeysQuery.isLoading || foldersQuery.isLoading
   const folders = foldersQuery.data || []
   const apiKeyLimit = teamQuery.data?.team?.apiKeyLimit
   const apiKeyCount = apiKeysQuery.data?.length || 0
@@ -158,7 +161,7 @@ const Page = () => {
             apiKeyForm.resetErrors()
             setOpen(true)
           }}
-          disabled={isCreateDisabled}
+          disabled={loading || isCreateDisabled}
         >
           <PlusIcon />
           {t('apiKeys.createWithCount', {
@@ -168,37 +171,43 @@ const Page = () => {
         </Button>
       </div>
       <FlexScrollViewer bordered>
-        {filteredApiKeys.map((apiKey: any, apiKeyIndex: number) => (
-          <Fragment key={apiKey.id}>
-            <APIKeyItem
-              apiKey={apiKey}
-              onEdit={() => {
-                apiKeyForm.setValues({
-                  ...apiKey,
-                  modelIds: apiKey.modelIds,
-                  folderId: apiKey.folderId || NO_FOLDER_OPTION_VALUE,
-                  expiresAt: apiKey.expiresAt
-                    ? dayjs(apiKey.expiresAt).format('YYYY-MM-DDTHH:mm')
-                    : void 0,
-                  maxQuota:
-                    Number(apiKey.maxQuota) === 0 ? void 0 : apiKey.maxQuota,
-                  maxRequests:
-                    Number(apiKey.maxRequests) === 0
-                      ? void 0
-                      : apiKey.maxRequests,
-                })
-                setOpen(true)
-              }}
-              onDelete={() => {
-                setDeleteId(apiKey.id)
-              }}
-            />
-            {apiKeyIndex !== filteredApiKeys.length - 1 && (
-              <div className="h-px bg-border w-full" />
-            )}
-          </Fragment>
-        ))}
-        {filteredApiKeys.length === 0 && (
+        {loading && (
+          <div className="flex min-h-80 items-center justify-center text-primary">
+            <Loader />
+          </div>
+        )}
+        {!loading &&
+          filteredApiKeys.map((apiKey: any, apiKeyIndex: number) => (
+            <Fragment key={apiKey.id}>
+              <APIKeyItem
+                apiKey={apiKey}
+                onEdit={() => {
+                  apiKeyForm.setValues({
+                    ...apiKey,
+                    modelIds: apiKey.modelIds,
+                    folderId: apiKey.folderId || NO_FOLDER_OPTION_VALUE,
+                    expiresAt: apiKey.expiresAt
+                      ? dayjs(apiKey.expiresAt).format('YYYY-MM-DDTHH:mm')
+                      : void 0,
+                    maxQuota:
+                      Number(apiKey.maxQuota) === 0 ? void 0 : apiKey.maxQuota,
+                    maxRequests:
+                      Number(apiKey.maxRequests) === 0
+                        ? void 0
+                        : apiKey.maxRequests,
+                  })
+                  setOpen(true)
+                }}
+                onDelete={() => {
+                  setDeleteId(apiKey.id)
+                }}
+              />
+              {apiKeyIndex !== filteredApiKeys.length - 1 && (
+                <div className="h-px bg-border w-full" />
+              )}
+            </Fragment>
+          ))}
+        {!loading && filteredApiKeys.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-6 py-6">
             <img className="w-64" src="/404.svg" />
             <div className="">

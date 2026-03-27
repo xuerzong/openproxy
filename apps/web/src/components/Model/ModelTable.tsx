@@ -119,106 +119,105 @@ export const ModelTable: React.FC<ModelTableProps> = ({
         </div>
       </div>
       <FlexScrollViewer bordered>
-        {dataSource.length > 0 && (
-          <Table
-            rowKey={(d) => d.id}
-            selectable={selectable}
-            selectedRowKeys={selectedIds}
-            onSelectedRowKeysChange={onSelectedIdsChange}
-            columns={[
-              {
-                key: 'id',
-                label: 'ID',
-                width: 240,
-                render: (value, record) => {
-                  return (
-                    <div className="flex items-center gap-2">
-                      <ModelIcon className="w-4 h-4" model={record.ownedBy} />
-                      <div className="flex-1 min-w-0 truncate">{value}</div>
-                      <div className="flex items-center gap-2 ml-auto">
-                        <CopyButton text={value} />
-                        {canManage && (
-                          <EditIcon
-                            className="w-4 h-4 cursor-pointer"
-                            onClick={() => {
-                              navigate(`/models/${record.id}`)
-                            }}
-                          />
-                        )}
-                      </div>
+        <Table
+          rowKey={(d) => d.id}
+          loading={modelsQuery.isLoading}
+          selectable={selectable}
+          selectedRowKeys={selectedIds}
+          onSelectedRowKeysChange={onSelectedIdsChange}
+          columns={[
+            {
+              key: 'id',
+              label: 'ID',
+              width: 240,
+              render: (value, record) => {
+                return (
+                  <div className="flex items-center gap-2">
+                    <ModelIcon className="w-4 h-4" model={record.ownedBy} />
+                    <div className="flex-1 min-w-0 truncate">{value}</div>
+                    <div className="flex items-center gap-2 ml-auto">
+                      <CopyButton text={value} />
+                      {canManage && (
+                        <EditIcon
+                          className="w-4 h-4 cursor-pointer"
+                          onClick={() => {
+                            navigate(`/models/${record.id}`)
+                          }}
+                        />
+                      )}
                     </div>
-                  )
-                },
+                  </div>
+                )
               },
-              {
-                key: 'inputPricing',
-                label: t('models.input', { defaultValue: 'Input' }),
-                width: 160,
-                render(_, record) {
-                  const value = record.pricing.input
-                  return Number(value) ? `¥${value}` : '-'
-                },
-                align: 'right',
+            },
+            {
+              key: 'inputPricing',
+              label: t('models.input', { defaultValue: 'Input' }),
+              width: 160,
+              render(_, record) {
+                const value = record.pricing.input
+                return Number(value) ? `¥${value}` : '-'
               },
-              ...(mode === 'admin'
-                ? [
-                    {
-                      key: 'isPublic',
-                      label: t('models.visibility', {
-                        defaultValue: 'Visibility',
-                      }),
-                      width: 120,
-                      render: (value: boolean) =>
-                        value
-                          ? t('models.public', { defaultValue: 'Public' })
-                          : t('models.private', { defaultValue: 'Private' }),
-                    },
-                  ]
-                : []),
-              {
-                key: 'outputPricing',
-                label: t('models.output', { defaultValue: 'Output' }),
-                width: 160,
-                render(_, record) {
-                  const value = record.pricing.output
-                  return Number(value) ? `¥${value}` : '-'
-                },
-                align: 'right',
+              align: 'right',
+            },
+            ...(mode === 'admin'
+              ? [
+                  {
+                    key: 'isPublic',
+                    label: t('models.visibility', {
+                      defaultValue: 'Visibility',
+                    }),
+                    width: 120,
+                    render: (value: boolean) =>
+                      value
+                        ? t('models.public', { defaultValue: 'Public' })
+                        : t('models.private', { defaultValue: 'Private' }),
+                  },
+                ]
+              : []),
+            {
+              key: 'outputPricing',
+              label: t('models.output', { defaultValue: 'Output' }),
+              width: 160,
+              render(_, record) {
+                const value = record.pricing.output
+                return Number(value) ? `¥${value}` : '-'
               },
-              {
-                key: 'providers',
-                label: t('models.providers', { defaultValue: 'Providers' }),
-                width: 120,
-                render(_, record) {
-                  const providers = record.providers || []
-                  const uniqueProviders = Array.from(
-                    new Map(providers.map((p) => [p.icon, p])).values()
-                  )
-                  return uniqueProviders.length > 0 ? (
-                    <div className="flex items-center">
-                      {uniqueProviders.map((provider, providerIndex) => (
-                        <Tooltip key={providerIndex} content={provider.name}>
-                          <span className="inline-flex mr-1">
-                            <ModelIcon model={provider.icon} />
-                          </span>
-                        </Tooltip>
-                      ))}
-                    </div>
-                  ) : (
-                    '-'
-                  )
-                },
+              align: 'right',
+            },
+            {
+              key: 'providers',
+              label: t('models.providers', { defaultValue: 'Providers' }),
+              width: 120,
+              render(_, record) {
+                const providers = record.providers || []
+                const uniqueProviders = Array.from(
+                  new Map(providers.map((p) => [p.icon, p])).values()
+                )
+                return uniqueProviders.length > 0 ? (
+                  <div className="flex items-center">
+                    {uniqueProviders.map((provider, providerIndex) => (
+                      <Tooltip key={providerIndex} content={provider.name}>
+                        <span className="inline-flex mr-1">
+                          <ModelIcon model={provider.icon} />
+                        </span>
+                      </Tooltip>
+                    ))}
+                  </div>
+                ) : (
+                  '-'
+                )
               },
-            ]}
-            data={dataSource}
-            locale={{
-              noData: t('common.noData', { defaultValue: 'No data' }),
-              emptyListHint: t('common.emptyListHint', {
-                defaultValue: 'No records yet',
-              }),
-            }}
-          />
-        )}
+            },
+          ]}
+          data={dataSource}
+          locale={{
+            noData: t('common.noData', { defaultValue: 'No data' }),
+            emptyListHint: t('common.emptyListHint', {
+              defaultValue: 'No records yet',
+            }),
+          }}
+        />
       </FlexScrollViewer>
     </div>
   )

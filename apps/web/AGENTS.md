@@ -21,6 +21,7 @@ When adding or modifying any visible text (labels, tooltips, placeholders, error
 
 - Functional components only. Use hooks for state and side effects.
 - Data fetching: use `@tanstack/react-query` hooks in `src/hooks/queries/`.
+- Query-backed tables should pass the corresponding query `isLoading` state into `@openproxy/ui/Table` via the `loading` prop instead of maintaining page-specific table loading UIs.
 - Styles: TailwindCSS utility classes + CSS modules (`*.module.css`) when needed.
 - Path aliases: `@/` → `src/`, `@openproxy/` → workspace packages.
 - Sidebar menus in `src/layouts/DashboardLayout.tsx` may include non-clickable `label` and `separator` entries to create grouped navigation sections.

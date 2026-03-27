@@ -9,6 +9,7 @@ import React, {
 import { useMap, useScroll, useSize } from 'ahooks'
 import { cn } from '../utils/cn'
 import { Checkbox } from '../Checkbox'
+import { Loader } from '../Loader'
 import s from './index.module.scss'
 
 interface TableLocale {
@@ -30,6 +31,7 @@ interface TableProps<T = any> {
   rowKey: (record: T) => string
   columns: TableColumn<T>[]
   data: T[]
+  loading?: boolean
   rowRender?: (children: React.ReactNode, record: T) => React.ReactNode
 
   selectedRowKeys?: string[]
@@ -42,6 +44,7 @@ export function Table<T extends Record<string, any> = {}>({
   rowKey,
   columns,
   data,
+  loading = false,
   rowRender,
   selectable = false,
   selectedRowKeys,
@@ -211,6 +214,7 @@ export function Table<T extends Record<string, any> = {}>({
   return (
     <div
       ref={scrollContainerRef}
+      aria-busy={loading}
       className={cn(s.TableRoot, 'w-full h-full rounded-md overflow-x-auto')}
     >
       <div className="w-full h-full">
@@ -260,21 +264,28 @@ export function Table<T extends Record<string, any> = {}>({
           </thead>
 
           <tbody>
-            {data.map((record) =>
-              rowRender ? (
-                <Fragment key={rowKey(record)}>
-                  {rowRender(defaultRowRender(record), record)}
-                </Fragment>
-              ) : (
-                <Fragment key={rowKey(record)}>
-                  {defaultRowRender(record)}
-                </Fragment>
-              )
-            )}
+            {!loading &&
+              data.map((record) =>
+                rowRender ? (
+                  <Fragment key={rowKey(record)}>
+                    {rowRender(defaultRowRender(record), record)}
+                  </Fragment>
+                ) : (
+                  <Fragment key={rowKey(record)}>
+                    {defaultRowRender(record)}
+                  </Fragment>
+                )
+              )}
           </tbody>
         </table>
 
-        {data.length === 0 && (
+        {loading && (
+          <div className="w-full flex items-center justify-center h-80 text-primary">
+            <Loader />
+          </div>
+        )}
+
+        {!loading && data.length === 0 && (
           <div className="w-full flex flex-col gap-6 items-center justify-center h-80">
             <div className="text-md font-bold">
               {locale?.noData ?? 'No data'}

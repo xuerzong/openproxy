@@ -142,6 +142,7 @@ const Page = () => {
       <FlexScrollViewer bordered>
         <Table
           rowKey={(d) => d.id}
+          loading={usagesQuery.isLoading}
           columns={[
             {
               key: 'createdAt',

@@ -8,7 +8,7 @@ import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { Button } from '@openproxy/ui/Button'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
-import { Skeleton } from '@openproxy/ui/Skeleton'
+import { Loader } from '@openproxy/ui/Loader'
 import { Select } from '@openproxy/ui/Select'
 import { Table } from '@openproxy/ui/Table'
 import { Tag } from '@openproxy/ui/Tag'
@@ -168,7 +168,9 @@ const Page = () => {
             </div>
           </div>
           {loading ? (
-            <Skeleton className="h-6 w-28 rounded-full" />
+            <div className="flex h-6 min-w-28 items-center justify-center text-primary">
+              <Loader />
+            </div>
           ) : (
             <Tag color={memberLimitReached ? 'yellow' : 'green'}>
               {members.length}/{team?.usersLimit || 0}{' '}
@@ -180,7 +182,9 @@ const Page = () => {
         </div>
 
         {loading ? (
-          <Skeleton className="h-10 w-full" />
+          <div className="flex h-10 w-full items-center justify-center rounded-md border border-border text-primary">
+            <Loader />
+          </div>
         ) : (
           <Input
             value={inviteLink || '-'}
@@ -219,130 +223,95 @@ const Page = () => {
           </div>
         </div>
 
-        {loading ? (
-          <FlexScrollViewer bordered>
-            <div className="overflow-hidden min-w-250">
-              <div className="grid grid-cols-[220px_260px_180px_200px_140px] gap-0 border-b border-border bg-muted/30">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <div key={index} className="px-4 py-3">
-                    <Skeleton className="h-4 w-20" />
-                  </div>
-                ))}
-              </div>
-              {Array.from({ length: 4 }).map((_, rowIndex) => (
-                <div
-                  key={rowIndex}
-                  className="grid grid-cols-[220px_260px_180px_200px_140px] gap-0 border-b border-border last:border-b-0"
-                >
-                  <div className="px-4 py-4">
-                    <Skeleton className="h-4 w-28" />
-                  </div>
-                  <div className="px-4 py-4">
-                    <Skeleton className="h-4 w-40" />
-                  </div>
-                  <div className="px-4 py-4">
-                    <Skeleton className="h-8 w-24 rounded-full" />
-                  </div>
-                  <div className="px-4 py-4">
-                    <Skeleton className="h-4 w-32" />
-                  </div>
-                  <div className="px-4 py-4 flex justify-center">
-                    <Skeleton className="h-8 w-16 rounded-md" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </FlexScrollViewer>
-        ) : (
-          <FlexScrollViewer bordered>
-            <Table
-              rowKey={(record) => record.id}
-              data={members}
-              columns={[
-                {
-                  key: 'name',
-                  label: t('teams.members.name', { defaultValue: 'Name' }),
-                  width: 220,
-                  render: (_, record) => record.user?.name || '-',
-                },
-                {
-                  key: 'email',
-                  label: t('teams.members.email', { defaultValue: 'Email' }),
-                  width: 260,
-                  render: (_, record) => record.user?.email || '-',
-                },
-                {
-                  key: 'role',
-                  label: t('teams.members.role', { defaultValue: 'Role' }),
-                  width: 180,
-                  render: (value, record) =>
-                    canManageMembers ? (
-                      <Select
-                        value={value}
-                        options={roleOptions}
-                        onChange={(nextRole) => {
-                          if (nextRole !== value) {
-                            onUpdateRole(record.id, nextRole)
-                          }
-                        }}
-                        triggerClassName="w-36"
-                        disabled={updatingMemberId === record.id}
-                      />
-                    ) : (
-                      <Tag color={value === 'owner' ? 'green' : 'default'}>
-                        {value === 'owner'
-                          ? t('teamSettings.members.roles.owner', {
-                              defaultValue: 'Owner',
-                            })
-                          : t('teamSettings.members.roles.member', {
-                              defaultValue: 'Member',
-                            })}
-                      </Tag>
-                    ),
-                },
-                {
-                  key: 'createdAt',
-                  label: t('teams.members.joinedAt', {
-                    defaultValue: 'Joined At',
-                  }),
-                  width: 200,
-                  render: (value) => dayjs(value).format('YYYY/MM/DD HH:mm:ss'),
-                },
-                {
-                  key: 'operation',
-                  label: t('common.operation', { defaultValue: 'Operation' }),
-                  width: 140,
-                  align: 'center',
-                  fixed: 'right',
-                  render: (_, record) => (
-                    <Button
-                      variant="danger"
-                      size="icon-xs"
-                      disabled={
-                        !canManageMembers || record.userId === currentUserId
-                      }
-                      aria-label={t('actions.delete', {
-                        defaultValue: 'Delete',
-                      })}
-                      title={t('actions.delete', {
-                        defaultValue: 'Delete',
-                      })}
-                      onClick={() => setRemovingMember(record)}
-                    >
-                      <TrashIcon />
-                    </Button>
+        <FlexScrollViewer bordered>
+          <Table
+            rowKey={(record) => record.id}
+            loading={loading}
+            data={members}
+            columns={[
+              {
+                key: 'name',
+                label: t('teams.members.name', { defaultValue: 'Name' }),
+                width: 220,
+                render: (_, record) => record.user?.name || '-',
+              },
+              {
+                key: 'email',
+                label: t('teams.members.email', { defaultValue: 'Email' }),
+                width: 260,
+                render: (_, record) => record.user?.email || '-',
+              },
+              {
+                key: 'role',
+                label: t('teams.members.role', { defaultValue: 'Role' }),
+                width: 180,
+                render: (value, record) =>
+                  canManageMembers ? (
+                    <Select
+                      value={value}
+                      options={roleOptions}
+                      onChange={(nextRole) => {
+                        if (nextRole !== value) {
+                          onUpdateRole(record.id, nextRole)
+                        }
+                      }}
+                      triggerClassName="w-36"
+                      disabled={updatingMemberId === record.id}
+                    />
+                  ) : (
+                    <Tag color={value === 'owner' ? 'green' : 'default'}>
+                      {value === 'owner'
+                        ? t('teamSettings.members.roles.owner', {
+                            defaultValue: 'Owner',
+                          })
+                        : t('teamSettings.members.roles.member', {
+                            defaultValue: 'Member',
+                          })}
+                    </Tag>
                   ),
-                },
-              ]}
-              locale={{
-                noData: t('common.noData', { defaultValue: 'No data' }),
-                emptyListHint: t('common.emptyListHint', {
-                  defaultValue: 'No records yet',
+              },
+              {
+                key: 'createdAt',
+                label: t('teams.members.joinedAt', {
+                  defaultValue: 'Joined At',
                 }),
-              }}
-            />
-          </FlexScrollViewer>
-        )}
+                width: 200,
+                render: (value) => dayjs(value).format('YYYY/MM/DD HH:mm:ss'),
+              },
+              {
+                key: 'operation',
+                label: t('common.operation', { defaultValue: 'Operation' }),
+                width: 140,
+                align: 'center',
+                fixed: 'right',
+                render: (_, record) => (
+                  <Button
+                    variant="danger"
+                    size="icon-xs"
+                    disabled={
+                      !canManageMembers || record.userId === currentUserId
+                    }
+                    aria-label={t('actions.delete', {
+                      defaultValue: 'Delete',
+                    })}
+                    title={t('actions.delete', {
+                      defaultValue: 'Delete',
+                    })}
+                    onClick={() => setRemovingMember(record)}
+                  >
+                    <TrashIcon />
+                  </Button>
+                ),
+              },
+            ]}
+            locale={{
+              noData: t('common.noData', { defaultValue: 'No data' }),
+              emptyListHint: t('common.emptyListHint', {
+                defaultValue: 'No records yet',
+              }),
+            }}
+          />
+        </FlexScrollViewer>
       </Card>
 
       <Dialog
