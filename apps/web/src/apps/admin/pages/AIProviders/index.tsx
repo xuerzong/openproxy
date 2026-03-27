@@ -100,6 +100,7 @@ const Page = () => {
       <FlexScrollViewer bordered>
         <Table
           rowKey={(d: any) => d.id}
+          loading={aiProvidersQuery.isLoading}
           data={aiProvidersQuery.data || []}
           columns={[
             {

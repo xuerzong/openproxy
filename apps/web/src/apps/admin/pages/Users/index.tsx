@@ -26,6 +26,7 @@ const Page = () => {
       <div className="flex-1 min-h-0 overflow-y-auto border border-border rounded-md">
         <Table
           rowKey={(d) => d.id}
+          loading={usersQuery.isLoading}
           columns={[
             {
               key: 'id',

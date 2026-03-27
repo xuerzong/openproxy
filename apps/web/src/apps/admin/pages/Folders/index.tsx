@@ -42,6 +42,7 @@ const Page = () => {
         <FlexScrollViewer bordered>
           <Table
             rowKey={(folder: any) => folder.id}
+            loading={foldersQuery.isLoading}
             data={foldersQuery.data || []}
             columns={[
               {

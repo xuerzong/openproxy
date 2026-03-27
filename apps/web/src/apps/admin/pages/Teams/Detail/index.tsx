@@ -396,6 +396,7 @@ const Page = () => {
           <div className="max-h-64 overflow-y-auto border border-border rounded-md">
             <Table
               rowKey={(member) => member.id}
+              loading={teamMembersQuery.isLoading}
               data={teamMembersQuery.data || []}
               columns={[
                 {

@@ -25,6 +25,7 @@ const Page = () => {
       <FlexScrollViewer bordered>
         <Table
           rowKey={(d) => d.orderId}
+          loading={ordersQuery.isLoading}
           data={ordersQuery.data || []}
           columns={[
             {

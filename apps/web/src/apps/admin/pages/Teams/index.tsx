@@ -61,6 +61,7 @@ const Page = () => {
       <FlexScrollViewer bordered>
         <Table
           rowKey={(team) => team.id}
+          loading={teamsQuery.isLoading}
           data={teamsQuery.data || []}
           columns={[
             {
