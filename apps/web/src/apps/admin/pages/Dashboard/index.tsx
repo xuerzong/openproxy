@@ -261,12 +261,6 @@ const Page = () => {
       }),
       color: 'var(--primary)',
     },
-    requests: {
-      label: t('adminDashboard.chart.requests', {
-        defaultValue: 'Requests',
-      }),
-      color: 'var(--primary)',
-    },
   }
 
   return (
@@ -352,17 +346,7 @@ const Page = () => {
                 axisLine={false}
                 minTickGap={24}
               />
-              <ChartLegend content={<ChartLegendContent />} />
               <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-              <Area
-                dataKey="requests"
-                type="monotone"
-                radius={0}
-                stroke="#10b981"
-                strokeWidth={2}
-                fill="#10b981"
-                fillOpacity={0.12}
-              />
               <Area
                 dataKey="totalTokens"
                 type="monotone"

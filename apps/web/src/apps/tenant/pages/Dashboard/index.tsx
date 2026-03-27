@@ -12,12 +12,11 @@ import { Button } from '@openproxy/ui/Button'
 import { Tag } from '@openproxy/ui/Tag'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
+import { SparklineStatisticCard } from '@/components/SparklineStatisticCard'
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useUsagesGroupedQuery } from '@/apps/tenant/hooks/queries/useUsagesGroupedQuery'
 import {
   ChartContainer,
-  ChartLegend,
-  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from '@openproxy/ui/Chart'
@@ -45,6 +44,11 @@ const Page = () => {
   const [billingOpen, setBillingOpen] = useState(false)
 
   const balance = teamQuery.data?.team.amount
+  const requestTotal = useMemo(() => {
+    return (usagesGroupedQuery.data || []).reduce((sum, item) => {
+      return sum + Number(item.requests || 0)
+    }, 0)
+  }, [usagesGroupedQuery.data])
 
   const chartData = useMemo(() => {
     return (usagesGroupedQuery.data || []).map((item) => ({
@@ -55,19 +59,22 @@ const Page = () => {
   }, [usagesGroupedQuery.data])
 
   const chartConfig: ChartConfig = {
+    totalTokens: {
+      label: translateDashboard('chart.totalTokens', 'Total Tokens'),
+      color: 'var(--primary)',
+    },
+  }
+
+  const requestChartConfig: ChartConfig = {
     requests: {
       label: translateDashboard('chart.requests', 'Requests'),
       color: 'var(--primary)',
-    },
-    totalTokens: {
-      label: translateDashboard('chart.totalTokens', 'Total Tokens'),
-      color: '#10b981',
     },
   }
 
   return (
     <PageContainer title={translateDashboard('title', 'Dashboard')}>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1.6fr)_minmax(18rem,1fr)]">
         <Card>
           <Statistic
             title={translateDashboard('balance', 'Balance')}
@@ -98,6 +105,31 @@ const Page = () => {
             }
           />
         </Card>
+
+        <SparklineStatisticCard
+          title={translateDashboard('chart.requests', 'Requests')}
+          value={requestTotal}
+          chart={
+            <ChartContainer config={requestChartConfig} className="h-20 w-full">
+              <AreaChart
+                data={chartData}
+                margin={{ top: 8, right: 4, left: 4, bottom: 4 }}
+              >
+                <ChartTooltip
+                  content={<ChartTooltipContent indicator="dot" />}
+                />
+                <Area
+                  dataKey="requests"
+                  type="monotone"
+                  stroke="var(--color-primary)"
+                  strokeWidth={2}
+                  fill="var(--color-primary)"
+                  fillOpacity={0.18}
+                />
+              </AreaChart>
+            </ChartContainer>
+          }
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-4">
@@ -114,24 +146,14 @@ const Page = () => {
                 axisLine={false}
                 minTickGap={24}
               />
-              <ChartLegend content={<ChartLegendContent />} />
               <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
               <Area
-                dataKey="requests"
+                dataKey="totalTokens"
                 type="monotone"
                 radius={0}
                 stroke="var(--color-primary)"
                 strokeWidth={2}
                 fill="var(--color-primary)"
-                fillOpacity={0.2}
-              />
-              <Area
-                dataKey="totalTokens"
-                type="monotone"
-                radius={0}
-                stroke="#10b981"
-                strokeWidth={2}
-                fill="#10b981"
                 fillOpacity={0.12}
               />
             </AreaChart>
