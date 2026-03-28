@@ -10,3 +10,7 @@ export const UpdateApiKeyFolderBodySchema = t.Object({
   name: t.String({ minLength: 1, maxLength: 32 }),
   isDefault: t.Optional(t.Boolean()),
 })
+
+export const DeleteApiKeyFolderQuerySchema = t.Object({
+  deleteAllApiKeys: t.Optional(t.BooleanString()),
+})

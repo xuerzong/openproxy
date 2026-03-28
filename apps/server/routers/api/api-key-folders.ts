@@ -11,6 +11,7 @@ import {
 import {
   CreateApiKeyFolderBodySchema,
   UpdateApiKeyFolderBodySchema,
+  DeleteApiKeyFolderQuerySchema,
 } from '@server/schemas'
 import { IS_OSS, TeamPlanLimits } from '@server/constants'
 import type { TeamPlan } from '@server/constants'
@@ -70,9 +71,13 @@ export const apiKeyFoldersRouter = new Elysia()
   )
   .delete(
     'apiKeyFolders/:id',
-    async ({ teamId, params, status }) => {
+    async ({ teamId, params, query, status }) => {
       try {
-        const folder = await deleteApiKeyFolder(params.id, teamId)
+        const folder = await deleteApiKeyFolder(
+          params.id,
+          teamId,
+          query.deleteAllApiKeys
+        )
         if (!folder) {
           return status(404, { message: 'Folder not found' })
         }
@@ -85,5 +90,9 @@ export const apiKeyFoldersRouter = new Elysia()
         throw error
       }
     },
-    { auth: { role: true }, team: true }
+    {
+      query: DeleteApiKeyFolderQuerySchema,
+      auth: { role: true },
+      team: true,
+    }
   )

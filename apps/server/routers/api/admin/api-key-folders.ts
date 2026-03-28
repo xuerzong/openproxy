@@ -1,5 +1,6 @@
 import { Elysia, t } from 'elysia'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
+import { DeleteApiKeyFolderQuerySchema } from '@server/schemas'
 import {
   ApiKeyFolderServiceError,
   getApiKeyFoldersByTeamIdAdmin,
@@ -22,9 +23,12 @@ export const adminApiKeyFoldersRouter = new Elysia({
   )
   .delete(
     '/folders/:id',
-    async ({ params, set }) => {
+    async ({ params, query, set }) => {
       try {
-        const folder = await deleteApiKeyFolderAdmin(params.id)
+        const folder = await deleteApiKeyFolderAdmin(
+          params.id,
+          query.deleteAllApiKeys
+        )
         if (!folder) {
           set.status = 404
           return 'Folder not found'
@@ -42,5 +46,6 @@ export const adminApiKeyFoldersRouter = new Elysia({
     {
       auth: { role: 'admin' },
       params: t.Object({ id: t.String() }),
+      query: DeleteApiKeyFolderQuerySchema,
     }
   )
