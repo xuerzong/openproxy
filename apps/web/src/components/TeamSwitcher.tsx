@@ -40,10 +40,11 @@ export const TeamSwitcher = () => {
   const teamName = currentTeam?.team?.name || '...'
   const currentPlan = currentTeam?.team?.plan || 'free'
   const teamId = currentTeamId || ''
+  const ownedTeamsCount = teams.filter((team) => team.role === 'owner').length
 
   const isOSS = useIsOSS()
   const maxTeams = constsQuery.data?.maxTeamsPerUser
-  const canCreateTeam = isOSS || !maxTeams || teams.length < maxTeams
+  const canCreateTeam = isOSS || !maxTeams || ownedTeamsCount < maxTeams
 
   const onSwitchTeam = async (nextTeamId: string) => {
     if (nextTeamId === currentTeamId) return
@@ -85,18 +86,15 @@ export const TeamSwitcher = () => {
         navigate('/settings/general')
       },
     },
-    ...(canCreateTeam
-      ? [
-          { type: 'separator' as const },
-          {
-            type: 'item' as const,
-            key: 'create',
-            label: t('team.create', { defaultValue: 'Create Team' }),
-            icon: <PlusIcon className="w-4 h-4" />,
-            onClick: () => setCreateOpen(true),
-          },
-        ]
-      : []),
+    { type: 'separator' },
+    {
+      type: 'item' as const,
+      key: 'create',
+      label: t('team.create', { defaultValue: 'Create Team' }),
+      icon: <PlusIcon className="w-4 h-4" />,
+      disabled: !canCreateTeam,
+      onClick: () => setCreateOpen(true),
+    },
   ]
 
   return (

@@ -17,6 +17,7 @@ packages/       → Shared packages (schema, ui, utils, phone-auth, payment-prov
 - Keep changes minimal and focused on the task.
 - Shared date and datetime inputs should be implemented in `packages/ui` as a single `DatePicker` built from Radix `Popover` and `react-day-picker`; do not introduce new native `datetime-local` fields when a reusable picker is needed.
 - Shared `dayjs` setup and date locale synchronization live in `packages/utils/dayjs`; frontend language changes should update that shared locale state instead of re-initializing `dayjs` inside apps or UI components.
+- Shared `DropdownMenu` items in `packages/ui` support a `disabled` state; prefer disabling unavailable actions instead of conditionally hiding them when the user should still see the action exists.
 
 ## Convention Maintenance — MANDATORY
 

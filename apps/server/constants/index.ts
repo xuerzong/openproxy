@@ -12,7 +12,7 @@ export const CLIENT_ORIGIN =
 
 export const UserExperienceQuota = '1.00' // RMB
 
-export const MAX_TEAMS_PER_USER = 5
+export const MAX_TEAMS_PER_USER = 1
 
 export const TeamPlanLimits = {
   free: { usersLimit: 1, apiKeyLimit: 20, folderLimit: 1 },

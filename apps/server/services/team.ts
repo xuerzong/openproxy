@@ -128,10 +128,17 @@ export const createTeam = async (userId: string) => {
 
 export const createTeamForUser = async (userId: string, name: string) => {
   if (!IS_OSS) {
-    const existingTeams = await db.query.teamUsers.findMany({
-      where: eq(dbSchema.teamUsers.userId, userId),
-    })
-    if (existingTeams.length >= MAX_TEAMS_PER_USER) {
+    const existingOwnedTeams = await db
+      .select({ count: count() })
+      .from(dbSchema.teamUsers)
+      .where(
+        and(
+          eq(dbSchema.teamUsers.userId, userId),
+          eq(dbSchema.teamUsers.role, 'owner')
+        )
+      )
+
+    if ((existingOwnedTeams[0]?.count || 0) >= MAX_TEAMS_PER_USER) {
       throw new TeamServiceError('TEAM_LIMIT_REACHED', 409)
     }
   }

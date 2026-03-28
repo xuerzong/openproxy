@@ -9,6 +9,7 @@ import { Button } from '../Button'
 export type DropdownMenuItem =
   | {
       color?: 'default' | 'danger'
+      disabled?: boolean
       icon?: React.ReactNode
       label: React.ReactNode
       key: string
@@ -46,11 +47,15 @@ export const DropdownMenu: React.FC<
               <Button
                 key={menu.key}
                 onClick={() => {
+                  if (menu.disabled) {
+                    return
+                  }
                   menu.onClick()
                   setOpen(false)
                 }}
                 variant={menu.color === 'danger' ? 'danger' : 'ghost'}
                 className="justify-start"
+                disabled={menu.disabled}
               >
                 {menu.icon && <Slot.Root>{menu.icon}</Slot.Root>}
                 {menu.label}
@@ -83,8 +88,14 @@ export const DropdownMenu: React.FC<
             ) : (
               <RadixDropdownMenu.Item
                 key={menu.key}
+                disabled={menu.disabled}
                 onClick={menu.onClick}
-                className="flex items-center gap-2 px-4 h-10 text-sm hover:bg-muted outline-none cursor-pointer"
+                className={cn(
+                  'flex items-center gap-2 px-4 h-10 text-sm outline-none',
+                  menu.disabled
+                    ? 'text-foreground/50 cursor-not-allowed'
+                    : 'hover:bg-muted cursor-pointer'
+                )}
               >
                 {menu.icon && (
                   <Slot.Root className="w-4 h-4">{menu.icon}</Slot.Root>
