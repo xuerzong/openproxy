@@ -7,10 +7,11 @@ import { APIKeyItem } from '@/components/APIKey/APIKeyItem'
 import { useApiKeysQuery } from '@/apps/tenant/hooks/queries/useApiKeysQuery'
 import { useApiKeyFoldersQuery } from '@/apps/tenant/hooks/queries/useApiKeyFoldersQuery'
 import { Button } from '@openproxy/ui/Button'
-import { FolderIcon, PlusIcon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
 import { Loader } from '@openproxy/ui/Loader'
+import { Select } from '@openproxy/ui/Select'
 import {
   APIKeyForm,
   NO_FOLDER_OPTION_VALUE,
@@ -81,6 +82,28 @@ const Page = () => {
     if (selectedFolderId === ALL_FOLDERS_FILTER) return keys
     return keys.filter((k: any) => k.folderId === selectedFolderId)
   }, [apiKeysQuery.data, selectedFolderId])
+  const folderOptions = useMemo(
+    () => [
+      {
+        value: ALL_FOLDERS_FILTER,
+        label: t('apiKeys.allFolders'),
+      },
+      ...folders.map((folder: any) => ({
+        value: folder.id,
+        label: folder.isDefault ? (
+          <span>
+            {folder.name}
+            <span className="ml-1 text-xs opacity-60">
+              ({t('folders.default')})
+            </span>
+          </span>
+        ) : (
+          folder.name
+        ),
+      })),
+    ],
+    [folders, t]
+  )
 
   const [apiKeyForm] = useForm({
     defaultValues: {
@@ -119,40 +142,19 @@ const Page = () => {
       title={t('apiKeys.title', { defaultValue: 'API Keys' })}
       className="h-screen"
     >
-      {folders.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <FolderIcon className="w-4 h-4 text-muted-foreground" />
-          <Button
-            size="sm"
-            variant={
-              selectedFolderId === ALL_FOLDERS_FILTER ? 'default' : 'outline'
-            }
-            onClick={() => setSelectedFolderId(ALL_FOLDERS_FILTER)}
-          >
-            {t('apiKeys.allFolders')}
-          </Button>
-          {folders.map((folder: any) => (
-            <Button
-              key={folder.id}
-              size="sm"
-              variant={selectedFolderId === folder.id ? 'default' : 'outline'}
-              onClick={() => setSelectedFolderId(folder.id)}
-            >
-              {folder.name}
-              {folder.isDefault && (
-                <span className="text-xs opacity-60 ml-1">
-                  ({t('folders.default')})
-                </span>
-              )}
-            </Button>
-          ))}
+      <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="w-full sm:max-w-xs">
+          {folders.length > 0 && (
+            <Select
+              value={selectedFolderId}
+              onChange={setSelectedFolderId}
+              options={folderOptions}
+              placeholder={t('apiKeys.allFolders')}
+            />
+          )}
         </div>
-      )}
-
-      <div className="flex items-center w-full gap-2">
-        <div style={{ flex: 1 }}></div>
-
         <Button
+          className="w-full sm:w-auto"
           onClick={() => {
             apiKeyForm.setValues({
               name: '',
@@ -170,6 +172,7 @@ const Page = () => {
           })}
         </Button>
       </div>
+
       <FlexScrollViewer bordered>
         {loading && (
           <div className="flex min-h-80 items-center justify-center text-primary">
