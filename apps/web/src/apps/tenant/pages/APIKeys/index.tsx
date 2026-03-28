@@ -20,6 +20,7 @@ import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useForm } from '@openproxy/ui/Form'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
+import { NotFoundIllustration } from '@/components/NotFoundIllustration'
 import { useTranslation } from 'react-i18next'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 import { useSearchParams } from 'react-router'
@@ -212,7 +213,7 @@ const Page = () => {
           ))}
         {!loading && filteredApiKeys.length === 0 && (
           <div className="flex flex-col items-center justify-center gap-6 py-6">
-            <img className="w-64" src="/404.svg" />
+            <NotFoundIllustration className="w-64" />
             <div className="">
               {t('common.emptyState', { defaultValue: 'Nothing here yet' })}
             </div>
