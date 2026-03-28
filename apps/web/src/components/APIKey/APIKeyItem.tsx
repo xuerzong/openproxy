@@ -1,4 +1,4 @@
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import {
   AlarmClockOffIcon,
   MoreVerticalIcon,

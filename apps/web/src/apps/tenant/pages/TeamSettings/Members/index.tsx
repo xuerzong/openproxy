@@ -16,7 +16,7 @@ import { useTeamMembersQuery } from '@/apps/tenant/hooks/queries/useTeamMembersQ
 import { useTeamQuery } from '@/apps/tenant/hooks/queries/useTeamQuery'
 import { useRequest } from '@/contexts/ApiContext'
 import { useAuth } from '@/contexts/AuthContext'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 import { queryKeys } from '@/constants/query-keys'
 

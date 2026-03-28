@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useUsersQuery } from '@/apps/admin/hooks/queries/useUsersQuery'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { useRequest } from '@/contexts/ApiContext'
 import { useUsersCountQuery } from '@/apps/admin/hooks/queries/useUsersCountQuery'
 import { Table } from '@openproxy/ui/Table'

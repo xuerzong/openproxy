@@ -1,6 +1,11 @@
-import dayjs, { type Dayjs } from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat'
-import 'dayjs/locale/zh-cn'
+import dayjs, {
+  getDateLocaleCode,
+  normalizeLocaleCode,
+  resolveDayPickerLocale,
+  resolveDayjsLocale,
+  type Dayjs,
+  subscribeDateLocaleChange,
+} from '@openproxy/utils/dayjs'
 import {
   CalendarDaysIcon,
   ChevronDownIcon,
@@ -9,7 +14,13 @@ import {
   Clock3Icon,
   XIcon,
 } from 'lucide-react'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react'
 import { Popover as RadixPopover } from 'radix-ui'
 import {
   DayPicker,
@@ -17,38 +28,15 @@ import {
   type DayButton,
   type Locale as DayPickerLocale,
 } from 'react-day-picker'
-import { enUS, zhCN } from 'react-day-picker/locale'
 import { Button, buttonVariants } from '../Button'
 import { inputVariants, Input } from '../Input'
 import { cn } from '../utils/cn'
 import { useZIndexStore } from '../stores/zIndex'
 
-dayjs.extend(customParseFormat)
-
 const OUTPUT_FORMAT = 'YYYY-MM-DDTHH:mm'
 const DISPLAY_FORMAT = 'YYYY-MM-DD HH:mm'
 const TIME_FORMAT = 'HH:mm'
 const DEFAULT_TIME = '00:00'
-
-const detectLocaleCode = () => {
-  if (typeof document !== 'undefined' && document.documentElement.lang) {
-    return document.documentElement.lang
-  }
-
-  if (typeof navigator !== 'undefined' && navigator.language) {
-    return navigator.language
-  }
-
-  return 'en-US'
-}
-
-const resolveDayPickerLocale = (localeCode?: string): DayPickerLocale => {
-  return localeCode?.toLowerCase().startsWith('zh') ? zhCN : enUS
-}
-
-const resolveDayjsLocale = (localeCode?: string) => {
-  return localeCode?.toLowerCase().startsWith('zh') ? 'zh-cn' : 'en'
-}
 
 const parseValue = (value?: string | null, localeCode?: string) => {
   if (!value) {
@@ -288,9 +276,16 @@ export const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     const [innerOpen, setInnerOpen] = useState(false)
     const [popupZIndex, setPopupZIndex] = useState(1000)
     const [draftTime, setDraftTime] = useState(DEFAULT_TIME)
+    const currentLocaleCode = useSyncExternalStore(
+      subscribeDateLocaleChange,
+      getDateLocaleCode,
+      getDateLocaleCode
+    )
     const isOpen = open ?? innerOpen
     const currentValue = value ?? null
-    const resolvedLocaleCode = localeCode || detectLocaleCode()
+    const resolvedLocaleCode = normalizeLocaleCode(
+      localeCode || currentLocaleCode
+    )
     const dayPickerLocale = useMemo(
       () => resolveDayPickerLocale(resolvedLocaleCode),
       [resolvedLocaleCode]

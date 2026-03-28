@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import dayjs from 'dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { PlusIcon, Trash2Icon } from 'lucide-react'
 import { Dialog } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'

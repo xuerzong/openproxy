@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { useRequest } from '@/contexts/ApiContext'
 import copy from 'copy-to-clipboard'
 import { toast } from 'sonner'

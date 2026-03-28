@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { useAdminOrdersQuery } from '@/apps/admin/hooks/queries/useAdminOrdersQuery'
 import { useAdminOrdersCountQuery } from '@/apps/admin/hooks/queries/useAdminOrdersCountQuery'
 import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
