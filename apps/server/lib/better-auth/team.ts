@@ -1,6 +1,6 @@
 import { getUserTeamById } from '@server/services/user'
 import type { BetterAuthPlugin } from 'better-auth'
-import { createAuthEndpoint } from 'better-auth/api'
+import { createAuthEndpoint, sessionMiddleware } from 'better-auth/api'
 import { z } from 'zod'
 
 export const teamPlugin = {
@@ -11,6 +11,7 @@ export const teamPlugin = {
       {
         method: 'POST',
         body: z.object({ teamId: z.string() }),
+        use: [sessionMiddleware],
       },
       async (ctx) => {
         const session = ctx.context.session

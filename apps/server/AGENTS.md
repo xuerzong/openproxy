@@ -10,6 +10,7 @@
 - TypeScript strict mode. Use `type` over `interface` for object shapes unless extending.
 - Use Elysia's plugin system (`.use()`) for modularity.
 - Auth macros: `{ auth: { role: true } }` for authenticated endpoints, `{ auth: { role: 'admin' } }` for admin-only.
+- Custom `better-auth` plugin endpoints that require a logged-in user must explicitly add `use: [sessionMiddleware]` before reading `ctx.context.session`.
 - Drizzle schema is in `lib/db/schema.ts`.
 
 ## Project Structure
