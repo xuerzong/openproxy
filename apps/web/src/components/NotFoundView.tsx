@@ -1,6 +1,7 @@
 import { Button } from '@openproxy/ui/Button'
 import { useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
+import { NotFoundIllustration } from './NotFoundIllustration'
 
 export const NotFoundView = () => {
   const { t } = useTranslation('common')
@@ -8,7 +9,7 @@ export const NotFoundView = () => {
 
   return (
     <div className="flex h-screen flex-col items-center justify-center gap-8">
-      <img style={{ width: 200 }} src="/404.svg" />
+      <NotFoundIllustration className="w-[200px]" />
       <h2 style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 0 }}>
         {t('notFound.title', { defaultValue: '404: Page not found' })}
       </h2>
