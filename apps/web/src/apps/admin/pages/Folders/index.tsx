@@ -4,6 +4,7 @@ import { FolderIcon, StarIcon, Trash2Icon, SearchIcon } from 'lucide-react'
 import { PageContainer } from '@/components/PageContainer'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { Button } from '@openproxy/ui/Button'
+import { Checkbox } from '@openproxy/ui/Checkbox'
 import { Input } from '@openproxy/ui/Input'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Table } from '@openproxy/ui/Table'
@@ -18,6 +19,7 @@ const Page = () => {
   const [teamId, setTeamId] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [deleteId, setDeleteId] = useState('')
+  const [deleteAllApiKeys, setDeleteAllApiKeys] = useState(false)
   const foldersQuery = useAdminApiKeyFoldersQuery({ teamId })
 
   return (
@@ -105,7 +107,10 @@ const Page = () => {
       <Dialog
         open={Boolean(deleteId)}
         onOpenChange={(open) => {
-          if (!open) setDeleteId('')
+          if (!open) {
+            setDeleteId('')
+            setDeleteAllApiKeys(false)
+          }
         }}
         title={t('actions.confirmDelete')}
         footer={
@@ -114,7 +119,9 @@ const Page = () => {
             okButtonProps={{ variant: 'danger' }}
             onOk={() => {
               void toastApiPromise(
-                request.admin.folders({ id: deleteId }).delete(),
+                request.admin.folders({ id: deleteId }).delete({
+                  query: { deleteAllApiKeys },
+                }),
                 {
                   loading: t('common.processing'),
                   success: t('folders.deleteSuccess'),
@@ -124,17 +131,35 @@ const Page = () => {
                     }),
                   onSuccess: () => {
                     setDeleteId('')
+                    setDeleteAllApiKeys(false)
                     void foldersQuery.refetch()
                   },
                 }
               )
             }}
             cancelText={t('actions.cancel')}
-            onCancel={() => setDeleteId('')}
+            onCancel={() => {
+              setDeleteId('')
+              setDeleteAllApiKeys(false)
+            }}
           />
         }
       >
-        <div>{t('folders.adminDeleteWarning')}</div>
+        <div className="flex flex-col gap-3">
+          <div>{t('folders.adminDeleteWarning')}</div>
+          <Checkbox
+            checked={deleteAllApiKeys}
+            onCheckedChange={(checked) => {
+              setDeleteAllApiKeys(checked === true)
+            }}
+            label={t('folders.deleteAllApiKeys')}
+          />
+          <div className="text-sm text-muted-foreground">
+            {deleteAllApiKeys
+              ? t('folders.deleteAllApiKeysEnabledHint')
+              : t('folders.deleteAllApiKeysDisabledHint')}
+          </div>
+        </div>
       </Dialog>
     </PageContainer>
   )

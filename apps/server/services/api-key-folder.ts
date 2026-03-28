@@ -132,7 +132,11 @@ export async function updateApiKeyFolder(params: {
   })
 }
 
-export async function deleteApiKeyFolder(id: string, teamId: string) {
+export async function deleteApiKeyFolder(
+  id: string,
+  teamId: string,
+  deleteAllApiKeys = false
+) {
   return db.transaction(async (tx) => {
     const folder = await tx.query.apiKeyFolders.findFirst({
       where: and(
@@ -147,6 +151,17 @@ export async function deleteApiKeyFolder(id: string, teamId: string) {
 
     if (folder.isDefault) {
       throw new ApiKeyFolderServiceError('DEFAULT_FOLDER_DELETE_FORBIDDEN', 409)
+    }
+
+    if (deleteAllApiKeys) {
+      await tx
+        .delete(dbSchema.apiKeys)
+        .where(
+          and(
+            eq(dbSchema.apiKeys.folderId, id),
+            eq(dbSchema.apiKeys.teamId, teamId)
+          )
+        )
     }
 
     const [deletedFolder] = await tx
@@ -173,7 +188,10 @@ export async function getApiKeyFoldersByTeamIdAdmin(teamId: string) {
   })
 }
 
-export async function deleteApiKeyFolderAdmin(id: string) {
+export async function deleteApiKeyFolderAdmin(
+  id: string,
+  deleteAllApiKeys = false
+) {
   return db.transaction(async (tx) => {
     const folder = await tx.query.apiKeyFolders.findFirst({
       where: eq(dbSchema.apiKeyFolders.id, id),
@@ -185,6 +203,17 @@ export async function deleteApiKeyFolderAdmin(id: string) {
 
     if (folder.isDefault) {
       throw new ApiKeyFolderServiceError('DEFAULT_FOLDER_DELETE_FORBIDDEN', 409)
+    }
+
+    if (deleteAllApiKeys) {
+      await tx
+        .delete(dbSchema.apiKeys)
+        .where(
+          and(
+            eq(dbSchema.apiKeys.folderId, id),
+            eq(dbSchema.apiKeys.teamId, folder.teamId)
+          )
+        )
     }
 
     const [deletedFolder] = await tx

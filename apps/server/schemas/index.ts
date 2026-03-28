@@ -9,6 +9,7 @@ export {
 export {
   CreateApiKeyFolderBodySchema,
   UpdateApiKeyFolderBodySchema,
+  DeleteApiKeyFolderQuerySchema,
 } from './api-key-folder'
 
 // Model Schemas
