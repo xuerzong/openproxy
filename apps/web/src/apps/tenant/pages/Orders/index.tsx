@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { useOrdersQuery } from '@/apps/tenant/hooks/queries/useOrdersQuery'
 import { useOrdersCountQuery } from '@/apps/tenant/hooks/queries/useOrdersCountQuery'
 import { useConstsQuery } from '@/hooks/queries/useConstsQuery'

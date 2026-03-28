@@ -7,7 +7,7 @@ import { useAdminDashboardUsagesGroupedQuery } from '@/apps/admin/hooks/queries/
 import { Select } from '@openproxy/ui/Select'
 import { Statistic } from '@openproxy/ui/Statistic'
 import { useAdminDashboardStatsQuery } from '@/apps/admin/hooks/queries/useAdminDashboardStatsQuery'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import {
   ChartContainer,
   ChartLegend,

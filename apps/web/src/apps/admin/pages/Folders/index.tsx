@@ -10,7 +10,7 @@ import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Table } from '@openproxy/ui/Table'
 import { useAdminApiKeyFoldersQuery } from '@/apps/admin/hooks/queries/useAdminApiKeyFoldersQuery'
 import { useRequest } from '@/contexts/ApiContext'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {

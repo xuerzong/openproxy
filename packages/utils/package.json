@@ -1,0 +1,17 @@
+{
+  "name": "@openproxy/utils",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./dayjs": "./src/dayjs.ts"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.20",
+    "react-day-picker": "^9.14.0"
+  }
+}

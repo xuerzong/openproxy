@@ -13,7 +13,7 @@ import { Pagination } from '@openproxy/ui/Pagination'
 import { Table } from '@openproxy/ui/Table'
 import { useAdminTeamsCountQuery } from '@/apps/admin/hooks/queries/useAdminTeamsCountQuery'
 import { useAdminTeamsQuery } from '@/apps/admin/hooks/queries/useAdminTeamsQuery'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 
 const Page = () => {
   const { t } = useTranslation('common')

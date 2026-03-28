@@ -18,7 +18,7 @@ import { useAdminTeamMembersQuery } from '@/apps/admin/hooks/queries/useAdminTea
 import { useAdminTeamQuery } from '@/apps/admin/hooks/queries/useAdminTeamQuery'
 import { NotFoundView } from '@/components/NotFoundView'
 import { useRequest } from '@/contexts/ApiContext'
-import dayjs from '@/utils/dayjs'
+import dayjs from '@openproxy/utils/dayjs'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
