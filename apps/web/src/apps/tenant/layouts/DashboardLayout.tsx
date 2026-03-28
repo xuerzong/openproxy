@@ -4,7 +4,7 @@ import {
   BoxIcon,
   CircleUserRoundIcon,
   ChevronLeftIcon,
-  FolderIcon,
+  FoldersIcon,
   GaugeIcon,
   KeyRoundIcon,
   SettingsIcon,
@@ -69,7 +69,7 @@ export const DashboardLayout = () => {
     },
     {
       key: '/folders',
-      icon: <FolderIcon className="w-5 h-5" />,
+      icon: <FoldersIcon className="w-5 h-5" />,
       label: t('menu.folders', { defaultValue: 'Folders' }),
       onClick() {
         navigate('/folders')

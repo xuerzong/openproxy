@@ -6,10 +6,9 @@ import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
 import { useIsOSS } from '@/hooks/useIsOSS'
 import {
   FolderIcon,
-  MoreHorizontalIcon,
+  MoreVerticalIcon,
   PenSquareIcon,
   PlusIcon,
-  StarIcon,
   Trash2Icon,
 } from 'lucide-react'
 import { PageContainer } from '@/components/PageContainer'
@@ -133,7 +132,7 @@ const Page = () => {
             {folders.map((folder) => (
               <div
                 key={folder.id}
-                className="flex h-full cursor-pointer flex-col rounded-lg border border-border bg-background/95 p-4 transition-colors hover:bg-muted/40"
+                className="flex h-full cursor-pointer flex-col rounded-lg border border-border bg-background/95 p-6 transition-colors hover:bg-muted"
                 role="button"
                 tabIndex={0}
                 onClick={() => {
@@ -150,9 +149,30 @@ const Page = () => {
                   }
                 }}
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
-                    <FolderIcon className="w-5 h-5" />
+                <div className="flex flex-col items-start gap-3">
+                  <div className="w-full flex items-center justify-between">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/8 text-primary">
+                      <FolderIcon className="w-5 h-5" />
+                    </div>
+
+                    <div
+                      onClick={(event) => {
+                        event.stopPropagation()
+                      }}
+                      onKeyDown={(event) => {
+                        event.stopPropagation()
+                      }}
+                    >
+                      <DropdownMenu
+                        menus={getFolderMenus(folder)}
+                        align="end"
+                        side="bottom"
+                      >
+                        <Button variant="ghost" size="icon-xs">
+                          <MoreVerticalIcon />
+                        </Button>
+                      </DropdownMenu>
+                    </div>
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -160,8 +180,7 @@ const Page = () => {
                         {folder.name}
                       </span>
                       {folder.isDefault && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-1 text-xs text-amber-600">
-                          <StarIcon className="w-3 h-3" />
+                        <span className="inline-flex items-center gap-1 rounded-md bg-success/10 px-2 py-1 text-xs text-success">
                           {t('folders.default')}
                         </span>
                       )}
@@ -170,24 +189,6 @@ const Page = () => {
                       {t('folders.createdAt')}:{' '}
                       {new Date(folder.createdAt).toLocaleDateString()}
                     </div>
-                  </div>
-                  <div
-                    onClick={(event) => {
-                      event.stopPropagation()
-                    }}
-                    onKeyDown={(event) => {
-                      event.stopPropagation()
-                    }}
-                  >
-                    <DropdownMenu
-                      menus={getFolderMenus(folder)}
-                      align="end"
-                      side="bottom"
-                    >
-                      <Button variant="ghost" size="icon-xs">
-                        <MoreHorizontalIcon />
-                      </Button>
-                    </DropdownMenu>
                   </div>
                 </div>
               </div>
