@@ -19,6 +19,7 @@ import {
   updateCurrentTeamMemberRole,
   upgradeTeamPlan,
 } from '@server/services/team'
+import { getTeamMonthlyUsagesByTeamId } from '@server/services/usage'
 
 const applyTeamServiceError = (
   error: unknown,
@@ -47,6 +48,13 @@ export const teamRouter = new Elysia()
       auth: { role: true },
       body: CreateTeamBodySchema,
     }
+  )
+  .get(
+    '/team/usages/monthly',
+    async ({ teamId }) => {
+      return await getTeamMonthlyUsagesByTeamId(teamId)
+    },
+    { auth: { role: true }, team: true }
   )
   .get(
     '/team/members',

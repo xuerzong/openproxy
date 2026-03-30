@@ -129,6 +129,20 @@ CREATE TABLE "sessions" (
 	"user_id" varchar NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "team_monthly_usages" (
+	"id" varchar PRIMARY KEY NOT NULL,
+	"team_id" varchar NOT NULL,
+	"month_start" timestamp with time zone NOT NULL,
+	"month_end" timestamp with time zone NOT NULL,
+	"total_requests" integer DEFAULT 0 NOT NULL,
+	"tokens_prompt" integer DEFAULT 0 NOT NULL,
+	"tokens_completion" integer DEFAULT 0 NOT NULL,
+	"total_cost" numeric(20, 10) DEFAULT '0' NOT NULL,
+	"model_breakdown" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "team_users" (
 	"id" varchar PRIMARY KEY NOT NULL,
 	"team_id" varchar NOT NULL,
@@ -218,6 +232,7 @@ ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_team_users_id_fk" FOREIGN KE
 ALTER TABLE "orders" ADD CONSTRAINT "orders_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "team_monthly_usages" ADD CONSTRAINT "team_monthly_usages_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "team_users" ADD CONSTRAINT "team_users_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "team_users" ADD CONSTRAINT "team_users_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "usages" ADD CONSTRAINT "usages_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -226,6 +241,7 @@ CREATE INDEX "accounts_user_id_idx" ON "accounts" USING btree ("user_id");--> st
 CREATE INDEX "ai_provider_api_keys_ai_provider_id_index" ON "ai_provider_api_keys" USING btree ("ai_provider_id");--> statement-breakpoint
 CREATE INDEX "ai_provider_api_keys_hash_index" ON "ai_provider_api_keys" USING btree ("api_key_hash");--> statement-breakpoint
 CREATE INDEX "api_key_folders_team_id_index" ON "api_key_folders" USING btree ("team_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "api_key_folders_team_default_unique" ON "api_key_folders" USING btree ("team_id") WHERE "api_key_folders"."is_default" = true;--> statement-breakpoint
 CREATE INDEX "api_keys_status_index" ON "api_keys" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "api_keys_hash_index" ON "api_keys" USING btree ("api_key_hash");--> statement-breakpoint
 CREATE INDEX "api_keys_team_id_index" ON "api_keys" USING btree ("team_id");--> statement-breakpoint
@@ -238,6 +254,8 @@ CREATE INDEX "orders_usage_status_index" ON "orders" USING btree ("usage_status"
 CREATE INDEX "orders_team_id_index" ON "orders" USING btree ("team_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "sessions_token_unique" ON "sessions" USING btree ("token");--> statement-breakpoint
 CREATE INDEX "sessions_user_id_idx" ON "sessions" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "team_monthly_usages_team_id_index" ON "team_monthly_usages" USING btree ("team_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "team_monthly_usages_team_month_unique" ON "team_monthly_usages" USING btree ("team_id","month_start");--> statement-breakpoint
 CREATE INDEX "usages_team_id_index" ON "usages" USING btree ("team_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "users_phone_unique" ON "users" USING btree ("phone_number") WHERE phone_number IS NOT NULL;--> statement-breakpoint
 CREATE UNIQUE INDEX "users_email_unique" ON "users" USING btree ("email") WHERE email IS NOT NULL;

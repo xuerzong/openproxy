@@ -4,6 +4,7 @@ import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import { PayStatus } from '@server/constants/pay'
 import { createTeam } from '@server/services/team'
+import { archiveMonthlyUsages } from '@server/services/usage'
 
 export const cronRouter = new Elysia({
   prefix: '/cron',
@@ -41,6 +42,14 @@ export const cronRouter = new Elysia({
       )
 
     return { success: true }
+  })
+  .post('/archiveMonthlyUsage', async () => {
+    const result = await archiveMonthlyUsages()
+
+    return {
+      success: true,
+      ...result,
+    }
   })
   .post('/syncTeamToUser', async () => {
     const users = await db.query.users.findMany({
