@@ -6,6 +6,7 @@ use axum::{
 };
 use reqwest::StatusCode;
 use serde_json::Value;
+use std::collections::HashSet;
 use std::sync::Arc;
 use tokio_util::bytes;
 
@@ -29,6 +30,56 @@ pub struct PreparedUpstreamRequest {
 pub struct SuccessfulUpstreamResponse {
     pub upstream_res: reqwest::Response,
     pub provider_ctx: services::usage::UsageContext,
+}
+
+const RECENT_USAGE_CACHE_TTL_SECONDS: usize = 60 * 30;
+
+fn recent_combo_cache_key(api_key_id: &str) -> String {
+    format!("openproxy:cache:recent_combo:{api_key_id}")
+}
+
+fn encode_combo(provider_id: &str, api_key_hash: &str) -> String {
+    format!("{provider_id}|{api_key_hash}")
+}
+
+fn decode_combo(raw: &str) -> Option<(String, String)> {
+    let mut parts = raw.splitn(2, '|');
+    let provider_id = parts.next()?.to_string();
+    let api_key_hash = parts.next()?.to_string();
+    Some((provider_id, api_key_hash))
+}
+
+fn get_recent_combos(api_key_id: &str) -> HashSet<(String, String)> {
+    let key = recent_combo_cache_key(api_key_id);
+    let raw_items = crate::shared::redis::list_range(&key, 0, -1).unwrap_or_default();
+
+    raw_items
+        .into_iter()
+        .filter_map(|raw| decode_combo(&raw))
+        .collect()
+}
+
+fn record_used_combo(api_key_id: &str, provider_id: &str, api_key_hash: &str, window: usize) {
+    if window == 0 {
+        return;
+    }
+
+    let key = recent_combo_cache_key(api_key_id);
+    let payload = encode_combo(provider_id, api_key_hash);
+    let start = -(window as isize);
+    let _ = crate::shared::redis::list_push_trim_expire(
+        &key,
+        &payload,
+        start,
+        -1,
+        RECENT_USAGE_CACHE_TTL_SECONDS,
+    );
+}
+
+#[cfg(test)]
+fn clear_recent_combos_for(api_key_id: &str) {
+    let key = recent_combo_cache_key(api_key_id);
+    crate::shared::redis::delete_key(&key);
 }
 
 pub async fn parse_proxy_request(req: Request) -> Result<ParsedProxyRequest, Response> {
@@ -89,7 +140,7 @@ where
     let window = total_combos.min(10);
 
     // Retrieve the combos used in the last `window` requests for this user.
-    let recent_set = crate::shared::cache::get_recent_combos(&user.api_key_id);
+    let recent_set = get_recent_combos(&user.api_key_id);
 
     // Flatten to (provider, key) pairs; non-recent combos come first so they
     // are preferred, recent ones fall back to the tail.
@@ -156,7 +207,7 @@ where
                 }
 
                 // Record this combo so future requests prefer a different one.
-                crate::shared::cache::record_used_combo(
+                record_used_combo(
                     &user.api_key_id,
                     &provider.ai_provider_id,
                     &api_key_entry.api_key_hash,
@@ -447,10 +498,17 @@ mod tests {
     /// provider_B's id.
     #[tokio::test]
     async fn proxy_skips_recently_used_combo() {
-        use crate::shared::cache::{clear_recent_combos_for, record_used_combo};
-
         let uid = "api-key-recent-skip-test";
         clear_recent_combos_for(uid);
+
+        record_used_combo(uid, "provider_a", "provider_a_hash", 2);
+        let recent_set = get_recent_combos(uid);
+        if !recent_set.contains(&("provider_a".to_string(), "provider_a_hash".to_string())) {
+            tracing::warn!(
+                "Skipping proxy_skips_recently_used_combo because Redis is unavailable"
+            );
+            return;
+        }
 
         // Two spy servers, both always succeed.
         let (tx_a, mut rx_a) = mpsc::unbounded_channel::<String>();
@@ -498,9 +556,6 @@ mod tests {
                 (url_b, "provider_b".to_string(), "key-b".to_string(), "model-b".to_string()),
             ],
         );
-
-        // Mark provider_a's combo as recently used (window=2, same as total combos)
-        record_used_combo(uid, "provider_a", "provider_a_hash", 2);
 
         let state = sample_state();
         let (_, usage_ctx) = build_usage_parts(&user, false);

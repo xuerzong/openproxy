@@ -46,7 +46,22 @@ src/
 ## Environment
 
 - `.env` file with `DATABASE_URL`, `RSA_PRIVATE_KEY`, `PORT`.
+- Redis-backed cache/rate-limit features use optional `REDIS_URL`.
 - Load via `dotenvy::dotenv()`.
+
+## Redis Usage (API only)
+
+- Redis is required for API caching and rate limiting. Configure `REDIS_URL` in runtime environments.
+- Shared low-level Redis utilities live in `src/shared/redis.rs`.
+- Keep business-specific cache key wrappers in the owning service/handler (for example, access validation cache logic in `src/services/access.rs`) instead of centralizing all wrappers in shared module.
+- Provider recent-combo rotation wrappers are owned by `src/shared/proxy.rs`; `src/shared/redis.rs` only exposes generic Redis primitives.
+- Keep keys namespaced with `openproxy:` prefix:
+  - `openproxy:cache:decrypted_provider_key:{encrypted_key}`
+  - `openproxy:cache:recent_combo:{api_key_id}`
+  - `openproxy:access:rows:{hash_api_key}:{model_id}`
+  - `openproxy:models:public:v1`
+  - `openproxy:rate:{hashed_key}:{minute_bucket}`
+- Keep TTLs short for auth/model data (tens of seconds to minutes), longer for decrypted provider keys.
 
 ## Token Counting & Balance Management
 

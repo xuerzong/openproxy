@@ -1,7 +1,7 @@
 use axum::{
-    Json,
     http::StatusCode,
     response::{IntoResponse, Response},
+    Json,
 };
 use serde::Serialize;
 
@@ -38,5 +38,20 @@ where
 
     pub fn to_res(self, status: StatusCode) -> Response {
         (status, Json(self)).into_response()
+    }
+}
+
+#[derive(Debug, Serialize)]
+pub struct ListResponse<T> {
+    pub object: String,
+    pub data: Vec<T>,
+}
+
+impl<T> ListResponse<T> {
+    pub fn new(data: Vec<T>) -> Self {
+        Self {
+            object: "list".to_string(),
+            data,
+        }
     }
 }

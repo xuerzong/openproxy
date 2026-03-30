@@ -6,11 +6,14 @@ use std::env;
 
 use crate::{
     models::provider::{ApiKeyEntry, ModelAccessResult, ProviderInfo},
-    shared::cache::{get_decrypted_provider_key, set_decrypted_provider_key},
+    shared::redis::{get_cached_string, set_cached_string},
     utils,
 };
 
-#[derive(Debug, FromRow)]
+const ACCESS_ROWS_CACHE_TTL_SECONDS: usize = 30;
+const DECRYPTED_PROVIDER_KEY_CACHE_TTL_SECONDS: usize = 60 * 60;
+
+#[derive(Debug, FromRow, serde::Serialize, serde::Deserialize)]
 struct AccessRow {
     api_key_id: String,
     api_key_max_quota: Decimal,
@@ -34,12 +37,12 @@ struct AccessRow {
     provider_api_key_id: String,
 }
 
-pub async fn validate_model_access(
+async fn fetch_access_rows(
     pool: &PgPool,
     hash_api_key: &str,
     model_id: &str,
-) -> Result<ModelAccessResult, (u16, &'static str, &'static str)> {
-    let rows = sqlx::query_as::<_, AccessRow>(
+) -> Result<Vec<AccessRow>, (u16, &'static str, &'static str)> {
+    sqlx::query_as::<_, AccessRow>(
         r#"
         WITH api_key_info AS (
             SELECT 
@@ -121,7 +124,53 @@ pub async fn validate_model_access(
     .bind(model_id)
     .fetch_all(pool)
     .await
-    .map_err(|_| (500, "DB_ERROR", "Database query failed"))?;
+    .map_err(|_| (500, "DB_ERROR", "Database query failed"))
+}
+
+fn cache_access_rows(cache_key: &str, rows: &[AccessRow]) {
+    if let Ok(serialized_rows) = serde_json::to_string(rows) {
+        set_cached_string(cache_key, &serialized_rows, ACCESS_ROWS_CACHE_TTL_SECONDS);
+    }
+}
+
+fn decrypted_provider_key_cache_key(encrypted_key: &str) -> String {
+    format!("openproxy:cache:decrypted_provider_key:{encrypted_key}")
+}
+
+fn get_cached_decrypted_provider_key(encrypted_key: &str) -> Option<String> {
+    get_cached_string(&decrypted_provider_key_cache_key(encrypted_key))
+}
+
+fn set_cached_decrypted_provider_key(encrypted_key: &str, decrypted_key: &str) {
+    set_cached_string(
+        &decrypted_provider_key_cache_key(encrypted_key),
+        decrypted_key,
+        DECRYPTED_PROVIDER_KEY_CACHE_TTL_SECONDS,
+    );
+}
+
+pub async fn validate_model_access(
+    pool: &PgPool,
+    hash_api_key: &str,
+    model_id: &str,
+) -> Result<ModelAccessResult, (u16, &'static str, &'static str)> {
+    let access_rows_cache_key = format!("openproxy:access:rows:{hash_api_key}:{model_id}");
+
+    let rows = if let Some(cached) = get_cached_string(&access_rows_cache_key) {
+        if let Ok(cached_rows) = serde_json::from_str::<Vec<AccessRow>>(&cached) {
+            cached_rows
+        } else {
+            let fetched_rows = fetch_access_rows(pool, hash_api_key, model_id).await?;
+            cache_access_rows(&access_rows_cache_key, &fetched_rows);
+            fetched_rows
+        }
+    } else {
+        let fetched_rows = fetch_access_rows(pool, hash_api_key, model_id).await?;
+
+        cache_access_rows(&access_rows_cache_key, &fetched_rows);
+
+        fetched_rows
+    };
 
     if rows.is_empty() {
         return Err((401, "INVALID_API_KEY", "Invalid API key"));
@@ -182,7 +231,7 @@ pub async fn validate_model_access(
         for api_key_entry in &mut provider.api_keys {
             let encrypted_key = api_key_entry.api_key_hash.clone();
 
-            if let Some(cached_key) = get_decrypted_provider_key(&encrypted_key) {
+            if let Some(cached_key) = get_cached_decrypted_provider_key(&encrypted_key) {
                 api_key_entry.api_key = cached_key;
                 continue;
             }
@@ -197,7 +246,7 @@ pub async fn validate_model_access(
             .map_err(|_| (500u16, "DECRYPT_ERROR", "Provider key decryption failed"))?;
 
             api_key_entry.api_key = decrypted_key.clone();
-            set_decrypted_provider_key(api_key_entry.api_key_hash.clone(), decrypted_key);
+            set_cached_decrypted_provider_key(&api_key_entry.api_key_hash, &decrypted_key);
         }
     }
 
