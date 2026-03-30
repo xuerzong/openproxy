@@ -16,7 +16,7 @@ reqwest = { version = "0.12", features = [
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 futures-util = "0.3"
-rust_decimal = "1.35"
+rust_decimal = { version = "1.35", features = ["serde"] }
 tower-http = { version = "0.5", features = ["cors", "trace", "timeout"] }
 async-stream = "0.3.6"
 sqlx = { version = "0.8", features = [
@@ -40,3 +40,4 @@ nanoid = "0.4.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 tiktoken-rs = "0.5"
+redis = "0.27"

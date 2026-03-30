@@ -10,7 +10,7 @@ use axum::{
     middleware::Next,
     response::Response,
 };
-use std::sync::Arc;
+use std::{env, sync::Arc};
 
 pub async fn auth_middleware(
     State(state): State<Arc<AppState>>,
@@ -28,6 +28,25 @@ pub async fn auth_middleware(
         ))?;
 
     let hashed_key = utils::hash::hash_api_key(auth_header);
+
+    let per_minute_limit = env::var("API_RATE_LIMIT_PER_MINUTE")
+        .ok()
+        .and_then(|v| v.parse::<i64>().ok())
+        .unwrap_or(120);
+    let minute_bucket = chrono::Utc::now().timestamp() / 60;
+    let rate_limit_key = format!("openproxy:rate:{hashed_key}:{minute_bucket}");
+
+    if let Some(current_count) = crate::shared::redis::incr_with_expire(&rate_limit_key, 120)
+        && current_count > per_minute_limit
+    {
+        return Err((
+            StatusCode::TOO_MANY_REQUESTS,
+            Json(ApiResponse::<()>::error(
+                "Rate limit exceeded",
+                "RATE_LIMITED",
+            )),
+        ));
+    }
 
     let (parts, body) = req.into_parts();
     let bytes = axum::body::to_bytes(body, 10 * 1024 * 1024)

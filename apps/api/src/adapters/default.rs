@@ -6,7 +6,6 @@ impl ProviderAdapter for DefaultProviderAdapter {}
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::models::provider::ProviderInfo;
     use crate::utils::chat::UsageStyle;
 
