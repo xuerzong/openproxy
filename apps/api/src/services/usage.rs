@@ -4,6 +4,7 @@ use serde_json::Value;
 use sqlx::PgPool;
 use std::error::Error;
 
+use crate::services::access::invalidate_access_cache_for_api_key;
 use crate::utils;
 
 #[derive(Debug, Clone)]
@@ -110,6 +111,8 @@ pub async fn add_usage(
     .await?;
 
     tx.commit().await?;
+
+    invalidate_access_cache_for_api_key(&ctx.api_key_id);
 
     Ok(())
 }

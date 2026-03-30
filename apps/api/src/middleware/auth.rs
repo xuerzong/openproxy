@@ -32,7 +32,7 @@ pub async fn auth_middleware(
     let per_minute_limit = env::var("API_RATE_LIMIT_PER_MINUTE")
         .ok()
         .and_then(|v| v.parse::<i64>().ok())
-        .unwrap_or(120);
+        .unwrap_or(600);
     let minute_bucket = chrono::Utc::now().timestamp() / 60;
     let rate_limit_key = format!("openproxy:rate:{hashed_key}:{minute_bucket}");
 

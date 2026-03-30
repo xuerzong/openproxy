@@ -100,6 +100,35 @@ pub fn delete_key(key: &str) {
     }
 }
 
+pub fn set_add_with_expire(key: &str, member: &str, ttl_seconds: usize) -> bool {
+    let Some(mut conn) = redis_connection() else {
+        return false;
+    };
+
+    let added = redis::cmd("SADD")
+        .arg(key)
+        .arg(member)
+        .query::<i64>(&mut conn)
+        .is_ok();
+    if !added {
+        return false;
+    }
+
+    redis::cmd("EXPIRE")
+        .arg(key)
+        .arg(ttl_seconds)
+        .query::<bool>(&mut conn)
+        .unwrap_or(false)
+}
+
+pub fn set_members(key: &str) -> Option<Vec<String>> {
+    let mut conn = redis_connection()?;
+    redis::cmd("SMEMBERS")
+        .arg(key)
+        .query::<Vec<String>>(&mut conn)
+        .ok()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -6,11 +6,14 @@ use std::env;
 
 use crate::{
     models::provider::{ApiKeyEntry, ModelAccessResult, ProviderInfo},
-    shared::redis::{get_cached_string, set_cached_string},
+    shared::redis::{
+        delete_key, get_cached_string, set_add_with_expire, set_cached_string, set_members,
+    },
     utils,
 };
 
 const ACCESS_ROWS_CACHE_TTL_SECONDS: usize = 30;
+const ACCESS_CACHE_INDEX_TTL_SECONDS: usize = 60;
 const DECRYPTED_PROVIDER_KEY_CACHE_TTL_SECONDS: usize = 60 * 60;
 
 #[derive(Debug, FromRow, serde::Serialize, serde::Deserialize)]
@@ -130,7 +133,27 @@ async fn fetch_access_rows(
 fn cache_access_rows(cache_key: &str, rows: &[AccessRow]) {
     if let Ok(serialized_rows) = serde_json::to_string(rows) {
         set_cached_string(cache_key, &serialized_rows, ACCESS_ROWS_CACHE_TTL_SECONDS);
+
+        if let Some(first_row) = rows.first() {
+            let index_key = access_cache_index_key(&first_row.api_key_id);
+            let _ = set_add_with_expire(&index_key, cache_key, ACCESS_CACHE_INDEX_TTL_SECONDS);
+        }
     }
+}
+
+fn access_cache_index_key(api_key_id: &str) -> String {
+    format!("openproxy:access:index:{api_key_id}")
+}
+
+pub fn invalidate_access_cache_for_api_key(api_key_id: &str) {
+    let index_key = access_cache_index_key(api_key_id);
+    let keys = set_members(&index_key).unwrap_or_default();
+
+    for cache_key in keys {
+        delete_key(&cache_key);
+    }
+
+    delete_key(&index_key);
 }
 
 fn decrypted_provider_key_cache_key(encrypted_key: &str) -> String {

@@ -59,9 +59,12 @@ src/
   - `openproxy:cache:decrypted_provider_key:{encrypted_key}`
   - `openproxy:cache:recent_combo:{api_key_id}`
   - `openproxy:access:rows:{hash_api_key}:{model_id}`
+  - `openproxy:access:index:{api_key_id}` (set of access cache keys for targeted invalidation)
   - `openproxy:models:public:v1`
   - `openproxy:rate:{hashed_key}:{minute_bucket}`
 - Keep TTLs short for auth/model data (tens of seconds to minutes), longer for decrypted provider keys.
+- After usage is committed, invalidate access-cache keys by `api_key_id` to ensure balance/quota changes are visible immediately.
+- `API_RATE_LIMIT_PER_MINUTE` defaults to `600` when env is not provided.
 
 ## Token Counting & Balance Management
 
