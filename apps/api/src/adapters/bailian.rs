@@ -34,6 +34,7 @@ fn ensure_stream_options_include_usage(body: &mut Value) {
 mod tests {
     use super::*;
     use crate::models::provider::ProviderInfo;
+    use crate::utils::chat::UsageStyle;
 
     fn provider(_name: &str, base_url: &str) -> ProviderInfo {
         ProviderInfo {
