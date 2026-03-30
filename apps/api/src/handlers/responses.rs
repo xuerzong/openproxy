@@ -128,8 +128,15 @@ async fn handle_openresponses_json(
 
     if let Some(usage_val) = services::usage::find_usage_recursive(&data) {
         let input = extract_usage_input_with_tokens(&usage_val, &model.pricing, UsageStyle::OpenAI);
+        let model_for_log = model.clone();
+        let ctx_for_log = ctx.clone();
         if let Err(error) = services::usage::add_usage(&pool, input, model, ctx).await {
-            tracing::error!(error = %error, "Failed to record usage");
+            services::usage::log_usage_recording_failure(
+                error.as_ref(),
+                &model_for_log,
+                &ctx_for_log,
+                "responses_json",
+            );
         }
     }
 
@@ -192,8 +199,15 @@ fn handle_openresponses_stream(
                     {
                         ctx.completed_time = start_time.elapsed().as_millis() as i32;
                         let input = extract_usage_input_with_tokens(&usage_val, &model.pricing, UsageStyle::OpenAI);
+                        let model_for_log = model.clone();
+                        let ctx_for_log = ctx.clone();
                         if let Err(error) = services::usage::add_usage(&pool, input, model.clone(), ctx.clone()).await {
-                            tracing::error!(error = ?error, "Failed to record stream usage");
+                            services::usage::log_usage_recording_failure(
+                                error.as_ref(),
+                                &model_for_log,
+                                &ctx_for_log,
+                                "responses_stream",
+                            );
                         } else {
                             usage_recorded = true;
                         }

@@ -8,16 +8,16 @@ use serde_json::Value;
 use tokio_util::codec::{FramedRead, LinesCodec};
 
 use crate::{
+    adapters::ProviderAdapterFactory,
     services::{self, usage::find_usage_recursive},
     shared::{
         ApiResponse,
         proxy::PreparedUpstreamRequest,
         proxy_flow::{ProxyResponseContext, ResponseFuture},
     },
-    adapters::ProviderAdapterFactory,
     utils::chat::{
-            UsageStyle, extract_usage_input_with_tokens, remove_provider_metadata_fields,
-            rewrite_usage_field,
+        UsageStyle, extract_usage_input_with_tokens, remove_provider_metadata_fields,
+        rewrite_usage_field,
     },
 };
 
@@ -96,10 +96,17 @@ impl ChatProxyHandler {
                     self.target_style,
                 );
                 rewrite_usage_field(&mut data, &usage_val, self.target_style);
+                let model_for_log = ctx.model.clone();
+                let usage_ctx_for_log = usage_ctx.clone();
                 if let Err(error) =
                     services::usage::add_usage(&ctx.pool, input, ctx.model, usage_ctx).await
                 {
-                    tracing::error!(error = %error, "Failed to record usage");
+                    services::usage::log_usage_recording_failure(
+                        error.as_ref(),
+                        &model_for_log,
+                        &usage_ctx_for_log,
+                        "chat_json",
+                    );
                 }
             }
 
@@ -185,10 +192,17 @@ async fn handle_stream_line(
             if is_usage_chunk {
                 rewrite_usage_field(&mut chunk, &usage_val, style);
             }
+            let model_for_log = model.clone();
+            let ctx_for_log = ctx.clone();
             if let Err(error) =
                 services::usage::add_usage(pool, input, model.clone(), ctx.clone()).await
             {
-                tracing::error!(error = ?error, "Failed to record stream usage");
+                services::usage::log_usage_recording_failure(
+                    error.as_ref(),
+                    &model_for_log,
+                    &ctx_for_log,
+                    "chat_stream",
+                );
             } else {
                 *usage_recorded = true;
             }
