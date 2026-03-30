@@ -14,12 +14,10 @@ use crate::{
         proxy::PreparedUpstreamRequest,
         proxy_flow::{ProxyResponseContext, ResponseFuture},
     },
-    utils::{
-        chat::{
+    adapters::ProviderAdapterFactory,
+    utils::chat::{
             UsageStyle, extract_usage_input_with_tokens, remove_provider_metadata_fields,
             rewrite_usage_field,
-        },
-        provider_adapter::ProviderAdapterFactory,
     },
 };
 

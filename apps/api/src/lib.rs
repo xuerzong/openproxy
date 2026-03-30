@@ -1,3 +1,4 @@
+pub mod adapters;
 pub mod handlers;
 pub mod middleware;
 pub mod models;
