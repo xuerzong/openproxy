@@ -3,25 +3,7 @@ use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct PricingTier {
-    pub cost: Decimal,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub min: Option<i64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub max: Option<i64>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Pricing {
-    pub input: Decimal,
-    pub output: Decimal,
-    pub input_cache_read: Decimal,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub output_tiers: Option<Vec<PricingTier>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub input_cache_read_tiers: Option<Vec<PricingTier>>,
-}
+pub use crate::models::model::{Pricing, PricingTier};
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 #[serde(rename_all = "camelCase")]

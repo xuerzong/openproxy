@@ -69,6 +69,7 @@ src/
 ## Token Counting & Balance Management
 
 ### Token Counting
+
 - Use `tiktoken-rs` crate for accurate token counting via OpenAI's tokenizer.
 - Token counting utilities live in `src/utils/tokens.rs`:
   - `count_input_tokens(body, model)`: Parse request messages and count tokens, including formatting overhead.
@@ -78,17 +79,21 @@ src/
 - Fallback gracefully to character-based estimation (1 token ≈ 4 chars) if tiktoken unavailable.
 
 ### Balance Validation & Output Token Limiting
+
 - All public model requests must validate user balance **before** forwarding to upstream.
 - Balance validation utilities live in `src/utils/balance.rs`:
   - `check_balance_and_available_output(user, input_tokens, requested_max_tokens)`: Validate balance and calculate available output tokens.
   - `apply_balance_check_to_body(body, result)`: Auto-adjust `max_tokens` in request if needed.
-- Formula: $O_{available} = \left\lfloor \frac{Balance - I_{cost}}{P_{output}} \times 1,000,000 \right\rfloor$, where $I_{cost} = \frac{I \times P_{input}}{1,000,000}$
+- Base formula without tiers: $O_{available} = \left\lfloor \frac{Balance - I_{cost}}{P_{output}} \times 1,000,000 \right\rfloor$, where $I_{cost} = \frac{I \times P_{input}}{1,000,000}$
+- If `output_tiers` or `input_cache_read_tiers` are present, bill them **progressively by tier range**, not by picking a single flat tier for the whole token count.
+- Balance pre-check must use the same progressive `output_tiers` logic as final usage charging so `max_tokens` capping matches eventual billing.
 - Return **402 Payment Required** if balance insufficient for input tokens; do not forward upstream.
 - Automatically cap `requested_max_tokens` to available output tokens (transparent to user).
 - Skip validation for private models (different billing model).
 - Log balance checks at INFO level for audit trail.
 
 ### Integration Pattern
+
 - Validation happens in request handlers (e.g., `src/handlers/chat_completions.rs`):
   1. Parse request body using `parse_proxy_request()`
   2. Count input tokens via `count_input_tokens()`
@@ -101,11 +106,13 @@ src/
 ## Provider Adapters
 
 ### Architecture
+
 - `adapters/` directory contains provider-specific request/response adapters.
 - Implement `ProviderAdapter` trait to customize request transformation for different AI provider APIs.
 - Use `ProviderAdapterFactory::for_provider()` in handlers to get the appropriate adapter.
 
 ### Creating a New Adapter
+
 1. Create a new file (e.g., `adapters/my_provider.rs`) with a struct that implements `ProviderAdapter`.
 2. Implement required methods:
    - `adapt_openai_request(&self, body: &mut Value, is_stream: bool)`: Transform OpenAI-style request to provider format.
@@ -114,5 +121,6 @@ src/
 4. Ensure tests validate both request and response transformations.
 
 ### Existing Adapters
+
 - **Default** (`default.rs`): OpenAI-compatible providers (passthrough).
 - **Bailian** (`bailian.rs`): Alibaba Cloud Bailian (ensures `stream_options.include_usage` for streaming).
