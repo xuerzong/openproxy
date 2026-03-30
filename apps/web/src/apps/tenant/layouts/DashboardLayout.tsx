@@ -1,6 +1,7 @@
 import { AuthRequiredRoute } from '@/components/AuthRequiredRoute'
 import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayout'
 import {
+  BarChart3Icon,
   BoxIcon,
   CircleUserRoundIcon,
   ChevronLeftIcon,
@@ -28,6 +29,15 @@ export const DashboardLayout = () => {
       label: t('menu.dashboard', { defaultValue: 'Dashboard' }),
       onClick() {
         navigate('/')
+      },
+      access: 'public',
+    },
+    {
+      key: '/analytics',
+      icon: <BarChart3Icon className="w-5 h-5" />,
+      label: t('menu.analytics', { defaultValue: 'Analytics' }),
+      onClick() {
+        navigate('/analytics')
       },
       access: 'public',
     },

@@ -24,6 +24,7 @@ When adding or modifying any visible text (labels, tooltips, placeholders, error
 - Query-backed tables should pass the corresponding query `isLoading` state into `@openproxy/ui/Table` via the `loading` prop instead of maintaining page-specific table loading UIs.
 - KPI cards that combine a headline metric with a right-aligned sparkline should use `src/components/SparklineStatisticCard.tsx` rather than inlining the layout repeatedly.
 - Shared 404 and empty-state illustrations should use `src/components/NotFoundIllustration.tsx` instead of linking `/404.svg` directly.
+- Historical analytics pages belong in the main workspace navigation, not under settings menus; settings should remain focused on configuration and management flows.
 - Styles: TailwindCSS utility classes + CSS modules (`*.module.css`) when needed.
 - Path aliases: `@/` → `src/`, `@openproxy/` → workspace packages.
 - Sidebar menus in `src/layouts/DashboardLayout.tsx` may include non-clickable `label` and `separator` entries to create grouped navigation sections.

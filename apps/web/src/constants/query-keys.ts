@@ -17,6 +17,7 @@ export const queryKeys = {
   usages: 'usages',
   usagesTotal: 'usagesTotal',
   usagesGrouped: 'usagesGrouped',
+  teamMonthlyUsages: 'teamMonthlyUsages',
   apiKeys: 'apiKeys',
   apiKeyFolders: 'apiKeyFolders',
 

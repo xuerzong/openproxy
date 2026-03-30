@@ -34,6 +34,7 @@
 - Always use `--name` flag when generating to keep migration filenames descriptive.
 - Every newly created team must get a `Default` API key folder with `isDefault=true` inside the same transaction as team creation.
 - Default API key folders are system folders: they cannot be deleted, and delete flows should still promote another folder to default if historical data ends up without one.
+- Team monthly usage archives live in `team_monthly_usages`; raw `usages` rows should only be retained for the current month, with prior months archived via the `/cron/archiveMonthlyUsage` endpoint before cleanup.
 
 ## Environment
 

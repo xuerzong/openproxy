@@ -337,6 +337,74 @@ export const usagesRelations = relations(usages, ({ one }) => ({
   }),
 }))
 
+export const teamMonthlyUsages = pgTable(
+  'team_monthly_usages',
+  {
+    id: varchar('id')
+      .notNull()
+      .$defaultFn(() => generateDBId())
+      .primaryKey(),
+    teamId: varchar('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade' }),
+    monthStart: timestamp('month_start', {
+      mode: 'date',
+      withTimezone: true,
+    }).notNull(),
+    monthEnd: timestamp('month_end', {
+      mode: 'date',
+      withTimezone: true,
+    }).notNull(),
+    totalRequests: integer('total_requests').notNull().default(0),
+    tokensPrompt: integer('tokens_prompt').notNull().default(0),
+    tokensCompletion: integer('tokens_completion').notNull().default(0),
+    totalCost: numeric('total_cost', { precision: 20, scale: 10 })
+      .notNull()
+      .default('0'),
+    modelBreakdown: jsonb('model_breakdown')
+      .$type<
+        Array<{
+          modelName: string
+          requests: number
+          totalCost: number
+          tokensPrompt: number
+          tokensCompletion: number
+        }>
+      >()
+      .notNull()
+      .default([]),
+    createdAt: timestamp('created_at', {
+      mode: 'date',
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', {
+      mode: 'date',
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('team_monthly_usages_team_id_index').on(table.teamId),
+    uniqueIndex('team_monthly_usages_team_month_unique').on(
+      table.teamId,
+      table.monthStart
+    ),
+  ]
+)
+
+export const teamMonthlyUsagesRelations = relations(
+  teamMonthlyUsages,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [teamMonthlyUsages.teamId],
+      references: [teams.id],
+    }),
+  })
+)
+
 export const orders = pgTable(
   'orders',
   {
@@ -555,6 +623,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   users: many(teamUsers),
   orders: many(orders),
   usages: many(usages),
+  monthlyUsages: many(teamMonthlyUsages),
   apiKeys: many(apiKeys),
   apiKeyFolders: many(apiKeyFolders),
 }))

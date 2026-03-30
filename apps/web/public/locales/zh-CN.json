@@ -1,6 +1,7 @@
 {
   "menu": {
     "dashboard": "控制台",
+    "analytics": "分析",
     "apiKeys": "API Keys",
     "library": "资源",
     "folders": "文件夹",
@@ -16,6 +17,9 @@
     "balance": "账户余额",
     "refresh": "刷新",
     "recharge": "充值",
+    "summary24hRequests": "24小时请求量",
+    "recentRequestsTitle": "最近请求",
+    "recentRequestsDescription": "展示当前团队最近 24 小时内的请求明细。",
     "chart": {
       "title24h": "24小时请求趋势",
       "requests": "请求数",
@@ -36,6 +40,23 @@
       "prev": "上一页",
       "next": "下一页"
     }
+  },
+  "analytics": {
+    "title": "分析",
+    "description": "按月份查看当前团队的历史使用统计，包括消费金额、请求量、Token 用量和模型分布。",
+    "selectedMonth": "统计月份",
+    "totalCost": "消费金额（元）",
+    "requests": "请求量",
+    "totalTokens": "Token 总量",
+    "activeModels": "活跃模型数",
+    "distributionTitle": "当月模型明细",
+    "distributionDescription": "查看所选月份内各模型的请求占比与 Token 用量。",
+    "distributionEmpty": "这个月份还没有模型使用数据。",
+    "tableTitle": "历史月份汇总",
+    "tableDescription": "当前月份展示实时汇总，历史月份展示月度归档记录。",
+    "month": "月份",
+    "models": "模型数",
+    "avgTokensPerRequest": "单次请求平均 Token"
   },
   "adminDashboard": {
     "timeRange": {

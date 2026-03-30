@@ -20,6 +20,10 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/APIKeys')),
       },
       {
+        path: 'analytics',
+        Component: lazy(() => import('./pages/Analytics')),
+      },
+      {
         path: 'folders',
         Component: lazy(() => import('./pages/Folders')),
       },

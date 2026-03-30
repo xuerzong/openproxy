@@ -107,7 +107,7 @@ const Page = () => {
         </Card>
 
         <SparklineStatisticCard
-          title={translateDashboard('chart.requests', 'Requests')}
+          title={translateDashboard('summary24hRequests', 'Requests (24h)')}
           value={requestTotal}
           chart={
             <ChartContainer config={requestChartConfig} className="h-20 w-full">
@@ -159,6 +159,18 @@ const Page = () => {
             </AreaChart>
           </ChartContainer>
         </Card>
+      </div>
+
+      <div>
+        <div className="text-base font-semibold">
+          {translateDashboard('recentRequestsTitle', 'Recent Requests')}
+        </div>
+        <div className="mt-1 text-sm text-primary/75">
+          {translateDashboard(
+            'recentRequestsDescription',
+            'Latest requests from the current team within the recent 24 hours.'
+          )}
+        </div>
       </div>
 
       <FlexScrollViewer bordered>

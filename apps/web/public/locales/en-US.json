@@ -1,6 +1,7 @@
 {
   "menu": {
     "dashboard": "Dashboard",
+    "analytics": "Analytics",
     "apiKeys": "API Keys",
     "library": "Library",
     "folders": "Folders",
@@ -16,6 +17,9 @@
     "balance": "Balance",
     "refresh": "Refresh",
     "recharge": "Recharge",
+    "summary24hRequests": "Requests (24h)",
+    "recentRequestsTitle": "Recent Requests",
+    "recentRequestsDescription": "Latest requests from the current team within the recent 24 hours.",
     "chart": {
       "title24h": "24h Request Trend",
       "requests": "Requests",
@@ -36,6 +40,23 @@
       "prev": "Prev",
       "next": "Next"
     }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "description": "Review monthly usage history for the current team, including cost, requests, token usage, and model breakdown.",
+    "selectedMonth": "Reporting Month",
+    "totalCost": "Cost (CNY)",
+    "requests": "Requests",
+    "totalTokens": "Total Tokens",
+    "activeModels": "Active Models",
+    "distributionTitle": "Model Breakdown",
+    "distributionDescription": "Review request share and token usage for each model within the selected month.",
+    "distributionEmpty": "No model usage in this month yet.",
+    "tableTitle": "Monthly History",
+    "tableDescription": "The current month shows a live summary, while previous months come from archived monthly records.",
+    "month": "Month",
+    "models": "Models",
+    "avgTokensPerRequest": "Avg Tokens / Request"
   },
   "adminDashboard": {
     "timeRange": {
