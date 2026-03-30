@@ -8,6 +8,7 @@ impl ProviderAdapter for DefaultProviderAdapter {}
 mod tests {
     use super::*;
     use crate::models::provider::ProviderInfo;
+    use crate::utils::chat::UsageStyle;
 
     fn provider(_name: &str, base_url: &str) -> ProviderInfo {
         ProviderInfo {

@@ -43,3 +43,34 @@ Examples of changes that require an `AGENTS.md` update:
 
 - Root `bun run dev` starts `apps/server` `dev` together with `apps/web` `dev:admin` and `dev:tenant`.
 - `website` is not included in the root development command.
+
+## API Billing & Token Management (apps/api)
+
+### Token Counting
+- Use `ticktoken-rs` crate for accurate token counting via OpenAI's tokenizer.
+- Token counting utilities live in `src/utils/tokens.rs`:
+  - `count_input_tokens(body, model)`: Parse request messages and count tokens
+  - `count_tokens_for_content(content, model)`: Count single string content
+- Support both string messages (`"content": "text"`) and multimodal/vision format (`"content": [{"type": "text", ...}]`)
+- Add message overhead: ~4 tokens per message + system prompt tokens.
+- Fallback gracefully to character-based estimation (1 token ≈ 4 chars) if tiktoken unavailable.
+
+### Balance Validation & Output Token Limiting
+- All public model requests must validate user balance **before** forwarding to upstream.
+- Balance validation utilities live in `src/utils/balance.rs`:
+  - `check_balance_and_available_output(user, input_tokens, requested_max_tokens)`: Validate balance and calculate available output tokens.
+  - `apply_balance_check_to_body(body, result)`: Auto-adjust `max_tokens` in request if needed.
+- Formula: $O_{available} = \left\lfloor \frac{Balance - I_{cost}}{P_{output}} \times 1,000,000 \right\rfloor$, where $I_{cost} = \frac{I \times P_{input}}{1,000,000}$
+- Return **402 Payment Required** if balance insufficient for input tokens; do not forward upstream.
+- Automatically cap `requested_max_tokens` to available output tokens (transparent to user).
+- Skip validation for private models (different billing model).
+- Log balance checks at INFO level for audit trail.
+
+### Integration Pattern
+- Validation happens in request handlers (e.g., `src/handlers/chat_completions.rs`):
+  1. Parse request body
+  2. Count input tokens
+  3. Check balance → return 402 if insufficient
+  4. Cap max_tokens if needed
+  5. Forward modified request to handler
+- Each endpoint handler repeats this pattern; centralize token counting/balance logic in `src/utils/` modules.
