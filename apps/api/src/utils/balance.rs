@@ -1,11 +1,10 @@
 use axum::http::StatusCode;
-use rust_decimal::prelude::ToPrimitive;
 use rust_decimal::Decimal;
 use serde_json::Value;
-use std::str::FromStr;
 
 use crate::models::provider::ModelAccessResult;
 use crate::shared::ApiResponse;
+use crate::utils::chat::{get_price, max_tokens_for_budget, parse_pricing};
 
 #[derive(Debug, Clone)]
 pub struct BalanceCheckResult {
@@ -21,49 +20,11 @@ pub struct BalanceCheckResult {
     pub adjusted_max_tokens: Option<i32>,
 }
 
-/// Extract input price from model pricing JSON
-fn get_input_price(model_pricing: &Value) -> Decimal {
-    if let Some(s) = model_pricing.as_str() {
-        if let Ok(pricing) = serde_json::from_str::<Value>(s) {
-            return pricing
-                .get("input")
-                .and_then(|v| v.as_str())
-                .and_then(|s| Decimal::from_str(s).ok())
-                .unwrap_or(Decimal::ZERO);
-        }
-    }
-
-    model_pricing
-        .get("input")
-        .and_then(|v| v.as_str())
-        .and_then(|s| Decimal::from_str(s).ok())
-        .unwrap_or(Decimal::ZERO)
-}
-
-/// Extract output price from model pricing JSON
-fn get_output_price(model_pricing: &Value) -> Decimal {
-    if let Some(s) = model_pricing.as_str() {
-        if let Ok(pricing) = serde_json::from_str::<Value>(s) {
-            return pricing
-                .get("output")
-                .and_then(|v| v.as_str())
-                .and_then(|s| Decimal::from_str(s).ok())
-                .unwrap_or(Decimal::ZERO);
-        }
-    }
-
-    model_pricing
-        .get("output")
-        .and_then(|v| v.as_str())
-        .and_then(|s| Decimal::from_str(s).ok())
-        .unwrap_or(Decimal::ZERO)
-}
-
 /// Check balance and calculate available output tokens.
 ///
 /// Formula:
 /// - Input cost: I * input_price / 1_000_000
-/// - Available output tokens: (Balance / output_price) * 1_000_000 - I
+/// - Available output tokens: solve max O such that tiered_output_cost(O) <= Balance - I_cost
 ///
 /// Returns:
 /// - (402, "Insufficient balance") if balance < input_cost
@@ -73,8 +34,10 @@ pub fn check_balance_and_available_output(
     input_tokens: i32,
     requested_max_tokens: Option<i32>,
 ) -> Result<BalanceCheckResult, (StatusCode, ApiResponse<()>)> {
-    let input_price = get_input_price(&user.model_pricing);
-    let output_price = get_output_price(&user.model_pricing);
+    let pricing = parse_pricing(&user.model_pricing);
+    let input_price = get_price(&pricing, "input");
+    let output_price = get_price(&pricing, "output");
+    let output_tiers = pricing.output_tiers.as_ref();
 
     if !user.model_is_public {
         return Ok(BalanceCheckResult {
@@ -102,9 +65,8 @@ pub fn check_balance_and_available_output(
 
     let remaining_balance = balance - input_cost;
 
-    let available_output_tokens = if output_price > Decimal::ZERO {
-        let available = (remaining_balance / output_price) * Decimal::from(1_000_000);
-        available.to_u32().unwrap_or(0).min(i32::MAX as u32) as i32
+    let available_output_tokens = if output_price > Decimal::ZERO || output_tiers.is_some() {
+        max_tokens_for_budget(output_tiers, output_price, remaining_balance)
     } else {
         i32::MAX
     };
@@ -147,6 +109,7 @@ mod tests {
     use super::*;
     use rust_decimal::Decimal;
     use serde_json::json;
+    use std::str::FromStr;
 
     fn create_test_user(balance: &str, input_price: &str, output_price: &str) -> ModelAccessResult {
         ModelAccessResult {
@@ -173,6 +136,12 @@ mod tests {
             monthly_free_last_reset_at: None,
             providers: vec![],
         }
+    }
+
+    fn create_test_user_with_pricing(balance: &str, pricing: Value) -> ModelAccessResult {
+        let mut user = create_test_user(balance, "0", "0");
+        user.model_pricing = pricing;
+        user
     }
 
     #[test]
@@ -223,5 +192,46 @@ mod tests {
         let result = result.unwrap();
         assert!(result.sufficient_for_input);
         assert_eq!(result.available_output_tokens, i32::MAX);
+    }
+
+    #[test]
+    fn test_output_tiers_use_progressive_budgeting() {
+        let pricing = json!({
+            "input": "0",
+            "output": "10",
+            "input_cache_read": "0",
+            "output_tiers": [
+                { "min": 0, "max": 1000, "cost": "8" },
+                { "min": 1001, "max": 5000, "cost": "6" }
+            ]
+        });
+        let balance = (Decimal::from(1000) * Decimal::from(8)
+            + Decimal::from(2000) * Decimal::from(6))
+            / Decimal::from(1_000_000);
+        let user = create_test_user_with_pricing(&balance.to_string(), pricing);
+
+        let result = check_balance_and_available_output(&user, 0, Some(5000)).unwrap();
+
+        assert_eq!(result.available_output_tokens, 3000);
+        assert_eq!(result.adjusted_max_tokens, Some(3000));
+    }
+
+    #[test]
+    fn test_output_tiers_respect_input_cost_before_budgeting() {
+        let pricing = json!({
+            "input": "1000000",
+            "output": "1000000",
+            "input_cache_read": "0",
+            "output_tiers": [
+                { "min": 0, "max": 2, "cost": "1000000" },
+                { "min": 3, "max": 4, "cost": "2000000" }
+            ]
+        });
+        let user = create_test_user_with_pricing("4", pricing);
+
+        let result = check_balance_and_available_output(&user, 1, Some(10)).unwrap();
+
+        assert_eq!(result.available_output_tokens, 2);
+        assert_eq!(result.adjusted_max_tokens, Some(2));
     }
 }
