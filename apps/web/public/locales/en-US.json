@@ -10,7 +10,8 @@
     "models": "Models",
     "users": "Users",
     "teams": "Teams",
-    "aiProviders": "AI Providers"
+    "aiProviders": "AI Providers",
+    "announcement": "Announcement"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -627,5 +628,12 @@
     "search": "Search",
     "createdAt": "Created At",
     "updatedAt": "Updated At"
+  },
+  "announcement": {
+    "title": "Announcement",
+    "description": "Publish an announcement that will be displayed to all users.",
+    "titlePlaceholder": "Announcement title",
+    "descriptionPlaceholder": "Announcement content",
+    "updatedAt": "Updated at"
   }
 }

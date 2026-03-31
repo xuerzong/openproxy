@@ -3,6 +3,7 @@ import { PageTitle } from './PageTitle'
 import { PanelLeftIcon } from 'lucide-react'
 import { Button } from '@openproxy/ui/Button'
 import { toggleCollapsed } from '@/stores/app'
+import { AnnouncementAlert } from './AnnouncementBanner'
 
 interface PageContainerProps {
   title?: React.ReactNode
@@ -15,6 +16,7 @@ export const PageContainer: React.FC<
   return (
     <div className={cn('relative flex flex-col h-full', className)}>
       <div className="sticky top-0 bg-background z-100 border-b border-border">
+        <AnnouncementAlert />
         <div className="max-w-5xl w-full mx-auto flex items-center p-4">
           <Button
             variant="ghost"

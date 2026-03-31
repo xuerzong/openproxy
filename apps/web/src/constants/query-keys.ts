@@ -40,4 +40,5 @@ export const queryKeys = {
     'admin-dashboard-usages-by-provider-grouped',
   users: 'users',
   usersCount: 'users/count',
+  announcement: 'announcement',
 } as const

@@ -17,6 +17,7 @@ import {
   adminUsersRouter,
   adminApiKeyFoldersRouter,
 } from './admin'
+import { announcementRouter } from './announcement'
 
 export const apiRouter = new Elysia({
   prefix: '/api',
@@ -37,3 +38,4 @@ export const apiRouter = new Elysia({
   .use(adminOrdersRouter)
   .use(adminTeamsRouter)
   .use(adminApiKeyFoldersRouter)
+  .use(announcementRouter)
