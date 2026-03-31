@@ -9,6 +9,7 @@ import { constsRouter } from './consts'
 import { aiProvidersRouter } from './ai-providers'
 import { usagesRouter } from './usages'
 import { teamRouter } from './team'
+import { accessTokensRouter } from './access-tokens'
 import {
   adminDashboardRouter,
   adminOrdersRouter,
@@ -31,6 +32,7 @@ export const apiRouter = new Elysia({
   .use(aiProvidersRouter)
   .use(usagesRouter)
   .use(teamRouter)
+  .use(accessTokensRouter)
   .use(adminDashboardRouter)
   .use(adminOrdersRouter)
   .use(adminTeamsRouter)

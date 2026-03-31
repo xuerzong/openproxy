@@ -20,6 +20,7 @@ export const queryKeys = {
   teamMonthlyUsages: 'teamMonthlyUsages',
   apiKeys: 'apiKeys',
   apiKeyFolders: 'apiKeyFolders',
+  accessTokens: 'accessTokens',
 
   // Admin
   adminTeams: 'admin/teams',

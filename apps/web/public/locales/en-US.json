@@ -248,6 +248,43 @@
       "errorDescription": "We could not process this invitation right now.",
       "switchTeam": "Switch to this team",
       "backHome": "Back to dashboard"
+    },
+    "accessTokens": {
+      "menu": "Access Tokens",
+      "title": "Access Tokens",
+      "description": "Manage access tokens for programmatic team management via OpenAPI.",
+      "createTitle": "Create Access Token",
+      "name": "Token Name",
+      "namePlaceholder": "e.g. CI/CD Token",
+      "scopes": "Permissions",
+      "expiresAt": "Expiration Date",
+      "noExpiration": "No expiration",
+      "expired": "Expired",
+      "scopeLabels": {
+        "api_keys:read": "API Keys (Read)",
+        "api_keys:write": "API Keys (Write)",
+        "balance:read": "Balance (Read)"
+      },
+      "table": {
+        "name": "Name",
+        "scopes": "Permissions",
+        "token": "Token",
+        "expiresAt": "Expires At",
+        "lastUsedAt": "Last Used",
+        "createdAt": "Created At",
+        "never": "Never",
+        "noExpiration": "No expiration"
+      },
+      "messages": {
+        "createSuccess": "Access token created successfully",
+        "deleteSuccess": "Access token deleted successfully",
+        "copyWarning": "Please copy the token now. You will not be able to see it again.",
+        "limitReached": "Maximum {{count}} tokens per team"
+      },
+      "confirmDelete": {
+        "title": "Delete this access token?",
+        "description": "Applications using this token will no longer have access."
+      }
     }
   },
   "orders": {

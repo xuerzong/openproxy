@@ -626,6 +626,7 @@ export const teamsRelations = relations(teams, ({ many }) => ({
   monthlyUsages: many(teamMonthlyUsages),
   apiKeys: many(apiKeys),
   apiKeyFolders: many(apiKeyFolders),
+  accessTokens: many(teamAccessTokens),
 }))
 
 export const teamUsers = pgTable('team_users', {
@@ -695,3 +696,55 @@ export const apiKeyFoldersRelations = relations(
 )
 
 export type ApiKeyFolder = typeof apiKeyFolders.$inferSelect
+
+export const teamAccessTokens = pgTable(
+  'team_access_tokens',
+  {
+    id: varchar('id')
+      .notNull()
+      .$defaultFn(() => generateDBId())
+      .primaryKey(),
+    teamId: varchar('team_id')
+      .notNull()
+      .references(() => teams.id, { onDelete: 'cascade' }),
+    createdBy: varchar('created_by')
+      .notNull()
+      .references(() => teamUsers.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    tokenHash: varchar('token_hash').notNull(),
+    token: varchar('token').notNull(),
+    scopes: text('scopes').array().notNull().default([]),
+    expiresAt: timestamp('expires_at', {
+      mode: 'date',
+      withTimezone: true,
+    }),
+    lastUsedAt: timestamp('last_used_at', {
+      mode: 'date',
+      withTimezone: true,
+    }),
+    createdAt: timestamp('created_at', {
+      mode: 'date',
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('team_access_tokens_team_id_index').on(table.teamId),
+    index('team_access_tokens_token_hash_index').on(table.tokenHash),
+  ]
+)
+
+export const teamAccessTokensRelations = relations(
+  teamAccessTokens,
+  ({ one }) => ({
+    team: one(teams, {
+      fields: [teamAccessTokens.teamId],
+      references: [teams.id],
+    }),
+    creator: one(teamUsers, {
+      fields: [teamAccessTokens.createdBy],
+      references: [teamUsers.id],
+    }),
+  })
+)

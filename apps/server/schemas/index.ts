@@ -49,3 +49,9 @@ export {
   OptionalPaginationQuerySchema,
   UsageGroupedQuerySchema,
 } from './common'
+
+// Access Token Schemas
+export {
+  CreateAccessTokenBodySchema,
+  AccessTokenIdParamSchema,
+} from './access-token'
