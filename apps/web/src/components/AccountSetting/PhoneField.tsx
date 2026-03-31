@@ -115,7 +115,7 @@ export const PhoneField = () => {
             <Button
               disabled={!newPhone.trim() || !code.trim() || loading}
               onClick={() => {
-                void toastPromise(handleVerifyAndUpdate(), {
+                toastPromise(handleVerifyAndUpdate(), {
                   loading: t('common.processing', {
                     defaultValue: 'Processing...',
                   }),
@@ -176,7 +176,7 @@ export const PhoneField = () => {
                   return true
                 }}
                 onValidate={(captchaData) => {
-                  void toastPromise(handleSendCode(captchaData), {
+                  toastPromise(handleSendCode(captchaData), {
                     loading: t('common.processing', {
                       defaultValue: 'Processing...',
                     }),

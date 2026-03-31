@@ -3,6 +3,12 @@ import * as dbSchema from '@server/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import omit from 'lodash/omit'
 
+type TransactionClient = Parameters<typeof db.transaction>[0] extends (
+  arg: infer T
+) => unknown
+  ? T
+  : never
+
 const normalizeAPIKeys = (apiKeys: string[]) => {
   return Array.from(
     new Set(apiKeys.map((apiKey) => apiKey.trim()).filter(Boolean))
@@ -19,7 +25,10 @@ const encryptAIProviderAPIKey = async (apiKey: string) => {
   }
 }
 
-const syncLegacyAIProviderAPIKey = async (tx: any, aiProviderId: string) => {
+const syncLegacyAIProviderAPIKey = async (
+  tx: TransactionClient,
+  aiProviderId: string
+) => {
   const firstAPIKey = await tx.query.aiProviderAPIKeys.findFirst({
     where: eq(dbSchema.aiProviderAPIKeys.aiProviderId, aiProviderId),
     columns: {

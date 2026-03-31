@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { cloneElement } from 'react'
 import { Dialog } from '@openproxy/ui/Dialog'
 import { useForm } from '@openproxy/ui/Form'
@@ -42,18 +42,22 @@ export const EditFolderDialog: React.FC<EditFolderDialogProps> = ({
   const [form] = useForm({
     defaultValues: { name: '', isDefault: false },
   })
+  const initialValues = useMemo(
+    () => defaultValues ?? { name: '', isDefault: false },
+    [defaultValues]
+  )
 
   useEffect(() => {
     if (!open) {
       return
     }
 
-    form.setValues(defaultValues ?? { name: '', isDefault: false })
+    form.setValues(initialValues)
     form.resetErrors()
   }, [defaultValues?.isDefault, defaultValues?.name, open])
 
   const handleOpen = () => {
-    form.setValues(defaultValues ?? { name: '', isDefault: false })
+    form.setValues(initialValues)
     form.resetErrors()
     setOpen(true)
   }
@@ -80,7 +84,7 @@ export const EditFolderDialog: React.FC<EditFolderDialogProps> = ({
           isDefault: isDefault ?? false,
         })
 
-    void toastApiPromise(resp, {
+    toastApiPromise(resp, {
       loading: t('common.processing'),
       success: t('common.operationSuccess'),
       error: (error) =>
@@ -88,7 +92,7 @@ export const EditFolderDialog: React.FC<EditFolderDialogProps> = ({
           status: getToastRequestStatus(error),
         }),
       onSuccess: () => {
-        void foldersQuery.refetch()
+        foldersQuery.refetch()
         handleClose()
       },
     })

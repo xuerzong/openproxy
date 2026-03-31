@@ -6,10 +6,53 @@ import { Config } from '@alicloud/openapi-client'
 import Credential from '@alicloud/credentials'
 import { RuntimeOptions } from '@alicloud/tea-util'
 
+type ConstructorWithDefault<T> = {
+  default?: T
+}
+
+type SMSClient = {
+  sendSmsVerifyCode: (request: SendSmsVerifyCodeRequest) => Promise<{
+    body?: {
+      code?: string
+      message?: string
+      requestId?: string
+    }
+  }>
+  checkSmsVerifyCodeWithOptions: (
+    request: CheckSmsVerifyCodeRequest,
+    runtime: RuntimeOptions
+  ) => Promise<{
+    body?: {
+      code?: string
+      message?: string
+      Recommend?: string
+    }
+  }>
+}
+
+type SMSClientConstructor = new (config: Config) => SMSClient
+
+const getErrorMessage = (error: unknown) => {
+  return error instanceof Error ? error.message : 'Internal Server Error'
+}
+
+const getErrorRecommend = (error: unknown) => {
+  if (typeof error === 'object' && error && 'data' in error) {
+    const data = (error as { data?: { Recommend?: string } }).data
+    return data?.Recommend
+  }
+
+  return undefined
+}
+
 // 1. Initialize Alibaba Cloud client (singleton pattern)
 const createClient = () => {
-  const CredentialCon = (Credential as any).default || Credential
-  const DypnsapiCon: any = (Dypnsapi as any).default || Dypnsapi
+  const CredentialCon =
+    (Credential as ConstructorWithDefault<typeof Credential>).default ||
+    Credential
+  const DypnsapiCon =
+    (Dypnsapi as ConstructorWithDefault<SMSClientConstructor>).default ||
+    (Dypnsapi as unknown as SMSClientConstructor)
   const config = new Config({
     credential: new CredentialCon(), // Auto-read environment variables
     endpoint: 'dypnsapi.aliyuncs.com',
@@ -46,10 +89,10 @@ export const sendSMS = async (phoneNumber: string, code: string) => {
         message: response.body?.message,
       }
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      message: error.message || 'Internal Server Error',
+      message: getErrorMessage(error),
     }
   }
 }
@@ -77,11 +120,11 @@ export const checkSMS = async (phoneNumber: string, verifyCode: string) => {
       message: response.body?.message,
       code: response.body?.code,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       success: false,
-      message: error.message,
-      recommend: error.data?.Recommend,
+      message: getErrorMessage(error),
+      recommend: getErrorRecommend(error),
     }
   }
 }

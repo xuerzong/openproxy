@@ -58,7 +58,7 @@ const Page = () => {
         icon: values.icon,
       }
 
-      void toastApiPromise(
+      toastApiPromise(
         isEdit
           ? request.aiProviders.put({ id: values.id, ...payload })
           : request.aiProviders.post({ ...payload, apiKeys: [] }),
@@ -73,7 +73,7 @@ const Page = () => {
               status: getToastRequestStatus(error),
             }),
           onSuccess: () => {
-            void aiProvidersQuery.refetch()
+            aiProvidersQuery.refetch()
             onAIProviderCancel()
           },
         }
@@ -236,7 +236,7 @@ const Page = () => {
           }
         }}
         onSuccess={() => {
-          void aiProvidersQuery.refetch()
+          aiProvidersQuery.refetch()
         }}
       />
 

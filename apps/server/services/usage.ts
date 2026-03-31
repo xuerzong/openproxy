@@ -169,14 +169,13 @@ const toGroupedUsageBuckets = (
   })
 }
 
-export async function getUsagesByTeamId(
+export const getUsagesByTeamId = async (
   teamId: string,
   limit: number,
   offset: number
-) {
+) => {
   const now = new Date()
   const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-
   const usageList = await db
     .select({
       usage: dbSchema.usages,
@@ -207,7 +206,7 @@ export async function getUsagesByTeamId(
   }))
 }
 
-export async function getUsagesCountByTeamId(teamId: string) {
+export const getUsagesCountByTeamId = async (teamId: string) => {
   const now = new Date()
   const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
   const result = await db
@@ -222,11 +221,11 @@ export async function getUsagesCountByTeamId(teamId: string) {
   return result[0]?.count || 0
 }
 
-export async function getUsagesGroupedByTeamId(
+export const getUsagesGroupedByTeamId = async (
   teamId: string,
   rangeHours?: number,
   bucketCount?: number
-) {
+) => {
   const {
     alignedStart,
     alignedStartMs,
@@ -234,7 +233,6 @@ export async function getUsagesGroupedByTeamId(
     effectiveBucketCount,
     rangeEnd,
   } = getUsageGroupingWindow(rangeHours, bucketCount)
-
   const usageRows = await db
     .select({
       createdAt: dbSchema.usages.createdAt,
@@ -251,7 +249,6 @@ export async function getUsagesGroupedByTeamId(
       )
     )
     .orderBy(dbSchema.usages.createdAt)
-
   return toGroupedUsageBuckets(
     usageRows,
     alignedStartMs,
@@ -260,10 +257,10 @@ export async function getUsagesGroupedByTeamId(
   )
 }
 
-export async function getUsagesGrouped(
+export const getUsagesGrouped = async (
   rangeHours?: number,
   bucketCount?: number
-) {
+) => {
   const {
     alignedStart,
     alignedStartMs,
@@ -271,7 +268,6 @@ export async function getUsagesGrouped(
     effectiveBucketCount,
     rangeEnd,
   } = getUsageGroupingWindow(rangeHours, bucketCount)
-
   const usageRows = await db
     .select({
       createdAt: dbSchema.usages.createdAt,
@@ -287,7 +283,6 @@ export async function getUsagesGrouped(
       )
     )
     .orderBy(dbSchema.usages.createdAt)
-
   return toGroupedUsageBuckets(
     usageRows,
     alignedStartMs,
@@ -296,10 +291,12 @@ export async function getUsagesGrouped(
   )
 }
 
-export async function getTeamMonthlyUsagesByTeamId(teamId: string, limit = 12) {
+export const getTeamMonthlyUsagesByTeamId = async (
+  teamId: string,
+  limit = 12
+) => {
   const currentMonthStart = startOfMonth(new Date())
   const currentMonthEnd = endOfMonth(currentMonthStart)
-
   const [archivedRows, currentSummaryRows, currentModelRows] =
     await Promise.all([
       db.query.teamMonthlyUsages.findMany({
@@ -343,7 +340,6 @@ export async function getTeamMonthlyUsagesByTeamId(teamId: string, limit = 12) {
         )
         .groupBy(dbSchema.usages.modelName),
     ])
-
   const currentSummary = currentSummaryRows[0]
   const currentMonthUsage = createCurrentMonthUsageView({
     teamId,
@@ -363,13 +359,11 @@ export async function getTeamMonthlyUsagesByTeamId(teamId: string, limit = 12) {
       }))
       .sort((left, right) => right.requests - left.requests),
   })
-
   return [currentMonthUsage, ...archivedRows.map(toMonthlyUsageView)]
 }
 
-export async function archiveMonthlyUsages() {
+export const archiveMonthlyUsages = async () => {
   const currentMonthStart = startOfMonth(new Date())
-
   const [summaryRows, modelRows] = await Promise.all([
     db
       .select({
@@ -404,24 +398,19 @@ export async function archiveMonthlyUsages() {
         dbSchema.usages.modelName
       ),
   ])
-
   if (summaryRows.length === 0) {
     await db
       .delete(dbSchema.usages)
       .where(lt(dbSchema.usages.createdAt, currentMonthStart))
-
     return {
       archivedMonths: 0,
       cleanedBefore: currentMonthStart,
     }
   }
-
   const modelBreakdownMap = new Map<string, MonthlyUsageModelBreakdown[]>()
-
   for (const row of modelRows) {
     const key = toMonthKey(row.teamId, row.monthStart)
     const current = modelBreakdownMap.get(key) || []
-
     current.push({
       modelName: row.modelName || 'unknown',
       requests: Number(row.requests || 0),
@@ -429,16 +418,13 @@ export async function archiveMonthlyUsages() {
       tokensPrompt: Number(row.tokensPrompt || 0),
       tokensCompletion: Number(row.tokensCompletion || 0),
     })
-
     modelBreakdownMap.set(key, current)
   }
-
   const archiveRows = summaryRows.map((row) => {
     const key = toMonthKey(row.teamId, row.monthStart)
     const modelBreakdown = (modelBreakdownMap.get(key) || []).sort(
       (left, right) => right.requests - left.requests
     )
-
     return {
       teamId: row.teamId,
       monthStart: row.monthStart,
@@ -451,7 +437,6 @@ export async function archiveMonthlyUsages() {
       updatedAt: new Date(),
     }
   })
-
   await db.transaction(async (tx) => {
     for (const row of archiveRows) {
       await tx
@@ -473,12 +458,10 @@ export async function archiveMonthlyUsages() {
           },
         })
     }
-
     await tx
       .delete(dbSchema.usages)
       .where(lt(dbSchema.usages.createdAt, currentMonthStart))
   })
-
   return {
     archivedMonths: archiveRows.length,
     cleanedBefore: currentMonthStart,

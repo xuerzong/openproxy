@@ -42,7 +42,7 @@ const Page = () => {
 
     setUpgradingPlan(true)
 
-    void toastApiPromise(request.team.plan.put({ plan }), {
+    toastApiPromise(request.team.plan.put({ plan }), {
       loading: t('common.processing', {
         defaultValue: 'Processing...',
       }),
@@ -55,7 +55,7 @@ const Page = () => {
           status: getToastRequestStatus(error),
         }),
       onSuccess: () => {
-        void queryClient.invalidateQueries({ queryKey: [queryKeys.team] })
+        queryClient.invalidateQueries({ queryKey: [queryKeys.team] })
       },
     }).finally(() => {
       setUpgradingPlan(false)

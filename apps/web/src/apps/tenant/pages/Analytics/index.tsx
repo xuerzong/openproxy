@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import dayjs from '@openproxy/utils/dayjs'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/Card'
@@ -25,6 +25,8 @@ const compactTokenFormatter = new Intl.NumberFormat('en-US', {
   compactDisplay: 'short',
   maximumFractionDigits: 1,
 })
+
+const EMPTY_MONTHLY_USAGES: Array<any> = []
 
 const getMonthTimestamp = (value?: Date | string | null) => {
   if (!value) {
@@ -65,14 +67,10 @@ const formatTokenCount = (value?: number | string | null) => {
 const Page = () => {
   const { t } = useTranslation('common')
   const monthlyUsagesQuery = useTeamMonthlyUsagesQuery()
-  const monthlyUsages = monthlyUsagesQuery.data || []
+  const monthlyUsages = monthlyUsagesQuery.data ?? EMPTY_MONTHLY_USAGES
   const [selectedMonthStart, setSelectedMonthStart] = useState<string>('')
-
-  useEffect(() => {
-    if (!selectedMonthStart && monthlyUsages[0]?.monthStart) {
-      setSelectedMonthStart(monthlyUsages[0].monthStart.toISOString())
-    }
-  }, [monthlyUsages, selectedMonthStart])
+  const resolvedSelectedMonthStart =
+    selectedMonthStart || monthlyUsages[0]?.monthStart?.toISOString() || ''
 
   const monthOptions = useMemo(() => {
     return monthlyUsages.map((item) => ({
@@ -84,10 +82,10 @@ const Page = () => {
   const selectedSummary = useMemo(() => {
     return (
       monthlyUsages.find(
-        (item) => item.monthStart.toISOString() === selectedMonthStart
+        (item) => item.monthStart.toISOString() === resolvedSelectedMonthStart
       ) || monthlyUsages[0]
     )
-  }, [monthlyUsages, selectedMonthStart])
+  }, [monthlyUsages, resolvedSelectedMonthStart])
 
   const chartData = useMemo(() => {
     return (selectedSummary?.modelBreakdown || []).map((item, index) => ({

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DicesIcon, RefreshCwIcon } from 'lucide-react'
+import { DicesIcon } from 'lucide-react'
 import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { Input } from '@openproxy/ui/Input'
 import { Select } from '@openproxy/ui/Select'

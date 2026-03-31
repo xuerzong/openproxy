@@ -80,9 +80,8 @@ const getTodayRange = () => {
   return { start, end }
 }
 
-export async function getAdminDashboardStats() {
+export const getAdminDashboardStats = async () => {
   const { start, end } = getTodayRange()
-
   const [totalUsersResult, todayNewUsersResult, todayRechargeResult] =
     await Promise.all([
       db.select({ count: count() }).from(dbSchema.users),
@@ -108,7 +107,6 @@ export async function getAdminDashboardStats() {
           )
         ),
     ])
-
   const minuteAgo = new Date(Date.now() - 60 * 1000)
   const [realtimeUsageResult] = await db
     .select({
@@ -117,7 +115,6 @@ export async function getAdminDashboardStats() {
     })
     .from(dbSchema.usages)
     .where(gte(dbSchema.usages.createdAt, minuteAgo))
-
   return {
     users: {
       total: totalUsersResult[0]?.count || 0,
@@ -134,17 +131,16 @@ export async function getAdminDashboardStats() {
   }
 }
 
-export async function getAdminDashboardUsageGrouped(
+export const getAdminDashboardUsageGrouped = async (
   rangeHours?: number,
   bucketCount?: number
-) {
+) => {
   return await getUsagesGrouped(rangeHours, bucketCount)
 }
 
-export async function getAdminDashboardUsageByModelGroup(rangeHours = 24) {
+export const getAdminDashboardUsageByModelGroup = async (rangeHours = 24) => {
   const safeRangeHours = Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 365)
   const rangeStart = new Date(Date.now() - safeRangeHours * 60 * 60 * 1000)
-
   const rows = await db
     .select({
       modelGroup: dbSchema.usages.modelOwnedBy,
@@ -153,33 +149,26 @@ export async function getAdminDashboardUsageByModelGroup(rangeHours = 24) {
     .from(dbSchema.usages)
     .where(gte(dbSchema.usages.createdAt, rangeStart))
     .groupBy(dbSchema.usages.modelOwnedBy)
-
   const requestsByGroup = new Map<string, number>()
-
   for (const row of rows) {
     const modelGroup = row.modelGroup?.trim() || 'other'
     const currentRequests = requestsByGroup.get(modelGroup) || 0
-
     requestsByGroup.set(modelGroup, currentRequests + Number(row.requests || 0))
   }
-
   const normalizedGroups = supportedModelOwnedBy.map((modelGroup) => ({
     modelGroup,
     requests: requestsByGroup.get(modelGroup) || 0,
   }))
-
   const extraGroups = Array.from(requestsByGroup.entries())
     .filter(([modelGroup]) => !supportedModelOwnedBy.includes(modelGroup))
     .map(([modelGroup, requests]) => ({ modelGroup, requests }))
     .sort((left, right) => right.requests - left.requests)
-
   return [...normalizedGroups, ...extraGroups]
 }
 
-export async function getAdminDashboardUsageByProvider(rangeHours = 24) {
+export const getAdminDashboardUsageByProvider = async (rangeHours = 24) => {
   const safeRangeHours = Math.min(Math.max(Math.floor(rangeHours), 1), 24 * 365)
   const rangeStart = new Date(Date.now() - safeRangeHours * 60 * 60 * 1000)
-
   const [providers, rows] = await Promise.all([
     db.query.aiProviders.findMany({
       columns: {
@@ -198,26 +187,21 @@ export async function getAdminDashboardUsageByProvider(rangeHours = 24) {
       .where(gte(dbSchema.usages.createdAt, rangeStart))
       .groupBy(dbSchema.usages.aiProviderId),
   ])
-
   const requestsByProviderId = new Map<string, number>()
-
   for (const row of rows) {
     const providerId = row.providerId?.trim() || ''
     const currentRequests = requestsByProviderId.get(providerId) || 0
-
     requestsByProviderId.set(
       providerId,
       currentRequests + Number(row.requests || 0)
     )
   }
-
   const normalizedProviders = providers.map((provider) => ({
     providerId: provider.id,
     providerName: provider.name,
     providerIcon: provider.icon,
     requests: requestsByProviderId.get(provider.id) || 0,
   }))
-
   const knownProviderIds = new Set(providers.map((provider) => provider.id))
   const extraProviders = Array.from(requestsByProviderId.entries())
     .filter(([providerId]) => providerId && !knownProviderIds.has(providerId))
@@ -228,14 +212,13 @@ export async function getAdminDashboardUsageByProvider(rangeHours = 24) {
       requests,
     }))
     .sort((left, right) => right.requests - left.requests)
-
   return [...normalizedProviders, ...extraProviders]
 }
 
-export async function getAdminDashboardUsageByModelGroupGrouped(
+export const getAdminDashboardUsageByModelGroupGrouped = async (
   rangeHours?: number,
   bucketCount?: number
-) {
+) => {
   const {
     alignedStart,
     alignedStartMs,
@@ -243,7 +226,6 @@ export async function getAdminDashboardUsageByModelGroupGrouped(
     effectiveBucketCount,
     rangeEnd,
   } = getDashboardUsageGroupingWindow(rangeHours, bucketCount)
-
   const rows = await db
     .select({
       createdAt: dbSchema.usages.createdAt,
@@ -257,7 +239,6 @@ export async function getAdminDashboardUsageByModelGroupGrouped(
       )
     )
     .orderBy(dbSchema.usages.createdAt)
-
   return groupDashboardUsageByBucketAndKey(
     rows,
     (row) => row.modelGroup?.trim() || 'other',
@@ -271,10 +252,10 @@ export async function getAdminDashboardUsageByModelGroupGrouped(
   }))
 }
 
-export async function getAdminDashboardUsageByProviderGrouped(
+export const getAdminDashboardUsageByProviderGrouped = async (
   rangeHours?: number,
   bucketCount?: number
-) {
+) => {
   const {
     alignedStart,
     alignedStartMs,
@@ -282,7 +263,6 @@ export async function getAdminDashboardUsageByProviderGrouped(
     effectiveBucketCount,
     rangeEnd,
   } = getDashboardUsageGroupingWindow(rangeHours, bucketCount)
-
   const [providers, rows] = await Promise.all([
     db.query.aiProviders.findMany({
       columns: {
@@ -304,11 +284,9 @@ export async function getAdminDashboardUsageByProviderGrouped(
       )
       .orderBy(dbSchema.usages.createdAt),
   ])
-
   const providerNameMap = new Map(
     providers.map((provider) => [provider.id, provider.name])
   )
-
   return groupDashboardUsageByBucketAndKey(
     rows,
     (row) => row.providerId?.trim() || 'unknown',

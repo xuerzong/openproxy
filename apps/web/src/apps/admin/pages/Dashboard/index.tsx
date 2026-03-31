@@ -39,9 +39,6 @@ const formatModelGroupLabel = (value: string) =>
     .map((item) => item.charAt(0).toUpperCase() + item.slice(1))
     .join(' ')
 
-const formatBucketLabel = (value: string | Date) =>
-  dayjs(value).format('MM/DD HH:mm')
-
 const DASHBOARD_TIME_RANGE_OPTIONS = [
   { key: '24h', rangeHours: 24, bucketHours: 2 },
   { key: '7day', rangeHours: 24 * 7, bucketHours: 12 },

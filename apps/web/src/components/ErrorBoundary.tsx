@@ -6,11 +6,11 @@ export class RouterError extends Error {
   code: number = 200
   constructor(message: string, code: number) {
     super(message)
-    this.code = 200
+    this.code = code
   }
 }
 
-export const ErrorBoundary: React.FC<React.PropsWithChildren> = ({}) => {
+export const ErrorBoundary: React.FC = () => {
   const error = useRouteError()
   if (error instanceof RouterError) {
     return <NotFoundView />

@@ -1,9 +1,7 @@
 import VerifyEmail from './VerifyEmail'
 import { render } from '@react-email/render'
 
-const emailNames = ['Verify', 'MagicLink'] as const
-
-type EmailName = (typeof emailNames)[number]
+type EmailName = 'Verify' | 'MagicLink'
 
 interface EmailOptions {
   url: string

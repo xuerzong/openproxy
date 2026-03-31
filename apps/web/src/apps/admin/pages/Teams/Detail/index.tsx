@@ -80,7 +80,7 @@ const Page = () => {
 
   const onUpdateTeam = () => {
     teamForm.onSubmit(async (values) => {
-      void toastApiPromise(request.admin.teams.put(values), {
+      toastApiPromise(request.admin.teams.put(values), {
         loading: t('common.processing', {
           defaultValue: 'Processing...',
         }),
@@ -105,7 +105,7 @@ const Page = () => {
       return
     }
 
-    void toastApiPromise(
+    toastApiPromise(
       request.admin.teams.resetInviteCode.post({
         id: team.id,
       }),
@@ -134,7 +134,7 @@ const Page = () => {
       return
     }
 
-    void toastApiPromise(
+    toastApiPromise(
       request.admin.teams.status.put({
         id: team.id,
         disabled,
@@ -172,7 +172,7 @@ const Page = () => {
       return
     }
 
-    void toastApiPromise(request.admin.teams({ id: team.id }).delete(), {
+    toastApiPromise(request.admin.teams({ id: team.id }).delete(), {
       loading: t('common.processing', {
         defaultValue: 'Processing...',
       }),

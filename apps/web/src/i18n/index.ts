@@ -8,7 +8,7 @@ i18n.on('languageChanged', (language) => {
   setDateLocale(language)
 })
 
-void i18n
+i18n
   .use(HttpBackend)
   .use(LanguageDetector)
   .use(initReactI18next)

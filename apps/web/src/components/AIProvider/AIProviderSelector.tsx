@@ -27,7 +27,6 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
   id,
   onSuccess,
   providers,
-  ...restProps
 }) => {
   const { t } = useTranslation('common')
   const request = useRequest()
@@ -108,7 +107,7 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                     disabled={switchingProviderId === record.id}
                     onCheckedChange={(checked) => {
                       setSwitchingProviderId(record.id)
-                      void toastApiPromise(
+                      toastApiPromise(
                         request.models.updateProvider.post({
                           aiProviderId: record.aiProviderId,
                           provider: {
@@ -241,7 +240,7 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
                       },
                     })
 
-                void toastApiPromise(api, {
+                toastApiPromise(api, {
                   loading: t('common.processing', {
                     defaultValue: 'Processing...',
                   }),
@@ -326,7 +325,7 @@ export const AIProviderSelector: React.FC<AIProviderSelectorProps> = ({
               variant: 'danger',
             }}
             onOk={() => {
-              void toastApiPromise(
+              toastApiPromise(
                 request.models.delProvider.post({
                   provider: { id: deleteProviderId },
                 }),

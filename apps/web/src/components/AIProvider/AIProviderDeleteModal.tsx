@@ -36,7 +36,7 @@ export const AIProviderDeleteModal: React.FC<AIProviderDeleteModalProps> = ({
             defaultValue: 'Confirm delete',
           })}
           onOk={() => {
-            void toastApiPromise(request.aiProviders({ id }).delete(), {
+            toastApiPromise(request.aiProviders({ id }).delete(), {
               loading: t('common.processing', {
                 defaultValue: 'Processing...',
               }),

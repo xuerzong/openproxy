@@ -27,6 +27,8 @@ import { useSearchParams } from 'react-router'
 import { useIsOSS } from '@/hooks/useIsOSS'
 
 const ALL_FOLDERS_FILTER = '__all__'
+const EMPTY_FOLDERS: Array<any> = []
+const EMPTY_API_KEYS: Array<any> = []
 
 const normalizeFolderIdForSubmit = (folderId?: string | null) => {
   if (!folderId || folderId === NO_FOLDER_OPTION_VALUE) {
@@ -49,7 +51,7 @@ const Page = () => {
   const foldersQuery = useApiKeyFoldersQuery()
   const loading =
     teamQuery.isLoading || apiKeysQuery.isLoading || foldersQuery.isLoading
-  const folders = foldersQuery.data || []
+  const folders = foldersQuery.data ?? EMPTY_FOLDERS
   const apiKeyLimit = teamQuery.data?.team?.apiKeyLimit
   const apiKeyCount = apiKeysQuery.data?.length || 0
   const isCreateDisabled = !isOSS && !!apiKeyLimit && apiKeyCount >= apiKeyLimit
@@ -79,7 +81,7 @@ const Page = () => {
   }
 
   const filteredApiKeys = useMemo(() => {
-    const keys = apiKeysQuery.data || []
+    const keys = apiKeysQuery.data ?? EMPTY_API_KEYS
     if (selectedFolderId === ALL_FOLDERS_FILTER) return keys
     return keys.filter((k: any) => k.folderId === selectedFolderId)
   }, [apiKeysQuery.data, selectedFolderId])
@@ -305,7 +307,7 @@ const Page = () => {
                           : null,
                       })
 
-                  void toastApiPromise(resp, {
+                  toastApiPromise(resp, {
                     loading: t('common.processing', {
                       defaultValue: 'Processing...',
                     }),
@@ -321,7 +323,7 @@ const Page = () => {
                       if (data && !values.id) {
                         setNewApiKey(data as string)
                       }
-                      void apiKeysQuery.refetch()
+                      apiKeysQuery.refetch()
                       setOpen(false)
                     },
                   })
@@ -357,7 +359,7 @@ const Page = () => {
               variant: 'danger',
             }}
             onOk={() => {
-              void toastApiPromise(request.apiKeys({ id: deleteId }).delete(), {
+              toastApiPromise(request.apiKeys({ id: deleteId }).delete(), {
                 loading: t('common.processing', {
                   defaultValue: 'Processing...',
                 }),
@@ -371,7 +373,7 @@ const Page = () => {
                   }),
                 onSuccess: () => {
                   setDeleteId('')
-                  void apiKeysQuery.refetch()
+                  apiKeysQuery.refetch()
                   setOpen(false)
                 },
               })

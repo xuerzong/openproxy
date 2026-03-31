@@ -89,7 +89,7 @@ export const AccountSetting = () => {
               <Button
                 disabled={sessionUserName === name}
                 onClick={() => {
-                  void toastPromise(
+                  toastPromise(
                     authClient.updateUser({ name }).then((res) => {
                       if (res.error) {
                         throw new Error(
@@ -115,7 +115,7 @@ export const AccountSetting = () => {
                               defaultValue: 'Operation failed',
                             }),
                       onSuccess: () => {
-                        void refreshSession()
+                        refreshSession()
                       },
                     }
                   )
@@ -148,7 +148,7 @@ export const AccountSetting = () => {
             : undefined
         }
         onConfirm={(url) => {
-          void toastPromise(
+          toastPromise(
             authClient.updateUser({ image: url }).then((res) => {
               if (res.error) {
                 throw new Error(
@@ -174,7 +174,7 @@ export const AccountSetting = () => {
                       defaultValue: 'Operation failed',
                     }),
               onSuccess: () => {
-                void refreshSession()
+                refreshSession()
               },
             }
           )

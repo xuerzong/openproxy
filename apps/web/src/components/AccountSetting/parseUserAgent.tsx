@@ -1,6 +1,6 @@
 import { UAParser } from 'ua-parser-js'
 
-export function parseUserAgent(ua?: string | null): string {
+export const parseUserAgent = (ua?: string | null): string => {
   if (!ua) return 'Unknown Device'
   const { browser, os } = new UAParser(ua).getResult()
   const parts = [

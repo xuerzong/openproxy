@@ -13,7 +13,7 @@ export class ApiKeyFolderServiceError extends Error {
 }
 
 const ensureTeamDefaultFolder = async (
-  tx: Parameters<typeof db.transaction>[0] extends (arg: infer T) => any
+  tx: Parameters<typeof db.transaction>[0] extends (arg: infer T) => unknown
     ? T
     : never,
   teamId: string
@@ -47,29 +47,27 @@ const ensureTeamDefaultFolder = async (
   return folder ?? null
 }
 
-export async function getApiKeyFoldersByTeamId(teamId: string) {
+export const getApiKeyFoldersByTeamId = async (teamId: string) => {
   return db.query.apiKeyFolders.findMany({
     where: eq(dbSchema.apiKeyFolders.teamId, teamId),
     orderBy: desc(dbSchema.apiKeyFolders.createdAt),
   })
 }
 
-export async function getApiKeyFolderCountByTeamId(teamId: string) {
+export const getApiKeyFolderCountByTeamId = async (teamId: string) => {
   const [row] = await db
     .select({ value: count() })
     .from(dbSchema.apiKeyFolders)
     .where(eq(dbSchema.apiKeyFolders.teamId, teamId))
-
   return row?.value || 0
 }
 
-export async function createApiKeyFolder(params: {
+export const createApiKeyFolder = async (params: {
   teamId: string
   name: string
   isDefault?: boolean
-}) {
+}) => {
   const { teamId, name, isDefault = false } = params
-
   return db.transaction(async (tx) => {
     if (isDefault) {
       await tx
@@ -82,24 +80,21 @@ export async function createApiKeyFolder(params: {
           )
         )
     }
-
     const [folder] = await tx
       .insert(dbSchema.apiKeyFolders)
       .values({ teamId, name, isDefault })
       .returning()
-
     return folder!
   })
 }
 
-export async function updateApiKeyFolder(params: {
+export const updateApiKeyFolder = async (params: {
   id: string
   teamId: string
   name: string
   isDefault?: boolean
-}) {
+}) => {
   const { id, teamId, name, isDefault } = params
-
   return db.transaction(async (tx) => {
     if (isDefault) {
       await tx
@@ -112,7 +107,6 @@ export async function updateApiKeyFolder(params: {
           )
         )
     }
-
     const [folder] = await tx
       .update(dbSchema.apiKeyFolders)
       .set({
@@ -127,16 +121,15 @@ export async function updateApiKeyFolder(params: {
         )
       )
       .returning()
-
     return folder
   })
 }
 
-export async function deleteApiKeyFolder(
+export const deleteApiKeyFolder = async (
   id: string,
   teamId: string,
   deleteAllApiKeys = false
-) {
+) => {
   return db.transaction(async (tx) => {
     const folder = await tx.query.apiKeyFolders.findFirst({
       where: and(
@@ -144,15 +137,12 @@ export async function deleteApiKeyFolder(
         eq(dbSchema.apiKeyFolders.teamId, teamId)
       ),
     })
-
     if (!folder) {
       return null
     }
-
     if (folder.isDefault) {
       throw new ApiKeyFolderServiceError('DEFAULT_FOLDER_DELETE_FORBIDDEN', 409)
     }
-
     if (deleteAllApiKeys) {
       await tx
         .delete(dbSchema.apiKeys)
@@ -163,7 +153,6 @@ export async function deleteApiKeyFolder(
           )
         )
     }
-
     const [deletedFolder] = await tx
       .delete(dbSchema.apiKeyFolders)
       .where(
@@ -173,38 +162,33 @@ export async function deleteApiKeyFolder(
         )
       )
       .returning()
-
     await ensureTeamDefaultFolder(tx, teamId)
-
     return deletedFolder
   })
 }
 
 // Admin functions
-export async function getApiKeyFoldersByTeamIdAdmin(teamId: string) {
+export const getApiKeyFoldersByTeamIdAdmin = async (teamId: string) => {
   return db.query.apiKeyFolders.findMany({
     where: eq(dbSchema.apiKeyFolders.teamId, teamId),
     orderBy: desc(dbSchema.apiKeyFolders.createdAt),
   })
 }
 
-export async function deleteApiKeyFolderAdmin(
+export const deleteApiKeyFolderAdmin = async (
   id: string,
   deleteAllApiKeys = false
-) {
+) => {
   return db.transaction(async (tx) => {
     const folder = await tx.query.apiKeyFolders.findFirst({
       where: eq(dbSchema.apiKeyFolders.id, id),
     })
-
     if (!folder) {
       return null
     }
-
     if (folder.isDefault) {
       throw new ApiKeyFolderServiceError('DEFAULT_FOLDER_DELETE_FORBIDDEN', 409)
     }
-
     if (deleteAllApiKeys) {
       await tx
         .delete(dbSchema.apiKeys)
@@ -215,14 +199,11 @@ export async function deleteApiKeyFolderAdmin(
           )
         )
     }
-
     const [deletedFolder] = await tx
       .delete(dbSchema.apiKeyFolders)
       .where(eq(dbSchema.apiKeyFolders.id, id))
       .returning()
-
     await ensureTeamDefaultFolder(tx, folder.teamId)
-
     return deletedFolder
   })
 }

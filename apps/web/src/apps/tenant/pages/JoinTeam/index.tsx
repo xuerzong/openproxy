@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useEffectEvent, useState, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { CheckCircle2Icon, TriangleAlertIcon, UsersIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -66,67 +66,54 @@ const JoinTeamPageInner = () => {
   const [switching, setSwitching] = useState(false)
   const [joinForbiddenReason, setJoinForbiddenReason] = useState('')
 
+  const joinTeam = useEffectEvent(async () => {
+    setState('loading')
+    const response = await request.team.join.post({ inviteCode })
+
+    if (response.error) {
+      const status = Number(response.error.status)
+      const errorValue = response.error.value as
+        | string
+        | { message?: string; code?: string; reason?: string }
+        | null
+
+      const errorReason =
+        typeof errorValue === 'string'
+          ? errorValue
+          : errorValue?.reason || errorValue?.message || errorValue?.code || ''
+
+      if (status === 409) {
+        setState('full')
+        return
+      }
+
+      if (status === 404) {
+        setState('not-found')
+        return
+      }
+
+      if (status === 403) {
+        setJoinForbiddenReason(errorReason)
+        setState('forbidden')
+        return
+      }
+
+      setState('error')
+      return
+    }
+
+    if (typeof response.data === 'string') {
+      setState('error')
+      return
+    }
+
+    setJoinForbiddenReason('')
+    setTeam(response.data.team)
+    setState(response.data.alreadyMember ? 'already-member' : 'success')
+  })
+
   useEffect(() => {
-    let alive = true
-
-    const joinTeam = async () => {
-      setState('loading')
-      const response = await request.team.join.post({ inviteCode })
-
-      if (!alive) {
-        return
-      }
-
-      if (response.error) {
-        const status = Number(response.error.status)
-        const errorValue = response.error.value as
-          | string
-          | { message?: string; code?: string; reason?: string }
-          | null
-
-        const errorReason =
-          typeof errorValue === 'string'
-            ? errorValue
-            : errorValue?.reason ||
-              errorValue?.message ||
-              errorValue?.code ||
-              ''
-
-        if (status === 409) {
-          setState('full')
-          return
-        }
-
-        if (status === 404) {
-          setState('not-found')
-          return
-        }
-
-        if (status === 403) {
-          setJoinForbiddenReason(errorReason)
-          setState('forbidden')
-          return
-        }
-
-        setState('error')
-        return
-      }
-
-      if (typeof response.data === 'string') {
-        setState('error')
-        return
-      }
-
-      setJoinForbiddenReason('')
-      setTeam(response.data.team)
-      setState(response.data.alreadyMember ? 'already-member' : 'success')
-    }
-
     joinTeam()
-
-    return () => {
-      alive = false
-    }
   }, [inviteCode])
 
   const onSwitchTeam = async () => {
@@ -136,7 +123,7 @@ const JoinTeamPageInner = () => {
 
     setSwitching(true)
 
-    void toastPromise(
+    toastPromise(
       changeActiveTeam(team.id).then(async () => {
         await refreshSession()
         return team.id

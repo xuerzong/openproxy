@@ -72,7 +72,7 @@ export const PasswordLoginForm = () => {
 
     setSubmitLoading(true)
 
-    void toastPromise(
+    toastPromise(
       signIn(values.account, values.password).then((success) => {
         if (!success) {
           throw new Error(t('auth.loginFailed'))

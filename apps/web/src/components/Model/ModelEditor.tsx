@@ -89,7 +89,7 @@ export const ModelEditor = ({
         icon: <SettingsIcon />,
       },
     ]
-  }, [isNewModel])
+  }, [isNewModel, t])
 
   return (
     <>

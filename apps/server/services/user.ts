@@ -1,9 +1,9 @@
-import { and, count, desc, eq, sql } from 'drizzle-orm'
+import { and, count, desc, eq } from 'drizzle-orm'
 import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import Decimal from 'decimal.js'
 
-export async function getUserByEmail(email: string) {
+export const getUserByEmail = async (email: string) => {
   const [user] = await db
     .select()
     .from(dbSchema.users)
@@ -11,33 +11,28 @@ export async function getUserByEmail(email: string) {
   return user
 }
 
-export async function getUserConfig(userId: string) {
+export const getUserConfig = async (userId: string) => {
   const userConfigs = await db
     .select()
     .from(dbSchema.userConfigs)
     .where(eq(dbSchema.userConfigs.userId, userId))
-
   if (userConfigs.length > 0) {
     return userConfigs[0]
   }
-
   const newConfigs = await db
     .insert(dbSchema.userConfigs)
     .values({
       userId,
     })
     .returning()
-
   return newConfigs[0]
 }
 
-export async function getUserConfigWithBalance(userId: string) {
+export const getUserConfigWithBalance = async (userId: string) => {
   const userConfig = await getUserConfig(userId)
-
   if (!userConfig) {
     throw new Error('User config not found')
   }
-
   return {
     totalTokenUsage: userConfig.totalTokenUsage,
     balance: new Decimal(userConfig.amount).minus(userConfig.cost).toFixed(2),
@@ -46,10 +41,10 @@ export async function getUserConfigWithBalance(userId: string) {
   }
 }
 
-export async function updateUserEmailVerified(
+export const updateUserEmailVerified = async (
   userId: string,
   emailVerified: boolean
-) {
+) => {
   return db
     .update(dbSchema.users)
     .set({ emailVerified })
@@ -57,7 +52,7 @@ export async function updateUserEmailVerified(
     .returning()
 }
 
-export async function getUsersWithConfig(limit: number, offset: number) {
+export const getUsersWithConfig = async (limit: number, offset: number) => {
   return await db.query.users.findMany({
     limit,
     offset,
@@ -68,15 +63,15 @@ export async function getUsersWithConfig(limit: number, offset: number) {
   })
 }
 
-export async function getUsersCount() {
+export const getUsersCount = async () => {
   const result = await db.select({ count: count() }).from(dbSchema.users)
   return result[0]?.count || 0
 }
 
-export async function updateUserMonthlyFreeAllowance(
+export const updateUserMonthlyFreeAllowance = async (
   userId: string,
   monthlyFreeAllowance: number
-) {
+) => {
   await db
     .update(dbSchema.userConfigs)
     .set({

@@ -177,7 +177,7 @@ export const auth = betterAuth({
     },
     user: {
       create: {
-        after: async (user, context) => {
+        after: async (user) => {
           await createTeam(user.id)
         },
       },
