@@ -13,7 +13,7 @@ export type SelectOption = {
   disabled?: boolean
 }
 
-interface SelectProps extends Omit<
+export interface SelectProps extends Omit<
   RadixSelect.SelectProps,
   'value' | 'defaultValue' | 'onValueChange' | 'children'
 > {

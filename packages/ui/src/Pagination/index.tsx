@@ -13,7 +13,7 @@ const defaultLocale = {
   prev: 'Previous',
 }
 
-interface PaginationProps {
+export interface PaginationProps {
   total?: number
   current?: number
   pageSize?: number

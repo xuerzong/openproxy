@@ -15,7 +15,7 @@ const tagVariants = cva(
   }
 )
 
-interface TagProps extends VariantProps<typeof tagVariants> {}
+export interface TagProps extends VariantProps<typeof tagVariants> {}
 
 export const Tag: React.FC<React.PropsWithChildren<TagProps>> = ({
   color,

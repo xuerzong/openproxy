@@ -8,7 +8,7 @@ import s from './index.module.scss'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { Drawer } from '../Drawer'
 
-interface DialogProps {
+export interface DialogProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   title?: string

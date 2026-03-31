@@ -8,7 +8,7 @@ export interface TabItem {
   children?: React.ReactNode
 }
 
-interface TabsProps extends RadixTabs.TabsProps {
+export interface TabsProps extends RadixTabs.TabsProps {
   items: TabItem[]
 }
 

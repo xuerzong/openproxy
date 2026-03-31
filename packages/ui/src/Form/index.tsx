@@ -192,7 +192,7 @@ const FormProvider: React.FC<React.PropsWithChildren<FormProviderProps>> = ({
   return <FormContext.Provider value={value}>{children}</FormContext.Provider>
 }
 
-interface FormProps
+export interface FormProps
   extends FormHTMLAttributes<HTMLFormElement>, FormProviderProps {}
 
 export const Form = React.forwardRef<HTMLFormElement, FormProps>(

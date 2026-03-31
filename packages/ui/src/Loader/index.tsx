@@ -2,7 +2,7 @@ import { Loader2Icon } from 'lucide-react'
 import { cn } from '../utils/cn'
 import s from './index.module.scss'
 
-interface LoaderProps {
+export interface LoaderProps {
   className?: string
 }
 

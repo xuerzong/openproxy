@@ -6,7 +6,7 @@ import { cn } from '../utils/cn'
 
 export type CheckedState = RadixCheckbox.CheckedState
 
-interface CheckboxProps {
+export interface CheckboxProps {
   label?: React.ReactNode
   checked?: RadixCheckbox.CheckedState
   onCheckedChange?: (checked: RadixCheckbox.CheckedState) => void

@@ -24,7 +24,7 @@ export const RadioItem: React.FC<RadioItemProps> = ({ value, label }) => {
   )
 }
 
-interface RadioGroupProps extends Omit<
+export interface RadioGroupProps extends Omit<
   RadixRadioGroup.RadioGroupProps,
   'onChange' | 'value'
 > {

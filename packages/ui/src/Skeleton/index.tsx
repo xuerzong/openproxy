@@ -1,7 +1,7 @@
 import React, { type HTMLAttributes } from 'react'
 import { cn } from '../utils/cn'
 
-interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
+export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
   loading?: boolean
 }
 
