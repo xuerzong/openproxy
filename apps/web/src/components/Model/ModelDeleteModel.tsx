@@ -21,7 +21,6 @@ export const ModelDeleteModal: React.FC<ModelDeleteModal> = ({
   const { t } = useTranslation('common')
   const request = useRequest()
   const [value, setValue] = useState('')
-  const [submitLoading, setSubmitLoading] = useState(false)
   return (
     <Dialog
       title={t('models.confirmDeleteTitle', {
@@ -49,8 +48,7 @@ export const ModelDeleteModal: React.FC<ModelDeleteModal> = ({
           }}
           onOk={() => {
             if (!id) return
-            setSubmitLoading(true)
-            void toastApiPromise(request.models.delete({ id }), {
+            toastApiPromise(request.models.delete({ id }), {
               loading: t('common.processing', {
                 defaultValue: 'Processing...',
               }),
@@ -67,8 +65,6 @@ export const ModelDeleteModal: React.FC<ModelDeleteModal> = ({
                 setValue('')
                 onSuccess?.()
               },
-            }).finally(() => {
-              setSubmitLoading(false)
             })
           }}
         />

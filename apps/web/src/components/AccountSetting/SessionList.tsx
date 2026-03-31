@@ -38,11 +38,11 @@ export const SessionList = () => {
   }, [])
 
   useEffect(() => {
-    void fetchSessions()
+    fetchSessions()
   }, [fetchSessions])
 
   const handleRevoke = (token: string) => {
-    void toastPromise(
+    toastPromise(
       authClient.revokeSession({ token }).then((res) => {
         if (res.error) throw new Error(String(res.error.status))
         return res
@@ -56,13 +56,13 @@ export const SessionList = () => {
           error instanceof Error
             ? error.message
             : t('common.operationFailed', { defaultValue: 'Operation failed' }),
-        onSuccess: () => void fetchSessions(),
+        onSuccess: () => fetchSessions(),
       }
     )
   }
 
   const handleRevokeOther = () => {
-    void toastPromise(
+    toastPromise(
       authClient.revokeOtherSessions().then((res) => {
         if (res.error) throw new Error(String(res.error.status))
         return res
@@ -76,7 +76,7 @@ export const SessionList = () => {
           error instanceof Error
             ? error.message
             : t('common.operationFailed', { defaultValue: 'Operation failed' }),
-        onSuccess: () => void fetchSessions(),
+        onSuccess: () => fetchSessions(),
       }
     )
   }

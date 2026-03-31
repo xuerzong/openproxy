@@ -18,6 +18,8 @@ packages/       → Shared packages (schema, ui, utils, phone-auth, payment-prov
 - Shared date and datetime inputs should be implemented in `packages/ui` as a single `DatePicker` built from Radix `Popover` and `react-day-picker`; do not introduce new native `datetime-local` fields when a reusable picker is needed.
 - Shared `dayjs` setup and date locale synchronization live in `packages/utils/dayjs`; frontend language changes should update that shared locale state instead of re-initializing `dayjs` inside apps or UI components.
 - Shared `DropdownMenu` items in `packages/ui` support a `disabled` state; prefer disabling unavailable actions instead of conditionally hiding them when the user should still see the action exists.
+- In `apps/web` and `apps/server`, use arrow functions for regular function definitions; avoid `function` declarations/expressions. Exception: `apps/web/src/utils/qr/codegen.ts` keeps its upstream function style.
+- Shared ESLint presets live in `packages/eslint-config`; app-level `eslint.config.js` files should import from this package and only keep local overrides.
 
 ## Convention Maintenance — MANDATORY
 
@@ -43,6 +45,7 @@ Examples of changes that require an `AGENTS.md` update:
 
 - Root `bun run dev` starts `apps/server` `dev` together with `apps/web` `dev:admin` and `dev:tenant`.
 - `website` is not included in the root development command.
+- Root `bun run lint` runs lint for `apps/server` and `apps/web`.
 
 ## API Billing & Token Management (apps/api)
 

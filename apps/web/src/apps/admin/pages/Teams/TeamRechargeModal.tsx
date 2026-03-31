@@ -37,7 +37,7 @@ export const TeamRechargeModal: React.FC<TeamRechargeModalProps> = ({
 
     setLoading(true)
 
-    void toastApiPromise(
+    toastApiPromise(
       request.admin.teams.recharge.post({
         id: team.id,
         amount,

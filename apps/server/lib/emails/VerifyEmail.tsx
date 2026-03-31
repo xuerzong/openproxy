@@ -11,7 +11,7 @@ import {
   Preview,
 } from '@react-email/components'
 
-export default function VerifyEmail({ url }: { url: string }) {
+const VerifyEmail = ({ url }: { url: string }) => {
   return (
     <Html>
       <Head />
@@ -50,3 +50,4 @@ export default function VerifyEmail({ url }: { url: string }) {
     </Html>
   )
 }
+export default VerifyEmail

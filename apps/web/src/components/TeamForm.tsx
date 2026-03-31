@@ -45,7 +45,7 @@ export const TeamForm: React.FC<TeamFormProps> = ({ open, onOpenChange }) => {
     form.onSubmit(async (values) => {
       setLoading(true)
 
-      void toastApiPromise(request.team.post({ name: values.name.trim() }), {
+      toastApiPromise(request.team.post({ name: values.name.trim() }), {
         loading: t('common.processing', { defaultValue: 'Processing...' }),
         success: t('common.operationSuccess', { defaultValue: 'Success' }),
         error: (error) => {

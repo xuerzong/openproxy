@@ -10,7 +10,7 @@ const getEnvKey = (name: 'RSA_PUBLIC_KEY' | 'RSA_PRIVATE_KEY') => {
   return value.replace(/\\n/g, '\n')
 }
 
-export function rsaEncrypt(data: string) {
+export const rsaEncrypt = (data: string) => {
   const publicKey = getEnvKey('RSA_PUBLIC_KEY')
   const buffer = Buffer.from(data, 'utf8') as unknown as Uint8Array
   const encrypted = publicEncrypt(
@@ -24,7 +24,7 @@ export function rsaEncrypt(data: string) {
   return encrypted.toString('base64')
 }
 
-export function rsaDecrypt(encryptedData: string) {
+export const rsaDecrypt = (encryptedData: string) => {
   const privateKey = getEnvKey('RSA_PRIVATE_KEY')
   const buffer = Buffer.from(encryptedData, 'base64') as unknown as Uint8Array
   const decrypted = privateDecrypt(

@@ -74,7 +74,7 @@ export const EmailField = () => {
             <Button
               disabled={!newEmail.trim() || loading}
               onClick={() => {
-                void toastPromise(handleChangeEmail(), {
+                toastPromise(handleChangeEmail(), {
                   loading: t('common.processing', {
                     defaultValue: 'Processing...',
                   }),

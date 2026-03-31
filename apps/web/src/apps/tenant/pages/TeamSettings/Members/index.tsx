@@ -75,7 +75,7 @@ const Page = () => {
 
     setUpdatingMemberId(memberId)
 
-    void toastApiPromise(
+    toastApiPromise(
       request.team.members.role.put({
         id: memberId,
         role,
@@ -100,7 +100,7 @@ const Page = () => {
               })
         },
         onSuccess: () => {
-          void refreshTeamMembers()
+          refreshTeamMembers()
         },
       }
     ).finally(() => {
@@ -115,37 +115,34 @@ const Page = () => {
 
     setRemoving(true)
 
-    void toastApiPromise(
-      request.team.members({ id: removingMember.id }).delete(),
-      {
-        loading: t('common.processing', {
-          defaultValue: 'Processing...',
-        }),
-        success: t('teamSettings.members.messages.memberRemoved', {
-          defaultValue: 'Member removed successfully',
-        }),
-        error: (error) => {
-          const status = Number(getToastRequestStatus(error))
+    toastApiPromise(request.team.members({ id: removingMember.id }).delete(), {
+      loading: t('common.processing', {
+        defaultValue: 'Processing...',
+      }),
+      success: t('teamSettings.members.messages.memberRemoved', {
+        defaultValue: 'Member removed successfully',
+      }),
+      error: (error) => {
+        const status = Number(getToastRequestStatus(error))
 
-          return status === 409
-            ? t('teamSettings.members.messages.lastOwner', {
-                defaultValue: 'At least one owner must remain in the team.',
+        return status === 409
+          ? t('teamSettings.members.messages.lastOwner', {
+              defaultValue: 'At least one owner must remain in the team.',
+            })
+          : status === 400
+            ? t('teamSettings.members.messages.selfRemoveBlocked', {
+                defaultValue: 'You cannot remove yourself from this page.',
               })
-            : status === 400
-              ? t('teamSettings.members.messages.selfRemoveBlocked', {
-                  defaultValue: 'You cannot remove yourself from this page.',
-                })
-              : t('common.operationFailedWithStatus', {
-                  defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
-                  status: getToastRequestStatus(error),
-                })
-        },
-        onSuccess: () => {
-          setRemovingMember(null)
-          void refreshTeamMembers()
-        },
-      }
-    ).finally(() => {
+            : t('common.operationFailedWithStatus', {
+                defaultValue: `Operation failed: ${getToastRequestStatus(error)}`,
+                status: getToastRequestStatus(error),
+              })
+      },
+      onSuccess: () => {
+        setRemovingMember(null)
+        refreshTeamMembers()
+      },
+    }).finally(() => {
       setRemoving(false)
     })
   }

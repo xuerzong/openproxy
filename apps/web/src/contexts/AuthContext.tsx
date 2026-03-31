@@ -24,16 +24,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
   const [session, setSession] = useState<AuthContextState['session']>(void 0)
-  const isAdminUser = session ? (session.user as any).role === 'admin' : false
-  useEffect(() => {
-    querySession()
-  }, [])
 
   const querySession = async () => {
     await authClient.getSession().then((session) => {
       setSession(session.data)
     })
   }
+
+  const isAdminUser = session ? (session.user as any).role === 'admin' : false
+
+  useEffect(() => {
+    querySession()
+  }, [])
 
   const signIn = async (email: string, password: string) => {
     const result = await authClient.signIn.email({

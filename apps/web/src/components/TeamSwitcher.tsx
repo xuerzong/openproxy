@@ -39,7 +39,6 @@ export const TeamSwitcher = () => {
   const currentTeam = teams.find((t) => t.teamId === currentTeamId)
   const teamName = currentTeam?.team?.name || '...'
   const currentPlan = currentTeam?.team?.plan || 'free'
-  const teamId = currentTeamId || ''
   const ownedTeamsCount = teams.filter((team) => team.role === 'owner').length
 
   const isOSS = useIsOSS()

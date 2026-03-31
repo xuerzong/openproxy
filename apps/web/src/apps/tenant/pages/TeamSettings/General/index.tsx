@@ -103,7 +103,7 @@ const Page = () => {
 
     setSaving(true)
 
-    void toastApiPromise(
+    toastApiPromise(
       request.team.put({
         name: name.trim(),
         allowJoin,
@@ -121,7 +121,7 @@ const Page = () => {
             status: getToastRequestStatus(error),
           }),
         onSuccess: () => {
-          void refreshTeamState()
+          refreshTeamState()
         },
       }
     ).finally(() => {
@@ -144,7 +144,7 @@ const Page = () => {
     setAllowJoin(nextAllowJoin)
     setUpdatingAllowJoin(true)
 
-    void toastApiPromise(
+    toastApiPromise(
       request.team.put({
         name: team.name,
         allowJoin: nextAllowJoin,
@@ -165,7 +165,7 @@ const Page = () => {
           })
         },
         onSuccess: () => {
-          void refreshTeamState()
+          refreshTeamState()
         },
       }
     ).finally(() => {
@@ -182,7 +182,7 @@ const Page = () => {
 
     setDeleting(true)
 
-    void toastPromise(
+    toastPromise(
       request.team.delete().then((response) => {
         if (response.error) {
           throw new ToastRequestError(response.error)
@@ -242,7 +242,7 @@ const Page = () => {
                 })
         },
         onSuccess: (data) => {
-          void changeActiveTeam(data.nextTeamId)
+          changeActiveTeam(data.nextTeamId)
             .then(() => refreshSession())
             .then(() => refreshTeamState())
             .then(() => {
@@ -481,7 +481,7 @@ const Page = () => {
         defaultOptions={team?.logo ? parseAvatarOptions(team.logo) : undefined}
         onConfirm={(url) => {
           if (!team) return
-          void toastApiPromise(
+          toastApiPromise(
             request.team.put({
               name: team.name,
               allowJoin,
@@ -500,7 +500,7 @@ const Page = () => {
                   status: getToastRequestStatus(error),
                 }),
               onSuccess: () => {
-                void refreshTeamState()
+                refreshTeamState()
               },
             }
           )

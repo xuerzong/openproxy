@@ -124,7 +124,7 @@ const ChangePasswordDialog = ({
           <Button
             disabled={!canSubmit}
             onClick={() => {
-              void toastPromise(handleChangePassword(), {
+              toastPromise(handleChangePassword(), {
                 loading: t('common.processing', {
                   defaultValue: 'Processing...',
                 }),
@@ -262,7 +262,7 @@ const SetPasswordDialog = ({
           <Button
             disabled={!canSubmit}
             onClick={() => {
-              void toastPromise(handleSetPassword(), {
+              toastPromise(handleSetPassword(), {
                 loading: t('common.processing', {
                   defaultValue: 'Processing...',
                 }),

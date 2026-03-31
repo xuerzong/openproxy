@@ -8,7 +8,7 @@ import { PayStatus, PayType } from '@server/constants/pay'
 type DbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0]
 type DbExecutor = typeof db | DbTransaction
 
-export async function createTeamOrder(
+export const createTeamOrder = async (
   database: DbExecutor,
   params: {
     teamId: string
@@ -19,10 +19,9 @@ export async function createTeamOrder(
     tradeNo?: string
     orderId?: string
   }
-) {
+) => {
   const amount = new Decimal(params.amount).toFixed(2)
   const orderId = params.orderId || generateOrderId()
-
   await database.insert(dbSchema.orders).values({
     teamId: params.teamId,
     userId: params.userId,
@@ -32,21 +31,20 @@ export async function createTeamOrder(
     tradeNo: params.tradeNo?.trim() || '',
     type: params.type,
   })
-
   return {
     orderId,
     amount,
   }
 }
 
-export async function settleTeamOrder(
+export const settleTeamOrder = async (
   database: DbExecutor,
   params: {
     orderId: string
     status: number
     tradeNo?: string
   }
-) {
+) => {
   const [order] = await database
     .update(dbSchema.orders)
     .set({
@@ -65,11 +63,9 @@ export async function settleTeamOrder(
       amount: dbSchema.orders.amount,
       status: dbSchema.orders.status,
     })
-
   if (!order) {
     return null
   }
-
   if (params.status === PayStatus.SUCCESS) {
     await database
       .update(dbSchema.teams)
@@ -79,24 +75,20 @@ export async function settleTeamOrder(
       })
       .where(eq(dbSchema.teams.id, order.teamId))
   }
-
   return order
 }
 
-export async function rechargeUser(email: string, amount: number) {
+export const rechargeUser = async (email: string, amount: number) => {
   const decimalAmount = new Decimal(amount)
-
   return await db.transaction(async (tx) => {
     const [targetUser] = await tx
       .select()
       .from(dbSchema.users)
       .where(eq(dbSchema.users.email, email))
-
     if (!targetUser) {
       tx.rollback()
       return null
     }
-
     const [newOrder] = await tx
       .insert(dbSchema.orders)
       .values({
@@ -108,7 +100,6 @@ export async function rechargeUser(email: string, amount: number) {
         type: PayType.WechatPay,
       })
       .returning()
-
     await tx
       .update(dbSchema.userConfigs)
       .set({
@@ -116,16 +107,15 @@ export async function rechargeUser(email: string, amount: number) {
         updatedAt: new Date(),
       })
       .where(eq(dbSchema.userConfigs.userId, targetUser.id))
-
     return newOrder?.orderId
   })
 }
 
-export async function getOrdersByTeamId(
+export const getOrdersByTeamId = async (
   teamId: string,
   limit: number,
   offset: number
-) {
+) => {
   return await db
     .select()
     .from(dbSchema.orders)
@@ -135,7 +125,7 @@ export async function getOrdersByTeamId(
     .limit(limit)
 }
 
-export async function getOrdersCountByTeamId(teamId: string) {
+export const getOrdersCountByTeamId = async (teamId: string) => {
   const result = await db
     .select({ count: count() })
     .from(dbSchema.orders)
@@ -143,7 +133,7 @@ export async function getOrdersCountByTeamId(teamId: string) {
   return result[0]?.count || 0
 }
 
-export async function getOrders(limit: number, offset: number) {
+export const getOrders = async (limit: number, offset: number) => {
   return await db
     .select()
     .from(dbSchema.orders)
@@ -152,7 +142,7 @@ export async function getOrders(limit: number, offset: number) {
     .limit(limit)
 }
 
-export async function getOrdersCount() {
+export const getOrdersCount = async () => {
   const result = await db.select({ count: count() }).from(dbSchema.orders)
   return result[0]?.count || 0
 }

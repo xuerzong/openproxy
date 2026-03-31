@@ -30,7 +30,7 @@ export const AIProviderAPIKeys: React.FC<AIProviderAPIKeysProps> = ({
   const handleCreateAPIKey = () => {
     if (!provider || !apiKey.trim()) return
 
-    void toastApiPromise(
+    toastApiPromise(
       request.aiProviders.apiKeys.post({
         aiProviderId: provider.id,
         apiKey: apiKey.trim(),
@@ -56,7 +56,7 @@ export const AIProviderAPIKeys: React.FC<AIProviderAPIKeysProps> = ({
   }
 
   const handleDeleteAPIKey = (id: string) => {
-    void toastApiPromise(request.aiProviders.apiKeys({ id }).delete(), {
+    toastApiPromise(request.aiProviders.apiKeys({ id }).delete(), {
       loading: t('common.processing', {
         defaultValue: 'Processing...',
       }),

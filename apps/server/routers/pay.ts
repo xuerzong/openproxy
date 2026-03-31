@@ -1,5 +1,4 @@
 import Elysia, { status, t } from 'elysia'
-import { generateOrderId } from '@server/lib/generate'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { PayStatus, PayType } from '@server/constants/pay'
 import Decimal from 'decimal.js'

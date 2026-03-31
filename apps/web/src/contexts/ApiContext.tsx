@@ -24,9 +24,9 @@ const getApiBaseUrl = () => {
 export const ApiProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const { session } = useAuth()
+  useAuth()
   const api = useMemo(() => {
     return treaty<App>(getApiBaseUrl())
-  }, [session])
+  }, [])
   return <ApiContext value={{ api }}>{children}</ApiContext>
 }

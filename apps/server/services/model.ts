@@ -8,12 +8,12 @@ import Decimal from 'decimal.js'
 type ModelInsert = typeof dbSchema.models.$inferInsert
 type ModelPricing = ModelInsert['pricing']
 
-export async function getModelsWithPermission(userId?: string) {
+export const getModelsWithPermission = async (userId?: string) => {
   const models = await getModels({ userId })
   return models
 }
 
-export async function createModel(params: {
+export const createModel = async (params: {
   id: string
   userId: string
   isAdmin: boolean
@@ -30,15 +30,22 @@ export async function createModel(params: {
     input: number
     output: number
     input_cache_read: number
-    output_tiers?: { cost: number; min?: number; max?: number }[]
-    input_cache_read_tiers?: { cost: number; min?: number; max?: number }[]
+    output_tiers?: {
+      cost: number
+      min?: number
+      max?: number
+    }[]
+    input_cache_read_tiers?: {
+      cost: number
+      min?: number
+      max?: number
+    }[]
   }
   tags?: string[]
-  metadata?: any
-}) {
+  metadata?: unknown
+}) => {
   const {
     id,
-    userId,
     isAdmin,
     name,
     description,
@@ -53,7 +60,6 @@ export async function createModel(params: {
     tags,
     metadata,
   } = params
-
   const pricingValue: ModelPricing = {
     input: new Decimal(pricing.input).toString(),
     output: new Decimal(pricing.output).toString(),
@@ -75,7 +81,6 @@ export async function createModel(params: {
       })
     )
   }
-
   const values: Omit<ModelInsert, 'id' | 'createdAt' | 'updatedAt'> = {
     isPublic: isAdmin ? isPublicParam || false : false,
     name,
@@ -90,9 +95,7 @@ export async function createModel(params: {
     tags: tags || [],
     metadata: metadata || {},
   }
-
   const newId = values.isPublic ? id.trim() : id.trim() + generateModelSuffix()
-
   const models = await db
     .insert(dbSchema.models)
     .values({
@@ -103,7 +106,7 @@ export async function createModel(params: {
   return models
 }
 
-export async function updateModel(params: {
+export const updateModel = async (params: {
   id: string
   userId: string
   isAdmin: boolean
@@ -120,15 +123,22 @@ export async function updateModel(params: {
     input: number
     output: number
     input_cache_read: number
-    output_tiers?: { cost: number; min?: number; max?: number }[]
-    input_cache_read_tiers?: { cost: number; min?: number; max?: number }[]
+    output_tiers?: {
+      cost: number
+      min?: number
+      max?: number
+    }[]
+    input_cache_read_tiers?: {
+      cost: number
+      min?: number
+      max?: number
+    }[]
   }
   tags?: string[]
-  metadata?: any
-}) {
+  metadata?: unknown
+}) => {
   const {
     id,
-    userId,
     isAdmin,
     name,
     description,
@@ -143,7 +153,6 @@ export async function updateModel(params: {
     tags,
     metadata,
   } = params
-
   const pricingValue: ModelPricing = {
     input: new Decimal(pricing.input).toString(),
     output: new Decimal(pricing.output).toString(),
@@ -165,7 +174,6 @@ export async function updateModel(params: {
       })
     )
   }
-
   const values: Omit<ModelInsert, 'id' | 'createdAt' | 'updatedAt'> = {
     isPublic: isAdmin ? isPublicParam || false : false,
     name,
@@ -180,7 +188,6 @@ export async function updateModel(params: {
     tags: tags || [],
     metadata: metadata || {},
   }
-
   await db
     .update(dbSchema.models)
     .set({
@@ -191,7 +198,7 @@ export async function updateModel(params: {
     .returning()
 }
 
-export async function deleteModel(id: string) {
+export const deleteModel = async (id: string) => {
   await db
     .delete(dbSchema.models)
     .where(and(eq(dbSchema.models.id, id)))
@@ -199,7 +206,7 @@ export async function deleteModel(id: string) {
   return id
 }
 
-export async function getModelById(id: string) {
+export const getModelById = async (id: string) => {
   const model = await db.query.models.findFirst({
     where: eq(dbSchema.models.id, id),
     with: {

@@ -211,7 +211,7 @@ export const BillingForm: React.FC<BillingFormProps> = ({ onFinish }) => {
   const onSubmit = async () => {
     setLoading(true)
 
-    void toastApiPromise(
+    toastApiPromise(
       request.pay.qrCodeUrl.post({
         amount,
         type: 'alipay',

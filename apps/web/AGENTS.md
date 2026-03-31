@@ -20,6 +20,7 @@ When adding or modifying any visible text (labels, tooltips, placeholders, error
 ## Code Style
 
 - Functional components only. Use hooks for state and side effects.
+- ESLint policy is layered: keep general cleanliness rules strict in the shared web preset, keep unavoidable React/type compatibility relaxations grouped separately, and prefer file-scoped overrides in `apps/web/eslint.config.js` for generated or upstream code such as `src/utils/qr/codegen.ts`.
 - Data fetching: use `@tanstack/react-query` hooks in `src/hooks/queries/`.
 - Query-backed tables should pass the corresponding query `isLoading` state into `@openproxy/ui/Table` via the `loading` prop instead of maintaining page-specific table loading UIs.
 - KPI cards that combine a headline metric with a right-aligned sparkline should use `src/components/SparklineStatisticCard.tsx` rather than inlining the layout repeatedly.

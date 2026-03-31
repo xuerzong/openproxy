@@ -26,7 +26,7 @@ export const modelsRouter = new Elysia()
   .get(
     'listModels',
     async ({ headers }) => {
-      // @ts-ignore
+      // @ts-expect-error better-auth session typing does not expose the header overload here
       const session = await auth.api.getSession({ headers })
       const user = session?.user
       const models = await getModelsWithPermission(user?.id)
@@ -64,8 +64,8 @@ export const modelsRouter = new Elysia()
           metadata: body.metadata,
         })
         return result
-      } catch (error: any) {
-        if (error.message === '已达到模型数量限制') {
+      } catch (error: unknown) {
+        if (error instanceof Error && error.message === '已达到模型数量限制') {
           return status(429)
         }
         throw error

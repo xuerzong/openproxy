@@ -7,4 +7,4 @@ export const PhoneCodeRegExp = /^\d{6}$/
 export const PasswordRegExp =
   /^[a-zA-Z0-9!"#$%&'()*+,-./:;<=>?@[\\\]^_`{|}~]{6,}$/
 
-export const CharNamePattern = /^[a-zA-Z0-9/\._-]+$/
+export const CharNamePattern = /^[a-zA-Z0-9/._-]+$/

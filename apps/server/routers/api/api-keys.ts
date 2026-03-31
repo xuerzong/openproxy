@@ -1,4 +1,4 @@
-import { Elysia, t } from 'elysia'
+import { Elysia } from 'elysia'
 import omit from 'lodash/omit'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
 import {
@@ -11,6 +11,10 @@ import {
 import { CreateApiKeyBodySchema, UpdateApiKeyBodySchema } from '@server/schemas'
 
 import { IS_OSS } from '@server/constants'
+
+const getErrorMessage = (error: unknown) => {
+  return error instanceof Error ? error.message : 'Unknown error'
+}
 
 export const apiKeysRouter = new Elysia()
   .use(betterAuthPlugin)
@@ -49,9 +53,9 @@ export const apiKeysRouter = new Elysia()
           modelIds: body.modelIds,
         })
         return apiKey
-      } catch (error: any) {
+      } catch (error: unknown) {
         return status(400, {
-          message: error.message,
+          message: getErrorMessage(error),
         })
       }
     },
@@ -63,7 +67,7 @@ export const apiKeysRouter = new Elysia()
   )
   .put(
     'apiKeys',
-    async ({ user, teamId, body, status }) => {
+    async ({ teamId, body, status }) => {
       try {
         await updateApiKey({
           id: body.id,
@@ -76,9 +80,9 @@ export const apiKeysRouter = new Elysia()
           modelIds: body.modelIds,
         })
         return ''
-      } catch (error: any) {
+      } catch (error: unknown) {
         return status(401, {
-          message: error.message,
+          message: getErrorMessage(error),
         })
       }
     },

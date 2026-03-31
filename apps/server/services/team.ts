@@ -53,7 +53,7 @@ const stringifyTeamMetadata = (metadata: TeamMetadata) => {
 }
 
 const createDefaultApiKeyFolder = async (
-  tx: Parameters<typeof db.transaction>[0] extends (arg: infer T) => any
+  tx: Parameters<typeof db.transaction>[0] extends (arg: infer T) => unknown
     ? T
     : never,
   teamId: string
@@ -110,7 +110,11 @@ export const createTeam = async (userId: string) => {
       })
       .returning({ id: dbSchema.teams.id })
 
-    const teamId = teamRows[0]?.id!
+    const teamId = teamRows[0]?.id
+
+    if (!teamId) {
+      throw new Error('Failed to create team')
+    }
 
     await tx.insert(dbSchema.teamUsers).values({
       userId,
@@ -151,7 +155,11 @@ export const createTeamForUser = async (userId: string, name: string) => {
       })
       .returning({ id: dbSchema.teams.id })
 
-    const teamId = teamRows[0]?.id!
+    const teamId = teamRows[0]?.id
+
+    if (!teamId) {
+      throw new Error('Failed to create team')
+    }
 
     await tx.insert(dbSchema.teamUsers).values({
       userId,

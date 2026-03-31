@@ -29,7 +29,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       key: 'zh-CN',
       label: t('language.zhCN', { defaultValue: '简体中文' }),
       onClick() {
-        void i18n.changeLanguage('zh-CN')
+        i18n.changeLanguage('zh-CN')
       },
       icon: <span>{LANGUAGE_FLAGS['zh-CN']}</span>,
       type: 'item',
@@ -38,7 +38,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
       key: 'en-US',
       label: t('language.enUS', { defaultValue: 'English' }),
       onClick() {
-        void i18n.changeLanguage('en-US')
+        i18n.changeLanguage('en-US')
       },
       icon: <span>{LANGUAGE_FLAGS['en-US']}</span>,
       type: 'item',

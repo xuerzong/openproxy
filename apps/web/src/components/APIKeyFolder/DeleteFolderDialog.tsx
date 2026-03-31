@@ -60,7 +60,7 @@ export const DeleteFolderDialog: React.FC<DeleteFolderDialogProps> = ({
             okText={t('actions.confirmDelete')}
             okButtonProps={{ variant: 'danger' }}
             onOk={() => {
-              void toastApiPromise(
+              toastApiPromise(
                 request.apiKeyFolders({ id: folderId }).delete({
                   query: { deleteAllApiKeys },
                 }),
@@ -73,8 +73,8 @@ export const DeleteFolderDialog: React.FC<DeleteFolderDialogProps> = ({
                     }),
                   onSuccess: () => {
                     setOpen(false)
-                    void apiKeysQuery.refetch()
-                    void foldersQuery.refetch()
+                    apiKeysQuery.refetch()
+                    foldersQuery.refetch()
                   },
                 }
               )

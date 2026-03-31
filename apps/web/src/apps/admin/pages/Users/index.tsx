@@ -9,7 +9,7 @@ import { Tag } from '@openproxy/ui/Tag'
 import { Switch } from '@openproxy/ui/Switch'
 import { PageContainer } from '@/components/PageContainer'
 import { useTranslation } from 'react-i18next'
-import { toastApiPromise, toastPromise } from '@/utils/toast'
+import { toastPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
@@ -58,7 +58,7 @@ const Page = () => {
                       <Switch
                         checked={text}
                         onCheckedChange={(checked) => {
-                          void toastPromise(
+                          toastPromise(
                             request.changeUserEmailVerified
                               .put({
                                 emailVerified: checked,
@@ -91,7 +91,7 @@ const Page = () => {
                                       defaultValue: 'Update failed',
                                     }),
                               onSuccess: () => {
-                                void usersQuery.refetch()
+                                usersQuery.refetch()
                               },
                             }
                           )

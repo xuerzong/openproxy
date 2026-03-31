@@ -5,7 +5,7 @@ import { generateApiKey, generateDeApiKey } from '@server/lib/generate'
 import { hash } from '@server/lib/utils/hash'
 import Decimal from 'decimal.js'
 
-async function assertFolderBelongsToTeam(teamId: string, folderId: string) {
+const assertFolderBelongsToTeam = async (teamId: string, folderId: string) => {
   const folder = await db.query.apiKeyFolders.findFirst({
     where: and(
       eq(dbSchema.apiKeyFolders.id, folderId),
@@ -15,13 +15,12 @@ async function assertFolderBelongsToTeam(teamId: string, folderId: string) {
       id: true,
     },
   })
-
   if (!folder) {
     throw new Error('API key folder not found')
   }
 }
 
-export async function getApiKeysByTeamId(teamId: string) {
+export const getApiKeysByTeamId = async (teamId: string) => {
   const apiKeys = await db.query.apiKeys.findMany({
     where: and(eq(dbSchema.apiKeys.teamId, teamId)),
     orderBy: desc(dbSchema.apiKeys.createdAt),
@@ -33,7 +32,6 @@ export async function getApiKeysByTeamId(teamId: string) {
       },
     },
   })
-
   return apiKeys.map((apiKey) => ({
     ...apiKey,
     modelIds: apiKey.apiKeysToModels.map((model) => model.modelId),
@@ -41,7 +39,7 @@ export async function getApiKeysByTeamId(teamId: string) {
   }))
 }
 
-export async function createApiKey(params: {
+export const createApiKey = async (params: {
   teamId: string
   teamUserId: string
   name: string
@@ -50,7 +48,7 @@ export async function createApiKey(params: {
   maxQuota?: number
   maxRequests?: number
   modelIds: string[]
-}) {
+}) => {
   const {
     teamId,
     teamUserId,
@@ -61,11 +59,8 @@ export async function createApiKey(params: {
     maxRequests,
     modelIds,
   } = params
-
   const apiKey = generateApiKey()
-
   await assertFolderBelongsToTeam(teamId, folderId)
-
   await db.transaction(async (tx) => {
     const apiKeys = await tx
       .insert(dbSchema.apiKeys)
@@ -81,9 +76,7 @@ export async function createApiKey(params: {
         maxRequests,
       })
       .returning({ id: dbSchema.apiKeys.id })
-
     const newApiKey = apiKeys[0]!
-
     if (modelIds.length > 0) {
       await tx
         .insert(dbSchema.apiKeysToModels)
@@ -96,7 +89,6 @@ export async function createApiKey(params: {
         .onConflictDoNothing()
     }
   })
-
   return apiKey
 }
 
@@ -109,7 +101,7 @@ export const getApiKeyCountByTeamId = async (teamId: string) => {
   return row?.value || 0
 }
 
-export async function updateApiKey(params: {
+export const updateApiKey = async (params: {
   id: string
   teamId: string
   name: string
@@ -118,7 +110,7 @@ export async function updateApiKey(params: {
   maxQuota?: number
   maxRequests?: number
   modelIds: string[]
-}) {
+}) => {
   const {
     id,
     teamId,
@@ -129,20 +121,16 @@ export async function updateApiKey(params: {
     maxRequests,
     modelIds,
   } = params
-
   const apiKeys = await db
     .select()
     .from(dbSchema.apiKeys)
     .where(eq(dbSchema.apiKeys.teamId, teamId))
-
   if (apiKeys.length === 0) {
     throw new Error('权限不足')
   }
-
   if (folderId) {
     await assertFolderBelongsToTeam(teamId, folderId)
   }
-
   await db.transaction(async (tx) => {
     await tx
       .update(dbSchema.apiKeys)
@@ -154,7 +142,6 @@ export async function updateApiKey(params: {
         maxRequests,
       })
       .where(eq(dbSchema.apiKeys.id, id))
-
     const currentModels = await tx
       .select({
         modelId: dbSchema.apiKeysToModels.modelId,
@@ -162,15 +149,12 @@ export async function updateApiKey(params: {
       .from(dbSchema.apiKeysToModels)
       .where(eq(dbSchema.apiKeysToModels.apiKeyId, id))
     const currentModelIds = currentModels.map((m) => m.modelId)
-
     const shouldDelModelIds: string[] = []
     const shouldAddModelIds: string[] = []
     const modelIdActionsMap = new Map<string, 'del' | 'add' | 'none'>()
-
     for (const modelId of currentModelIds) {
       modelIdActionsMap.set(modelId, 'del')
     }
-
     for (const modelId of modelIds) {
       if (modelIdActionsMap.has(modelId)) {
         modelIdActionsMap.delete(modelId)
@@ -178,7 +162,6 @@ export async function updateApiKey(params: {
         modelIdActionsMap.set(modelId, 'add')
       }
     }
-
     for (const [modelId, action] of modelIdActionsMap.entries()) {
       switch (action) {
         case 'add':
@@ -189,7 +172,6 @@ export async function updateApiKey(params: {
           break
       }
     }
-
     if (shouldAddModelIds.length) {
       await tx.insert(dbSchema.apiKeysToModels).values(
         shouldAddModelIds.map((modelId) => ({
@@ -198,7 +180,6 @@ export async function updateApiKey(params: {
         }))
       )
     }
-
     if (shouldDelModelIds.length) {
       await tx
         .delete(dbSchema.apiKeysToModels)
@@ -207,7 +188,7 @@ export async function updateApiKey(params: {
   })
 }
 
-export async function deleteApiKey(id: string, teamId: string) {
+export const deleteApiKey = async (id: string, teamId: string) => {
   await db.transaction(async (tx) => {
     await tx
       .delete(dbSchema.apiKeys)

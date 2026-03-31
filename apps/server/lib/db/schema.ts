@@ -492,7 +492,7 @@ export const models = pgTable(
 
 export type ModelInstance = typeof models.$inferSelect
 
-export const modelsRelations = relations(models, ({ many, one }) => ({
+export const modelsRelations = relations(models, ({ many }) => ({
   apiKeysToModels: many(apiKeysToModels),
   modelsToAIProviders: many(modelsToAIProviders),
 }))

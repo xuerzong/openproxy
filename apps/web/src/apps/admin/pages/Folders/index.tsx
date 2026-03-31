@@ -118,7 +118,7 @@ const Page = () => {
             okText={t('actions.confirmDelete')}
             okButtonProps={{ variant: 'danger' }}
             onOk={() => {
-              void toastApiPromise(
+              toastApiPromise(
                 request.admin.folders({ id: deleteId }).delete({
                   query: { deleteAllApiKeys },
                 }),
@@ -132,7 +132,7 @@ const Page = () => {
                   onSuccess: () => {
                     setDeleteId('')
                     setDeleteAllApiKeys(false)
-                    void foldersQuery.refetch()
+                    foldersQuery.refetch()
                   },
                 }
               )
