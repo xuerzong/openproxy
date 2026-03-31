@@ -17,7 +17,8 @@ export type DropdownMenuItem =
       type: 'item'
     }
   | { type: 'separator' }
-interface DropdownMenuProps extends RadixDropdownMenu.DropdownMenuContentProps {
+export interface DropdownMenuProps
+  extends RadixDropdownMenu.DropdownMenuContentProps {
   menus: DropdownMenuItem[]
 }
 

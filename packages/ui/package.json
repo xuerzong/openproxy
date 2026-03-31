@@ -2,6 +2,10 @@
   "name": "@openproxy/ui",
   "type": "module",
   "private": true,
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./Avatar": "./src/Avatar/index.tsx",
@@ -53,7 +57,17 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "^8",
+    "@storybook/blocks": "^8",
+    "@storybook/react": "^8",
+    "@storybook/react-vite": "^8",
+    "@storybook/test": "^8",
+    "@tailwindcss/vite": "^4",
     "@types/react": "^19.2.5",
-    "typescript": "^5"
+    "sass-embedded": "^1",
+    "storybook": "^8",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^6"
   }
 }

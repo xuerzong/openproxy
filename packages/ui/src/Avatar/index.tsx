@@ -1,6 +1,6 @@
 import { UserIcon } from 'lucide-react'
 
-interface AvatarProps {
+export interface AvatarProps {
   src?: string | null
   className?: string
   iconClassName?: string

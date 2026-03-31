@@ -21,7 +21,7 @@ type NumberFieldRootClickEvent = Parameters<
   NonNullable<ComponentProps<typeof NumberField.Root>['onClick']>
 >[0]
 
-interface NumberInputProps extends NumberFieldRootProps {
+export interface NumberInputProps extends NumberFieldRootProps {
   value?: number
   onChange?: (value: number | undefined) => void
   size?: 'sm' | 'md'

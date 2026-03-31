@@ -1,6 +1,6 @@
 import NumberFlow from '@number-flow/react'
 
-interface StatisticProps {
+export interface StatisticProps {
   title: string
   value: number | string | undefined
   locales?: React.ComponentProps<typeof NumberFlow>['locales']

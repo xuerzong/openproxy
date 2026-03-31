@@ -2,7 +2,7 @@ import { Tooltip as RadixTooltip } from 'radix-ui'
 import { useEffect, useState } from 'react'
 import { useZIndexStore } from '../stores/zIndex'
 
-interface TooltipProps {
+export interface TooltipProps {
   content: React.ReactNode
 }
 
