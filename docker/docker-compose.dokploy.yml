@@ -25,6 +25,7 @@ services:
       - ZPAYZ_PID
       - ZPAYZ_PAY_KEY
       - ZPAYZ_GATEWAY
+      - REDIS_URL
     restart: always
 
   web-tenant:
