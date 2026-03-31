@@ -9,7 +9,7 @@ type ModelInsert = typeof dbSchema.models.$inferInsert
 type ModelPricing = ModelInsert['pricing']
 
 export const getModelsWithPermission = async (userId?: string) => {
-  const models = await getModels({ userId })
+  const models = await getModels()
   return models
 }
 

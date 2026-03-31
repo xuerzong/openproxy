@@ -26,7 +26,7 @@ const compactTokenFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 1,
 })
 
-const EMPTY_MONTHLY_USAGES: Array<any> = []
+const EMPTY_MONTHLY_USAGES: never[] = []
 
 const getMonthTimestamp = (value?: Date | string | null) => {
   if (!value) {
