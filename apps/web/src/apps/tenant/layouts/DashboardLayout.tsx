@@ -123,6 +123,17 @@ export const DashboardLayout = () => {
         },
         access: 'public',
       },
+      {
+        key: '/settings/access-tokens',
+        icon: <KeyRoundIcon className="w-5 h-5" />,
+        label: t('teamSettings.accessTokens.menu', {
+          defaultValue: 'Access Tokens',
+        }),
+        onClick() {
+          navigate('/settings/access-tokens')
+        },
+        access: 'public',
+      },
     ],
     [navigate, t]
   )

@@ -43,6 +43,10 @@ const router = createBrowserRouter([
             path: 'members',
             Component: lazy(() => import('./pages/TeamSettings/Members')),
           },
+          {
+            path: 'access-tokens',
+            Component: lazy(() => import('./pages/TeamSettings/AccessTokens')),
+          },
         ],
       },
       {

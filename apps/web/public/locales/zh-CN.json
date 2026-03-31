@@ -248,6 +248,43 @@
       "errorDescription": "当前无法处理该邀请，请稍后再试。",
       "switchTeam": "切换到该团队",
       "backHome": "返回控制台"
+    },
+    "accessTokens": {
+      "menu": "访问令牌",
+      "title": "访问令牌",
+      "description": "管理用于通过 OpenAPI 进行团队程序化管理的访问令牌。",
+      "createTitle": "创建访问令牌",
+      "name": "令牌名称",
+      "namePlaceholder": "例如 CI/CD 令牌",
+      "scopes": "权限",
+      "expiresAt": "过期时间",
+      "noExpiration": "永不过期",
+      "expired": "已过期",
+      "scopeLabels": {
+        "api_keys:read": "API Key（读取）",
+        "api_keys:write": "API Key（写入）",
+        "balance:read": "余额（读取）"
+      },
+      "table": {
+        "name": "名称",
+        "scopes": "权限",
+        "token": "令牌",
+        "expiresAt": "过期时间",
+        "lastUsedAt": "最后使用",
+        "createdAt": "创建时间",
+        "never": "从未使用",
+        "noExpiration": "永不过期"
+      },
+      "messages": {
+        "createSuccess": "访问令牌创建成功",
+        "deleteSuccess": "访问令牌删除成功",
+        "copyWarning": "请立即复制令牌，之后将无法再次查看。",
+        "limitReached": "每个团队最多 {{count}} 个令牌"
+      },
+      "confirmDelete": {
+        "title": "确认删除该访问令牌？",
+        "description": "使用此令牌的应用程序将无法再访问。"
+      }
     }
   },
   "orders": {
