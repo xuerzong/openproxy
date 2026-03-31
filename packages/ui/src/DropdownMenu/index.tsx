@@ -90,11 +90,11 @@ export const DropdownMenu: React.FC<
               <RadixDropdownMenu.Item
                 key={menu.key}
                 disabled={menu.disabled}
-                onClick={menu.onClick}
+                onSelect={menu.onClick}
                 className={cn(
                   'flex items-center gap-2 px-4 h-10 text-sm outline-none',
                   menu.disabled
-                    ? 'text-foreground/50 cursor-not-allowed'
+                    ? 'text-foreground/50 cursor-not-allowed pointer-events-none'
                     : 'hover:bg-muted cursor-pointer'
                 )}
               >
