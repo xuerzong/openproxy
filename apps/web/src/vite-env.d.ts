@@ -3,6 +3,7 @@
 interface ImportMetaEnv {
   readonly VITE_APP_TARGET: string
   readonly VITE_SITE_URL?: string
+  readonly VITE_UMAMI_WEBSITE_ID?: string
 }
 
 interface ImportMeta {
