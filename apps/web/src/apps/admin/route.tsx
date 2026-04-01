@@ -75,6 +75,10 @@ const router = createBrowserRouter([
         path: 'orders',
         Component: lazy(() => import('./pages/Orders')),
       },
+      {
+        path: 'announcement',
+        Component: lazy(() => import('./pages/Announcement')),
+      },
     ],
   },
   {

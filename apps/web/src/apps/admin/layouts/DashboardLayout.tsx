@@ -4,6 +4,7 @@ import {
   BoxIcon,
   FolderIcon,
   GaugeIcon,
+  MegaphoneIcon,
   StampIcon,
   StoreIcon,
   UsersRoundIcon,
@@ -70,6 +71,14 @@ export const DashboardLayout = () => {
       label: t('menu.folders', { defaultValue: 'Folders' }),
       onClick() {
         navigate('/folders')
+      },
+    },
+    {
+      key: '/announcement',
+      icon: <MegaphoneIcon className="w-5 h-5" />,
+      label: t('menu.announcement', { defaultValue: 'Announcement' }),
+      onClick() {
+        navigate('/announcement')
       },
     },
   ]

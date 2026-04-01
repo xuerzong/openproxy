@@ -55,3 +55,6 @@ export {
   CreateAccessTokenBodySchema,
   AccessTokenIdParamSchema,
 } from './access-token'
+
+// Announcement Schemas
+export { AnnouncementBodySchema } from './announcement'

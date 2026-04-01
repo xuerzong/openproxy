@@ -7,6 +7,7 @@ import { Logo } from '@/components/Logo'
 import { ThemeSwitcher } from '@/components/ThemeSwitcher'
 import { UserAccount } from '@/components/UserAccount'
 import { TeamSwitcher } from '@/components/TeamSwitcher'
+import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { useMenuTransition } from '@/hooks/useMenuTransition'
 import { cn } from '@openproxy/ui/utils/cn'
 import { changeCollapsed, toggleCollapsed, useAppStore } from '@/stores/app'
@@ -155,6 +156,7 @@ export const DashboardLayout: React.FC<MainLayoutProps> = ({
         </div>
       </div>
       <div className="relative flex-1 min-w-0">
+        <AnnouncementBanner />
         <Outlet />
       </div>
     </div>
