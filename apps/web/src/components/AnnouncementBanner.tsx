@@ -52,12 +52,13 @@ export const AnnouncementAlert = () => {
   }
 
   return (
-    <div className="w-full flex items-center gap-2 bg-primary text-primary-foreground px-4 py-1 text-xs">
+    <div className="w-full flex items-center gap-2 bg-yellow-300 text-yellow-900 px-4 py-1 text-xs">
       <MegaphoneIcon className="w-4 h-4 shrink-0" />
-      <span className="flex-1 truncate font-medium">{announcement.title}</span>
+      <span className="truncate font-bold">{announcement.title}</span>
+      <span className="truncate">{announcement.description}</span>
       <button
         onClick={handleAlertClose}
-        className="shrink-0 rounded p-0.5 hover:bg-primary/20 transition-colors"
+        className="shrink-0 rounded p-0.5 hover:bg-yellow-300 transition-colors ml-auto"
       >
         <XIcon className="w-4 h-4" />
       </button>
@@ -95,7 +96,6 @@ export const AnnouncementBanner = () => {
         if (!open) handleModalClose()
       }}
       title={announcement.title}
-      description={announcement.description}
       footer={
         <DialogFooter
           okText={t('actions.confirm', { defaultValue: 'Confirm' })}
@@ -104,6 +104,8 @@ export const AnnouncementBanner = () => {
           cancelText={t('actions.close', { defaultValue: 'Close' })}
         />
       }
-    />
+    >
+      <span>{announcement.description}</span>
+    </Dialog>
   )
 }
