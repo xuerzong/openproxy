@@ -47,6 +47,11 @@ Examples of changes that require an `AGENTS.md` update:
 - `website` is not included in the root development command.
 - Root `bun run lint` runs lint for `apps/server` and `apps/web`.
 
+## Dependency Updates
+
+- GitHub Dependabot manages JavaScript dependency version updates for the Bun workspace via `.github/dependabot.yml` using the `npm` ecosystem at the repository root.
+- Keep the root `packageManager` field and `bun.lock` current so automated dependency PRs stay compatible with the Bun toolchain used in CI and Docker builds.
+
 ## API Billing & Token Management (apps/api)
 
 ### Token Counting
