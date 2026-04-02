@@ -1,5 +1,8 @@
 {
   "menu": {
+    "management": "管理",
+    "resources": "资源",
+    "monitoring": "运营",
     "dashboard": "控制台",
     "analytics": "分析",
     "apiKeys": "API Keys",

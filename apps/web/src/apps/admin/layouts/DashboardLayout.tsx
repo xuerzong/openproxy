@@ -1,5 +1,8 @@
 import { AdminRequiredRoute } from '@/components/AdminRequiredRoute'
-import { DashboardLayout as DashboardLayoutRoot } from '@/layouts/DashboardLayout'
+import {
+  DashboardLayout as DashboardLayoutRoot,
+  type MenuData,
+} from '@/layouts/DashboardLayout'
 import {
   BoxIcon,
   FolderIcon,
@@ -16,11 +19,16 @@ import { useTranslation } from 'react-i18next'
 export const DashboardLayout = () => {
   const navigate = useNavigate()
   const { t } = useTranslation('common')
-  const menus = [
+  const menus: MenuData[] = [
+    {
+      type: 'label',
+      key: 'management-label',
+      label: t('menu.management'),
+    },
     {
       key: '/',
       icon: <GaugeIcon className="w-5 h-5" />,
-      label: t('menu.dashboard', { defaultValue: 'Dashboard' }),
+      label: t('menu.dashboard'),
       onClick() {
         navigate('/')
       },
@@ -28,23 +36,15 @@ export const DashboardLayout = () => {
     {
       key: '/orders',
       icon: <StampIcon className="w-5 h-5" />,
-      label: t('menu.orders', { defaultValue: 'Orders' }),
+      label: t('menu.orders'),
       onClick() {
         navigate('/orders')
       },
     },
     {
-      key: '/models',
-      icon: <BoxIcon className="w-5 h-5" />,
-      label: t('menu.models', { defaultValue: 'Models' }),
-      onClick() {
-        navigate('/models')
-      },
-    },
-    {
       key: '/users',
       icon: <UsersIcon className="w-5 h-5" />,
-      label: t('menu.users', { defaultValue: 'Users' }),
+      label: t('menu.users'),
       onClick() {
         navigate('/users')
       },
@@ -52,15 +52,32 @@ export const DashboardLayout = () => {
     {
       key: '/teams',
       icon: <UsersRoundIcon className="w-5 h-5" />,
-      label: t('menu.teams', { defaultValue: 'Teams' }),
+      label: t('menu.teams'),
       onClick() {
         navigate('/teams')
       },
     },
     {
+      type: 'separator',
+      key: 'resources-separator',
+    },
+    {
+      type: 'label',
+      key: 'resources-label',
+      label: t('menu.resources'),
+    },
+    {
+      key: '/models',
+      icon: <BoxIcon className="w-5 h-5" />,
+      label: t('menu.models'),
+      onClick() {
+        navigate('/models')
+      },
+    },
+    {
       key: '/ai-providers',
       icon: <StoreIcon />,
-      label: t('menu.aiProviders', { defaultValue: 'AI Providers' }),
+      label: t('menu.aiProviders'),
       onClick() {
         navigate('/ai-providers')
       },
@@ -68,15 +85,24 @@ export const DashboardLayout = () => {
     {
       key: '/folders',
       icon: <FolderIcon className="w-5 h-5" />,
-      label: t('menu.folders', { defaultValue: 'Folders' }),
+      label: t('menu.folders'),
       onClick() {
         navigate('/folders')
       },
     },
     {
+      type: 'separator',
+      key: 'monitoring-separator',
+    },
+    {
+      type: 'label',
+      key: 'monitoring-label',
+      label: t('menu.monitoring'),
+    },
+    {
       key: '/announcement',
       icon: <MegaphoneIcon className="w-5 h-5" />,
-      label: t('menu.announcement', { defaultValue: 'Announcement' }),
+      label: t('menu.announcement'),
       onClick() {
         navigate('/announcement')
       },

@@ -1,5 +1,8 @@
 {
   "menu": {
+    "management": "Management",
+    "resources": "Resources",
+    "monitoring": "Operations",
     "dashboard": "Dashboard",
     "analytics": "Analytics",
     "apiKeys": "API Keys",
