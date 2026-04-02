@@ -243,7 +243,10 @@ pub async fn validate_model_access(
             });
         }
     }
-    let provider_candidates: Vec<_> = provider_map.into_values().collect();
+    let provider_candidates: Vec<_> = provider_map
+        .into_values()
+        .filter(|provider| provider.weight > 0)
+        .collect();
 
     let mut providers = weighted_random_sort(&provider_candidates);
 
