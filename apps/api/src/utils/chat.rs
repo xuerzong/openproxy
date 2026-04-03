@@ -270,6 +270,26 @@ mod tests {
     }
 
     #[test]
+    fn missing_cache_price_defaults_to_zero_without_zeroing_other_prices() {
+        let usage = services::usage::ExtractedUsage {
+            prompt_tokens: 5,
+            completion_tokens: 107,
+            input_cache_read_tokens: 0,
+        };
+        let pricing = serde_json::json!({
+            "input": "2",
+            "output": "3"
+        });
+
+        let input = extract_usage_input_with_tokens(&usage, &pricing, UsageStyle::OpenAI);
+        let expected = (Decimal::from(2) * Decimal::from(5)
+            + Decimal::from(3) * Decimal::from(107))
+            / Decimal::from(1_000_000);
+
+        assert_eq!(input.cost, expected);
+    }
+
+    #[test]
     fn anthropic_billing_keeps_input_and_cached_separate() {
         let usage = services::usage::ExtractedUsage {
             prompt_tokens: 100,

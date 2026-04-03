@@ -12,7 +12,8 @@ pub struct PricingTier {
     pub max: Option<i64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Pricing {
     pub input: Decimal,
     pub output: Decimal,
