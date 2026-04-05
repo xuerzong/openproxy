@@ -6,7 +6,6 @@ use axum::{
 };
 use reqwest::StatusCode;
 use serde_json::Value;
-use std::collections::HashSet;
 use std::sync::Arc;
 use tokio_util::bytes;
 
@@ -32,10 +31,10 @@ pub struct SuccessfulUpstreamResponse {
     pub provider_ctx: services::usage::UsageContext,
 }
 
-const RECENT_USAGE_CACHE_TTL_SECONDS: usize = 60 * 30;
+const STICKY_COMBO_CACHE_TTL_SECONDS: usize = 60 * 30;
 
-fn recent_combo_cache_key(api_key_id: &str) -> String {
-    format!("openproxy:cache:recent_combo:{api_key_id}")
+fn sticky_combo_cache_key(api_key_id: &str, fingerprint: &str) -> String {
+    format!("openproxy:cache:sticky_combo:{api_key_id}:{fingerprint}")
 }
 
 fn encode_combo(provider_id: &str, api_key_hash: &str) -> String {
@@ -49,36 +48,46 @@ fn decode_combo(raw: &str) -> Option<(String, String)> {
     Some((provider_id, api_key_hash))
 }
 
-fn get_recent_combos(api_key_id: &str) -> HashSet<(String, String)> {
-    let key = recent_combo_cache_key(api_key_id);
-    let raw_items = crate::shared::redis::list_range(&key, 0, -1).unwrap_or_default();
+fn extract_request_api_key(headers: &HeaderMap) -> Option<String> {
+    let authorization = crate::utils::ip::read_header_value(headers, "authorization")?;
 
-    raw_items
-        .into_iter()
-        .filter_map(|raw| decode_combo(&raw))
-        .collect()
-}
+    let mut parts = authorization.splitn(2, ' ');
+    let scheme = parts.next()?.trim();
+    let token = parts.next()?.trim();
 
-fn record_used_combo(api_key_id: &str, provider_id: &str, api_key_hash: &str, window: usize) {
-    if window == 0 {
-        return;
+    if !scheme.eq_ignore_ascii_case("bearer") || token.is_empty() {
+        return None;
     }
 
-    let key = recent_combo_cache_key(api_key_id);
+    Some(token.to_string())
+}
+
+fn build_user_fingerprint(api_key_id: &str, model_id: &str, headers: &HeaderMap) -> String {
+    let client_ip = crate::utils::ip::extract_client_ip(headers);
+    let user_agent = crate::utils::ip::read_header_value(headers, "user-agent")
+        .unwrap_or_else(|| "unknown-ua".to_string());
+    let request_api_key =
+        extract_request_api_key(headers).unwrap_or_else(|| format!("fallback:{api_key_id}"));
+
+    let raw = format!("{request_api_key}|{model_id}|{client_ip}|{user_agent}");
+    crate::utils::hash::hash_api_key(&raw)
+}
+
+fn get_sticky_combo(api_key_id: &str, fingerprint: &str) -> Option<(String, String)> {
+    let key = sticky_combo_cache_key(api_key_id, fingerprint);
+    let raw = crate::shared::redis::get_cached_string(&key)?;
+    decode_combo(&raw)
+}
+
+fn record_sticky_combo(api_key_id: &str, fingerprint: &str, provider_id: &str, api_key_hash: &str) {
+    let key = sticky_combo_cache_key(api_key_id, fingerprint);
     let payload = encode_combo(provider_id, api_key_hash);
-    let start = -(window as isize);
-    let _ = crate::shared::redis::list_push_trim_expire(
-        &key,
-        &payload,
-        start,
-        -1,
-        RECENT_USAGE_CACHE_TTL_SECONDS,
-    );
+    crate::shared::redis::set_cached_string(&key, &payload, STICKY_COMBO_CACHE_TTL_SECONDS);
 }
 
 #[cfg(test)]
-fn clear_recent_combos_for(api_key_id: &str) {
-    let key = recent_combo_cache_key(api_key_id);
+fn clear_sticky_combo_for(api_key_id: &str, fingerprint: &str) {
+    let key = sticky_combo_cache_key(api_key_id, fingerprint);
     crate::shared::redis::delete_key(&key);
 }
 
@@ -135,15 +144,10 @@ pub async fn proxy_to_provider<F>(
 where
     F: Fn(&ProviderInfo) -> PreparedUpstreamRequest,
 {
-    // Build a window = min(10, total_combos) for the recent-usage history.
-    let total_combos: usize = user.providers.iter().map(|p| p.api_keys.len()).sum();
-    let window = total_combos.min(10);
+    let fingerprint = build_user_fingerprint(&user.api_key_id, &user.model_id, original_headers);
+    let sticky_combo = get_sticky_combo(&user.api_key_id, &fingerprint);
 
-    // Retrieve the combos used in the last `window` requests for this user.
-    let recent_set = get_recent_combos(&user.api_key_id);
-
-    // Flatten to (provider, key) pairs; non-recent combos come first so they
-    // are preferred, recent ones fall back to the tail.
+    // Flatten to (provider, key) pairs and prioritize the sticky combo if present.
     let all: Vec<(&ProviderInfo, _)> = user
         .providers
         .iter()
@@ -151,15 +155,24 @@ where
         .collect();
 
     let mut ordered: Vec<(&ProviderInfo, _)> = Vec::with_capacity(all.len());
-    let mut recent_tail: Vec<(&ProviderInfo, _)> = Vec::new();
-    for (p, k) in &all {
-        if recent_set.contains(&(p.ai_provider_id.clone(), k.api_key_hash.clone())) {
-            recent_tail.push((p, k));
-        } else {
-            ordered.push((p, k));
+    if let Some((sticky_provider_id, sticky_api_key_hash)) = sticky_combo {
+        if let Some(sticky_index) = all.iter().position(|(provider, api_key_entry)| {
+            provider.ai_provider_id == sticky_provider_id
+                && api_key_entry.api_key_hash == sticky_api_key_hash
+        }) {
+            ordered.push(all[sticky_index]);
+
+            for (idx, combo) in all.iter().enumerate() {
+                if idx != sticky_index {
+                    ordered.push(*combo);
+                }
+            }
         }
     }
-    ordered.extend(recent_tail);
+
+    if ordered.is_empty() {
+        ordered = all;
+    }
 
     let total = ordered.len();
     let mut last_error = None;
@@ -206,12 +219,12 @@ where
                     return Err(forward_upstream_error(upstream_res).await);
                 }
 
-                // Record this combo so future requests prefer a different one.
-                record_used_combo(
+                // Keep successful combo sticky for this fingerprint to improve upstream cache hits.
+                record_sticky_combo(
                     &user.api_key_id,
+                    &fingerprint,
                     &provider.ai_provider_id,
                     &api_key_entry.api_key_hash,
-                    window,
                 );
 
                 let mut provider_ctx = usage_ctx.clone();
@@ -489,23 +502,25 @@ mod tests {
         server.abort();
     }
 
-    /// Verifies that when a provider+key combo is already in the recent-usage
-    /// cache the proxy tries the *other* (fresh) combo first.
-    ///
-    /// Setup: two providers, both return 200. provider_A is pre-marked as
-    /// recently used. provider_B is fresh. We assert that provider_B is tried
-    /// first (its capture channel gets the request) and the result reports
-    /// provider_B's id.
+    /// Verifies that when the same fingerprint has a sticky provider+key combo,
+    /// the proxy prioritizes that combo on subsequent requests.
     #[tokio::test]
-    async fn proxy_skips_recently_used_combo() {
+    async fn proxy_prioritizes_sticky_combo_for_same_fingerprint() {
         let uid = "api-key-recent-skip-test";
-        clear_recent_combos_for(uid);
+        let mut headers = HeaderMap::new();
+        headers.insert("content-type", HeaderValue::from_static("application/json"));
+        headers.insert("authorization", HeaderValue::from_static("Bearer client-key-1"));
+        headers.insert("user-agent", HeaderValue::from_static("test-agent"));
+        headers.insert("x-real-ip", HeaderValue::from_static("203.0.113.9"));
 
-        record_used_combo(uid, "provider_a", "provider_a_hash", 2);
-        let recent_set = get_recent_combos(uid);
-        if !recent_set.contains(&("provider_a".to_string(), "provider_a_hash".to_string())) {
+        let fingerprint = build_user_fingerprint(uid, "model-id", &headers);
+        clear_sticky_combo_for(uid, &fingerprint);
+
+        record_sticky_combo(uid, &fingerprint, "provider_a", "provider_a_hash");
+        let sticky = get_sticky_combo(uid, &fingerprint);
+        if sticky.is_none() {
             tracing::warn!(
-                "Skipping proxy_skips_recently_used_combo because Redis is unavailable"
+                "Skipping proxy_prioritizes_sticky_combo_for_same_fingerprint because Redis is unavailable"
             );
             return;
         }
@@ -548,19 +563,17 @@ mod tests {
         let (url_a, srv_a) = spawn_test_server(server_a_app).await;
         let (url_b, srv_b) = spawn_test_server(server_b_app).await;
 
-        // provider_a is listed first in the providers vec (would normally be tried first)
+        // provider_a is listed second in providers; sticky mapping should move it to front.
         let user = sample_user(
             uid,
             vec![
-                (url_a, "provider_a".to_string(), "key-a".to_string(), "model-a".to_string()),
                 (url_b, "provider_b".to_string(), "key-b".to_string(), "model-b".to_string()),
+                (url_a, "provider_a".to_string(), "key-a".to_string(), "model-a".to_string()),
             ],
         );
 
         let state = sample_state();
         let (_, usage_ctx) = build_usage_parts(&user, false);
-        let mut headers = HeaderMap::new();
-        headers.insert("content-type", HeaderValue::from_static("application/json"));
 
         let result = proxy_to_provider(
             &state,
@@ -575,15 +588,15 @@ mod tests {
         .await
         .unwrap();
 
-        // provider_b should have been selected (provider_a was recent → deprioritised)
-        assert_eq!(result.provider_ctx.ai_provider_id, "provider_b");
+        assert_eq!(result.provider_ctx.ai_provider_id, "provider_a");
 
-        // server_b received the request, server_a did not
-        assert!(rx_b.try_recv().is_ok(), "provider_b should have been called");
-        assert!(rx_a.try_recv().is_err(), "provider_a should have been skipped");
+        assert!(rx_a.try_recv().is_ok(), "provider_a should have been called first");
+        assert!(rx_b.try_recv().is_err(), "provider_b should not have been called first");
 
         srv_a.abort();
         srv_b.abort();
+
+        clear_sticky_combo_for(uid, &fingerprint);
     }
 
     async fn spawn_test_server(app: Router) -> (String, tokio::task::JoinHandle<()>) {

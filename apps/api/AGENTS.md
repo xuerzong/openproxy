@@ -53,16 +53,17 @@ src/
 
 - Redis is required for API caching and rate limiting. Configure `REDIS_URL` in runtime environments.
 - Shared low-level Redis utilities live in `src/shared/redis.rs`.
+- Shared request IP/header parsing utilities live in `src/utils/ip.rs`.
 - Keep business-specific cache key wrappers in the owning service/handler (for example, access validation cache logic in `src/services/access.rs`) instead of centralizing all wrappers in shared module.
-- Provider recent-combo rotation wrappers are owned by `src/shared/proxy.rs`; `src/shared/redis.rs` only exposes generic Redis primitives.
+- Provider sticky combo wrappers (fingerprint -> last successful provider/api-key) are owned by `src/shared/proxy.rs`; `src/shared/redis.rs` only exposes generic Redis primitives.
 - Keep keys namespaced with `openproxy:` prefix:
   - `openproxy:cache:decrypted_provider_key:{encrypted_key}`
-  - `openproxy:cache:recent_combo:{api_key_id}`
+  - `openproxy:cache:sticky_combo:{api_key_id}:{fingerprint_hash}`
   - `openproxy:access:rows:{hash_api_key}:{model_id}`
   - `openproxy:access:index:{api_key_id}` (set of access cache keys for targeted invalidation)
   - `openproxy:models:public:v1`
   - `openproxy:rate:{hashed_key}:{minute_bucket}`
-- Keep TTLs short for auth/model data (tens of seconds to minutes), longer for decrypted provider keys.
+- Keep TTLs short for auth/model data (tens of seconds to minutes); sticky combo cache currently uses 30 minutes, while decrypted provider keys can stay longer.
 - After usage is committed, invalidate access-cache keys by `api_key_id` to ensure balance/quota changes are visible immediately.
 - `API_RATE_LIMIT_PER_MINUTE` defaults to `600` when env is not provided.
 
