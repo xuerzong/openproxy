@@ -13,8 +13,15 @@ import { RuntimeOptions } from '@alicloud/tea-util'
 import { createAuthEndpoint } from 'better-auth/api'
 import { z } from 'zod'
 import { setSessionCookie } from 'better-auth/cookies'
+import { verifyPassword } from 'better-auth/crypto'
 import type { BetterAuthPlugin } from 'better-auth'
-import type { SmsProvider, CaptchaProvider, PhoneAuthConfig, PhoneAuthDeps, SmsResult } from './types'
+import type {
+  SmsProvider,
+  CaptchaProvider,
+  PhoneAuthConfig,
+  PhoneAuthDeps,
+  SmsResult,
+} from './types'
 
 // ---------------------------------------------------------------------------
 // Alibaba Cloud SMS
@@ -55,7 +62,10 @@ export class AliCloudSmsProvider implements SmsProvider {
         message: response.body?.message,
       }
     } catch (error: any) {
-      return { success: false, message: error.message || 'Internal Server Error' }
+      return {
+        success: false,
+        message: error.message || 'Internal Server Error',
+      }
     }
   }
 
@@ -67,7 +77,10 @@ export class AliCloudSmsProvider implements SmsProvider {
     const runtime = new RuntimeOptions({})
 
     try {
-      const response = await client.checkSmsVerifyCodeWithOptions(request, runtime)
+      const response = await client.checkSmsVerifyCodeWithOptions(
+        request,
+        runtime
+      )
       if (response.body?.code === 'OK') {
         return { success: true, data: response.body }
       }
@@ -155,11 +168,70 @@ function createPhoneLoginPlugin(deps: PhoneAuthDeps) {
             })
           }
 
-          const session = await ctx.context.internalAdapter.createSession(user!.id)
+          const session = await ctx.context.internalAdapter.createSession(
+            user!.id
+          )
           await setSessionCookie(ctx, { session, user: user as any })
           await ctx.context.internalAdapter.deleteVerificationByIdentifier(
             verification.identifier
           )
+
+          return ctx.json({ data: { user, session }, error: null })
+        }
+      ),
+      phonePasswordLogin: createAuthEndpoint(
+        '/phone-password-login',
+        {
+          method: 'POST',
+          body: z.object({
+            phoneNumber: z.string(),
+            password: z.string(),
+          }),
+        },
+        async (ctx) => {
+          const { phoneNumber, password } = ctx.body
+
+          const user = await deps.findUserByPhone(phoneNumber)
+          if (!user) {
+            return ctx.json(
+              { data: null, error: 'Invalid phone number or password' },
+              { status: 400 }
+            )
+          }
+
+          const accounts = await ctx.context.internalAdapter.findAccounts(
+            user.id
+          )
+          const credentialAccount = accounts.find(
+            (account: any) =>
+              account.providerId === 'credential' &&
+              typeof account.password === 'string' &&
+              account.password
+          ) as { password?: string } | undefined
+
+          if (!credentialAccount?.password) {
+            return ctx.json(
+              { data: null, error: 'Invalid phone number or password' },
+              { status: 400 }
+            )
+          }
+
+          const valid = await verifyPassword({
+            hash: credentialAccount.password,
+            password,
+          })
+
+          if (!valid) {
+            return ctx.json(
+              { data: null, error: 'Invalid phone number or password' },
+              { status: 400 }
+            )
+          }
+
+          const session = await ctx.context.internalAdapter.createSession(
+            user.id
+          )
+          await setSessionCookie(ctx, { session, user: user as any })
 
           return ctx.json({ data: { user, session }, error: null })
         }

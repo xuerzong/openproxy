@@ -1,5 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router'
 import { useState } from 'react'
+import { Form, FormField, useForm } from '@openproxy/ui/Form'
 import { useAuth } from '@/contexts/AuthContext'
 import { LoginButton } from './LoginButton'
 import { LoginInput } from './LoginInput'
@@ -19,57 +20,34 @@ export const PasswordLoginForm = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const redirect = searchParams.get('redirect') || '/'
-
-  const [formValues, setFormValues] = useState<{
-    account: string
-    password: string
-  }>({
-    account: '',
-    password: '',
+  const [form] = useForm({
+    defaultValues: {
+      account: '',
+      password: '',
+    },
+    validators: {
+      account: async (account) => {
+        if (EmailRegExp.test(account) || PhoneNumberRegExp.test(account)) {
+          return { success: true }
+        }
+        return {
+          success: false,
+          message: t('auth.invalidAccount'),
+        }
+      },
+      password: async (password) => {
+        if (PasswordRegExp.test(password)) {
+          return { success: true }
+        }
+        return {
+          success: false,
+          message: t('auth.invalidPassword'),
+        }
+      },
+    },
   })
-
-  const [formErrors, setFormErrors] = useState<typeof formValues>({
-    account: '',
-    password: '',
-  })
-
-  const onChangeFormValues = (key: keyof typeof formValues, value: any) => {
-    setFormValues((pre) => ({ ...pre, [key]: value }))
-  }
-
-  const onValidateFormValues = (values: typeof formValues) => {
-    let success = true
-    if (
-      !PhoneNumberRegExp.test(values.account) &&
-      !EmailRegExp.test(values.account)
-    ) {
-      success = false
-      setFormErrors((pre) => ({
-        ...pre,
-        account: t('auth.invalidAccount'),
-      }))
-    } else {
-      setFormErrors((pre) => ({ ...pre, account: '' }))
-    }
-
-    if (!PasswordRegExp.test(values.password)) {
-      success = false
-      setFormErrors((pre) => ({
-        ...pre,
-        password: t('auth.invalidPassword'),
-      }))
-    } else {
-      setFormErrors((pre) => ({ ...pre, password: '' }))
-    }
-
-    return success
-  }
 
   const onFinish = async (values: any) => {
-    if (PhoneNumberRegExp.test(values.account)) {
-      return
-    }
-
     setSubmitLoading(true)
 
     toastPromise(
@@ -93,56 +71,48 @@ export const PasswordLoginForm = () => {
       setSubmitLoading(false)
     })
   }
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    form.onSubmit(async (values) => {
+      await onFinish(values)
+    })
+  }
+
   return (
     <div className="gap-2">
-      <div className="w-full">
-        <div className="relative mb-6">
+      <Form form={form} className="w-full" onSubmit={onSubmit}>
+        <FormField
+          name="account"
+          label={
+            <span className="sr-only">{t('auth.accountPlaceholder')}</span>
+          }
+        >
           <LoginInput
-            value={formValues.account}
-            onChange={(e) => {
-              onChangeFormValues('account', e.target.value)
-            }}
             name="account"
             placeholder={t('auth.accountPlaceholder')}
-            isError={!!formErrors.account}
+            isError={!!form.getFieldError('account')}
           />
-          {formErrors.account && (
-            <span className="absolute left-0 -bottom-1 transform translate-y-full text-xs text-danger">
-              {formErrors.account}
-            </span>
-          )}
-        </div>
-        <div className="relative mb-6">
+        </FormField>
+
+        <FormField
+          name="password"
+          label={
+            <span className="sr-only">{t('auth.passwordPlaceholder')}</span>
+          }
+        >
           <LoginInput
             name="password"
             type="password"
             placeholder={t('auth.passwordPlaceholder')}
-            value={formValues.password}
-            onChange={(e) => {
-              onChangeFormValues('password', e.target.value)
-            }}
-            isError={!!formErrors.password}
+            isError={!!form.getFieldError('password')}
           />
-          {formErrors.password && (
-            <span className="absolute left-0 -bottom-1 transform translate-y-full text-xs text-danger">
-              {formErrors.password}
-            </span>
-          )}
-        </div>
-      </div>
+        </FormField>
 
-      <TermsAndPrivacy />
+        <TermsAndPrivacy />
 
-      <LoginButton
-        onClick={() => {
-          const success = onValidateFormValues(formValues)
-          if (!success) {
-            return
-          }
-          onFinish(formValues)
-        }}
-        disabled={submitLoading}
-      />
+        <LoginButton type="submit" disabled={submitLoading} />
+      </Form>
     </div>
   )
 }

@@ -25,3 +25,35 @@ export const betterAuthRouter = new Elysia({
     },
     { auth: { role: true } }
   )
+  .post('/api/auth/set-password', async ({ body, request, set }) => {
+    const newPassword =
+      body && typeof body === 'object' && 'newPassword' in body
+        ? (body.newPassword as string)
+        : ''
+
+    if (!newPassword) {
+      set.status = 400
+      return {
+        message: 'newPassword is required',
+      }
+    }
+
+    try {
+      return await auth.api.setPassword({
+        headers: request.headers,
+        body: {
+          newPassword,
+        },
+      })
+    } catch (error: any) {
+      if (typeof error?.statusCode === 'number') {
+        set.status = error.statusCode
+      }
+      if (typeof error?.status === 'number') {
+        set.status = error.status
+      }
+      return {
+        message: error?.message || 'Set password failed',
+      }
+    }
+  })

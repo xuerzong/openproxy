@@ -1,11 +1,12 @@
 import { authClient } from '@/utils/better-auth'
+import { PhoneNumberRegExp } from '@/constants/regexp'
 import type { Session, User } from 'better-auth'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 interface AuthContextState {
   session: { session: Session; user: User } | null | undefined
   refreshSession: () => Promise<void>
-  signIn: (email: string, password: string) => Promise<boolean>
+  signIn: (account: string, password: string) => Promise<boolean>
   signOut: () => Promise<boolean>
   isAdmin: boolean
 }
@@ -37,9 +38,29 @@ export const AuthProvider: React.FC<React.PropsWithChildren> = ({
     querySession()
   }, [])
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (account: string, password: string) => {
+    if (PhoneNumberRegExp.test(account)) {
+      const response = await fetch('/api/auth/phone-password-login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phoneNumber: account,
+          password,
+        }),
+      })
+
+      if (!response.ok) {
+        return false
+      }
+
+      await querySession()
+      return true
+    }
+
     const result = await authClient.signIn.email({
-      email,
+      email: account,
       password,
     })
     if (result.error) {

@@ -221,13 +221,10 @@ const SetPasswordDialog = ({
     if (!newPassword) return
     setLoading(true)
     try {
-      const res = await authClient.$fetch<{ status: boolean }>(
-        '/set-password',
-        {
-          method: 'POST',
-          body: { newPassword },
-        }
-      )
+      const res = await authClient.$fetch<{ status: boolean }>('set-password', {
+        method: 'POST',
+        body: { newPassword },
+      })
       if (res.error) {
         throw new Error(
           t('common.operationFailedWithStatus', {
