@@ -29,6 +29,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "copy-to-clipboard": "^3.3.3",
+    "elysia": "^1.4.28",
     "i18next": "^26.0.3",
     "i18next-browser-languagedetector": "^8.2.1",
     "i18next-http-backend": "^3.0.4",
@@ -48,7 +49,6 @@
     "ua-parser-js": "^2.0.9",
     "use-debounce": "^10.1.1",
     "vaul": "^1.1.2",
-    "vite-tsconfig-paths": "^6.1.1",
     "zod": "^4.3.6",
     "zustand": "^5.0.12"
   },
