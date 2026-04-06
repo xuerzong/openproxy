@@ -16,6 +16,7 @@ export default defineConfig({
       output: {
         entryFileNames: 'assets/[hash].js',
         chunkFileNames: 'assets/[hash].js',
+        assetFileNames: 'assets/[hash][extname]',
         manualChunks: (id) => {
           if (id.includes('/node_modules/recharts/')) {
             return 'recharts'
