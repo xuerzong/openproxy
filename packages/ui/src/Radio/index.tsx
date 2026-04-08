@@ -1,5 +1,6 @@
-import { RadioGroup as RadixRadioGroup, Slot } from 'radix-ui'
+import { RadioGroup as RadixRadioGroup } from 'radix-ui'
 import { useId } from 'react'
+import { cn } from '../utils/cn'
 
 interface RadioOption {
   value: string | number | boolean
@@ -13,11 +14,18 @@ export const RadioItem: React.FC<RadioItemProps> = ({ value, label }) => {
   return (
     <div className="flex items-center gap-2">
       <RadixRadioGroup.Item
-        className="relative w-4 h-4 bg-primary/20 rounded-full border border-border cursor-pointer"
+        className={cn(
+          'relative w-4 h-4 bg-background rounded-full border border-border hover:border-primary cursor-pointer',
+          'data-[state=checked]:bg-primary data-[state=checked]:border-primary'
+        )}
         value={value.toString()}
         id={id}
       >
-        <RadixRadioGroup.Indicator className="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] block w-2 h-2 rounded-full bg-primary" />
+        <RadixRadioGroup.Indicator
+          className={cn(
+            'absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] block w-2 h-2 rounded-full bg-background'
+          )}
+        />
       </RadixRadioGroup.Item>
       <label htmlFor={id}>{label}</label>
     </div>
