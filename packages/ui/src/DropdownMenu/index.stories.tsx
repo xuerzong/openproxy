@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { fn } from '@storybook/test'
+import { fn } from 'storybook/test'
 import { DropdownMenu } from './index'
 import { Button } from '../Button'
 import { Trash2Icon, CopyIcon, PencilIcon } from 'lucide-react'

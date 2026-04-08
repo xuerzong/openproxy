@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { DatePicker } from './index'
-import { fn } from '@storybook/test'
+import { fn } from 'storybook/test'
 
 const meta = {
   title: 'Components/DatePicker',
