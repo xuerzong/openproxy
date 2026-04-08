@@ -23,6 +23,10 @@ const endOfMonth = (value: Date) => {
   return result
 }
 
+const toDate = (value: Date | string) => {
+  return value instanceof Date ? value : new Date(value)
+}
+
 const toMonthKey = (teamId: string, monthStart: Date) => {
   return `${teamId}:${monthStart.toISOString()}`
 }
@@ -368,7 +372,7 @@ export const archiveMonthlyUsages = async () => {
     db
       .select({
         teamId: dbSchema.usages.teamId,
-        monthStart: sql<Date>`date_trunc('month', ${dbSchema.usages.createdAt})`,
+        monthStart: sql<string>`date_trunc('month', ${dbSchema.usages.createdAt})`,
         totalRequests: count(),
         totalCost: sql<string>`coalesce(sum(${dbSchema.usages.cost}), 0)`,
         tokensPrompt: sql<number>`coalesce(sum(${dbSchema.usages.tokensPrompt}), 0)`,
@@ -383,7 +387,7 @@ export const archiveMonthlyUsages = async () => {
     db
       .select({
         teamId: dbSchema.usages.teamId,
-        monthStart: sql<Date>`date_trunc('month', ${dbSchema.usages.createdAt})`,
+        monthStart: sql<string>`date_trunc('month', ${dbSchema.usages.createdAt})`,
         modelName: dbSchema.usages.modelName,
         requests: count(),
         totalCost: sql<string>`coalesce(sum(${dbSchema.usages.cost}), 0)`,
@@ -409,7 +413,8 @@ export const archiveMonthlyUsages = async () => {
   }
   const modelBreakdownMap = new Map<string, MonthlyUsageModelBreakdown[]>()
   for (const row of modelRows) {
-    const key = toMonthKey(row.teamId, row.monthStart)
+    const monthStart = toDate(row.monthStart)
+    const key = toMonthKey(row.teamId, monthStart)
     const current = modelBreakdownMap.get(key) || []
     current.push({
       modelName: row.modelName || 'unknown',
@@ -421,14 +426,15 @@ export const archiveMonthlyUsages = async () => {
     modelBreakdownMap.set(key, current)
   }
   const archiveRows = summaryRows.map((row) => {
-    const key = toMonthKey(row.teamId, row.monthStart)
+    const monthStart = toDate(row.monthStart)
+    const key = toMonthKey(row.teamId, monthStart)
     const modelBreakdown = (modelBreakdownMap.get(key) || []).sort(
       (left, right) => right.requests - left.requests
     )
     return {
       teamId: row.teamId,
-      monthStart: row.monthStart,
-      monthEnd: endOfMonth(row.monthStart),
+      monthStart,
+      monthEnd: endOfMonth(monthStart),
       totalRequests: Number(row.totalRequests || 0),
       totalCost: Number(row.totalCost || 0).toFixed(10),
       tokensPrompt: Number(row.tokensPrompt || 0),
