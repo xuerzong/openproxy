@@ -6,9 +6,31 @@ import { PayStatus } from '@server/constants/pay'
 import { createTeam } from '@server/services/team'
 import { archiveMonthlyUsages } from '@server/services/usage'
 
+const BEARER_PREFIX = 'Bearer '
+
 export const cronRouter = new Elysia({
   prefix: '/cron',
 })
+  .onBeforeHandle(({ request, set }) => {
+    const cronSecret = process.env.CRON_SECRET?.trim()
+
+    if (!cronSecret) {
+      set.status = 500
+      throw new Error('CRON_SECRET is not configured')
+    }
+
+    const authHeader = request.headers.get('authorization')
+    if (!authHeader?.startsWith(BEARER_PREFIX)) {
+      set.status = 401
+      throw new Error('Missing or invalid Authorization header')
+    }
+
+    const token = authHeader.slice(BEARER_PREFIX.length).trim()
+    if (token !== cronSecret) {
+      set.status = 401
+      throw new Error('Invalid cron access token')
+    }
+  })
   .post('/cleanupOrder', async () => {
     await db
       .update(dbSchema.orders)
