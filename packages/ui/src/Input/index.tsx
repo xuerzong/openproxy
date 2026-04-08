@@ -10,7 +10,7 @@ import { Slot } from 'radix-ui'
 
 export const inputVariants = cva(
   cn(
-    'w-full h-10 px-4 text-sm border ring-2 ring-transparent outline-none rounded-md',
+    'w-full h-9 px-4 text-sm border ring-2 ring-transparent outline-none rounded-md',
     'hover:ring-transparent focus-visible:border-primary focus-visible:ring-primary/20',
     'disabled:hover:border-border! disabled:bg-muted disabled:text-foreground/75',
     'transition-colors duration-300'
