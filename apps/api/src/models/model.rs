@@ -19,6 +19,8 @@ pub struct Pricing {
     pub output: Decimal,
     pub input_cache_read: Decimal,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub input_tiers: Option<Vec<PricingTier>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub output_tiers: Option<Vec<PricingTier>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub input_cache_read_tiers: Option<Vec<PricingTier>>,

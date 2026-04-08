@@ -22,6 +22,7 @@ fn default_pricing() -> Pricing {
         input: Decimal::ZERO,
         output: Decimal::ZERO,
         input_cache_read: Decimal::ZERO,
+        input_tiers: None,
         output_tiers: None,
         input_cache_read_tiers: None,
     }
@@ -185,6 +186,7 @@ pub fn extract_usage_input_with_tokens(
     let input_cache_read_price = get_price(&pricing, "input_cache_read");
 
     let output_tiers = pricing.output_tiers.as_ref();
+    let input_tiers = pricing.input_tiers.as_ref();
     let input_cache_read_tiers = pricing.input_cache_read_tiers.as_ref();
 
     let cache_tokens_i32 = usage.input_cache_read_tokens.max(0);
@@ -194,7 +196,7 @@ pub fn extract_usage_input_with_tokens(
     };
 
     let input_cost =
-        input_price * Decimal::from(prompt_tokens_without_cache_i32) / Decimal::from(1_000_000);
+        calculate_tiered_cost(input_tiers, input_price, prompt_tokens_without_cache_i32);
     let cache_cost = calculate_tiered_cost(
         input_cache_read_tiers,
         input_cache_read_price,
@@ -393,11 +395,9 @@ mod tests {
         remove_provider_metadata_fields(&mut payload);
 
         assert!(payload.get("provider_metadata").is_none());
-        assert!(
-            payload
-                .get("nested")
-                .and_then(|n| n.get("providerMetadata"))
-                .is_none()
-        );
+        assert!(payload
+            .get("nested")
+            .and_then(|n| n.get("providerMetadata"))
+            .is_none());
     }
 }

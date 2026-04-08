@@ -9,6 +9,7 @@ export interface PricingInputProps {
     output: string
     input: string
     input_cache_read: string
+    input_tiers?: PricingTier[]
     output_tiers?: PricingTier[]
     input_cache_read_tiers?: PricingTier[]
   }
@@ -35,7 +36,7 @@ export const PricingInput: React.FC<PricingInputProps> = ({
     value && value.input_cache_read ? Number(value.input_cache_read) : void 0
 
   const updateTier = (
-    fieldName: 'output_tiers' | 'input_cache_read_tiers',
+    fieldName: 'input_tiers' | 'output_tiers' | 'input_cache_read_tiers',
     index: number,
     key: keyof PricingTier,
     val: string | number | undefined
@@ -45,14 +46,16 @@ export const PricingInput: React.FC<PricingInputProps> = ({
     onTriggerChange({ [fieldName]: tiers })
   }
 
-  const addTier = (fieldName: 'output_tiers' | 'input_cache_read_tiers') => {
+  const addTier = (
+    fieldName: 'input_tiers' | 'output_tiers' | 'input_cache_read_tiers'
+  ) => {
     const tiers = [...(value?.[fieldName] || [])]
     tiers.push({ cost: '0' })
     onTriggerChange({ [fieldName]: tiers })
   }
 
   const removeTier = (
-    fieldName: 'output_tiers' | 'input_cache_read_tiers',
+    fieldName: 'input_tiers' | 'output_tiers' | 'input_cache_read_tiers',
     index: number
   ) => {
     const tiers = [...(value?.[fieldName] || [])]
@@ -91,12 +94,21 @@ export const PricingInput: React.FC<PricingInputProps> = ({
           }}
           value={inputCacheRead}
           onChange={(e) => {
-            onTriggerChange({ input_cache_read: e != null ? e.toString() : '0' })
+            onTriggerChange({
+              input_cache_read: e != null ? e.toString() : '0',
+            })
           }}
           min={0}
           precision={2}
         />
       </div>
+      <TierList
+        label={t('models.inputTiers', { defaultValue: 'Input Tiers' })}
+        tiers={value?.input_tiers || []}
+        onAdd={() => addTier('input_tiers')}
+        onUpdate={(idx, key, val) => updateTier('input_tiers', idx, key, val)}
+        onRemove={(idx) => removeTier('input_tiers', idx)}
+      />
       <TierList
         label={t('models.outputTiers', { defaultValue: 'Output Tiers' })}
         tiers={value?.output_tiers || []}

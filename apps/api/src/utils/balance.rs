@@ -4,7 +4,7 @@ use serde_json::Value;
 
 use crate::models::provider::ModelAccessResult;
 use crate::shared::ApiResponse;
-use crate::utils::chat::{get_price, max_tokens_for_budget, parse_pricing};
+use crate::utils::chat::{calculate_tiered_cost, get_price, max_tokens_for_budget, parse_pricing};
 
 #[derive(Debug, Clone)]
 pub struct BalanceCheckResult {
@@ -37,6 +37,7 @@ pub fn check_balance_and_available_output(
     let pricing = parse_pricing(&user.model_pricing);
     let input_price = get_price(&pricing, "input");
     let output_price = get_price(&pricing, "output");
+    let input_tiers = pricing.input_tiers.as_ref();
     let output_tiers = pricing.output_tiers.as_ref();
 
     if !user.model_is_public {
@@ -51,7 +52,7 @@ pub fn check_balance_and_available_output(
 
     let balance = user.user_amount.unwrap_or(Decimal::ZERO);
 
-    let input_cost = Decimal::from(input_tokens) * input_price / Decimal::from(1_000_000);
+    let input_cost = calculate_tiered_cost(input_tiers, input_price, input_tokens);
 
     if balance < input_cost {
         return Err((

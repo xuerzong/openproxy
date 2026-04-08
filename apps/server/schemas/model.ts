@@ -19,6 +19,7 @@ export const PricingSchema = t.Object({
   input: t.Numeric({ minimum: 0, maximum: 99999 }),
   output: t.Numeric({ minimum: 0, maximum: 99999 }),
   input_cache_read: t.Numeric({ minimum: 0, maximum: 99999 }),
+  input_tiers: t.Optional(t.Array(PricingTierSchema)),
   output_tiers: t.Optional(t.Array(PricingTierSchema)),
   input_cache_read_tiers: t.Optional(t.Array(PricingTierSchema)),
 })

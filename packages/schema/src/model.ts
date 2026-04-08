@@ -25,6 +25,15 @@ export const ModelFormSchema = z.object({
     input: z.string().refine((v) => !isNaN(Number(v))),
     output: z.string().refine((v) => !isNaN(Number(v))),
     input_cache_read: z.string().refine((v) => !isNaN(Number(v))),
+    input_tiers: z
+      .array(
+        z.object({
+          cost: z.string().refine((v) => !isNaN(Number(v))),
+          min: z.number().min(0).optional(),
+          max: z.number().min(0).optional(),
+        })
+      )
+      .optional(),
     output_tiers: z
       .array(
         z.object({
