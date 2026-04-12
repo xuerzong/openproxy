@@ -1,47 +1,27 @@
 # website
 
-This is a Next.js application generated with
-[Create Fumadocs](https://github.com/fuma-nama/fumadocs).
+This package now builds the OpenProxy docs site with `stropress@0.0.5` from the npm registry.
 
-It is a Next.js app with [Static Export](https://nextjs.org/docs/app/guides/static-exports) configured.
-
-Run development server:
+## Commands
 
 ```bash
-npm run dev
-# or
-pnpm dev
-# or
-yarn dev
+bun run dev
+bun run build
+bun run start
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+`dev` starts the local Stropress dev server.
+`build` outputs static assets to `dist/`.
+`start` serves the generated `dist/` directory.
 
-## Explore
+## Structure
 
-In the project, you can see:
+- `docs/config.json`: Stropress site configuration, navigation, sidebar, and locale metadata.
+- `docs/`: Default locale documents.
+- `docs/en/`: English locale documents.
+- `docs/public/`: Static assets copied into the generated site.
 
-- `lib/source.ts`: Code for content source adapter, [`loader()`](https://fumadocs.dev/docs/headless/source-api) provides the interface to access your content.
-- `lib/layout.shared.tsx`: Shared options for layouts, optional but preferred to keep.
+## Notes
 
-| Route                     | Description                                            |
-| ------------------------- | ------------------------------------------------------ |
-| `app/(home)`              | The route group for your landing page and other pages. |
-| `app/docs`                | The documentation layout and pages.                    |
-| `app/api/search/route.ts` | The Route Handler for search.                          |
-
-### Fumadocs MDX
-
-A `source.config.ts` config file has been included, you can customise different options like frontmatter schema.
-
-Read the [Introduction](https://fumadocs.dev/docs/mdx) for further details.
-
-## Learn More
-
-To learn more about Next.js and Fumadocs, take a look at the following
-resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [Fumadocs](https://fumadocs.dev) - learn about Fumadocs
+- This site uses the published `stropress` package, not the local sibling repository.
+- Content stays in MDX, but the route structure now follows Stropress conventions: `/` for Chinese and `/en/` for English.

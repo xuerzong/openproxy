@@ -45,6 +45,7 @@ Examples of changes that require an `AGENTS.md` update:
 
 - Root `bun run dev` starts `apps/server` `dev` together with `apps/web` `dev:admin` and `dev:tenant`.
 - `website` is not included in the root development command.
+- `website` is built with the published `stropress` npm package; keep its docs content under `website/docs/` with locale folders like `docs/en/`, and configure navigation/locales in `website/docs/config.json`.
 - Root `bun run lint` runs lint for `apps/server` and `apps/web`.
 
 ## Dependency Updates

@@ -16,7 +16,7 @@ openproxy/
 │   ├── payment-provider/  # 支付网关抽象
 │   ├── phone-auth/        # 手机 OTP 抽象
 │   └── ui/                # 共享 React 组件
-└── website/      # 文档站（Fumadocs + Next.js）
+└── website/      # 文档站（Stropress）
 ```
 
 ## 一键启动所有服务
@@ -94,16 +94,16 @@ SQL 迁移文件位于 `apps/server/drizzle/`。表结构变更需通过 Drizzle
 
 ## 关键环境文件
 
-| 文件 | 用途 |
-| --- | --- |
+| 文件               | 用途                                              |
+| ------------------ | ------------------------------------------------- |
 | `apps/server/.env` | 鉴权密钥、数据库地址、RSA 密钥对、邮件/OAuth 配置 |
-| `apps/api/.env` | 数据库地址、RSA 私钥、端口 |
-| `apps/web/envs/` | 前端按目标（tenant/admin）分别配置的环境变量文件 |
+| `apps/api/.env`    | 数据库地址、RSA 私钥、端口                        |
+| `apps/web/envs/`   | 前端按目标（tenant/admin）分别配置的环境变量文件  |
 
 ## 关键端口
 
-| 服务 | 默认端口 |
-| --- | --- |
-| `apps/server` | `3888` |
-| `apps/api` | `5060` |
-| `apps/web` | `5173`（Vite，以终端实际输出为准） |
+| 服务          | 默认端口                           |
+| ------------- | ---------------------------------- |
+| `apps/server` | `3888`                             |
+| `apps/api`    | `5060`                             |
+| `apps/web`    | `5173`（Vite，以终端实际输出为准） |

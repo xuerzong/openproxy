@@ -16,7 +16,7 @@ openproxy/
 │   ├── payment-provider/  # Payment gateway abstraction
 │   ├── phone-auth/        # Phone OTP abstraction
 │   └── ui/                # Shared React components
-└── website/      # Docs site (Fumadocs + Next.js)
+└── website/      # Docs site (Stropress)
 ```
 
 ## Start all services at once
@@ -94,16 +94,16 @@ Migration SQL lives in `apps/server/drizzle/`. Schema changes should be made via
 
 ## Key environment files
 
-| File | Purpose |
-| --- | --- |
+| File               | Purpose                                                   |
+| ------------------ | --------------------------------------------------------- |
 | `apps/server/.env` | Auth secrets, DB URL, RSA public+private key, email/OAuth |
-| `apps/api/.env` | DB URL, RSA private key, port |
-| `apps/web/envs/` | Frontend env files per target (tenant/admin) |
+| `apps/api/.env`    | DB URL, RSA private key, port                             |
+| `apps/web/envs/`   | Frontend env files per target (tenant/admin)              |
 
 ## Key ports
 
-| Service | Default port |
-| --- | --- |
-| `apps/server` | `3888` |
-| `apps/api` | `5060` |
-| `apps/web` | `5173` (Vite, check terminal output) |
+| Service       | Default port                         |
+| ------------- | ------------------------------------ |
+| `apps/server` | `3888`                               |
+| `apps/api`    | `5060`                               |
+| `apps/web`    | `5173` (Vite, check terminal output) |

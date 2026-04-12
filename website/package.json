@@ -2,34 +2,16 @@
   "name": "website",
   "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "start": "serve out",
-    "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",
-    "postinstall": "fumadocs-mdx"
+  "overrides": {
+    "vite": "^7"
   },
-  "dependencies": {
-    "@orama/orama": "^3.1.18",
-    "fumadocs-core": "16.7.7",
-    "fumadocs-mdx": "14.2.11",
-    "fumadocs-ui": "16.7.7",
-    "lucide-react": "^1.7.0",
-    "next": "16.2.2",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "tailwind-merge": "^3.5.0",
-    "@takumi-rs/image-response": "^0.73.1"
+  "scripts": {
+    "build": "stropress build --dir docs",
+    "dev": "stropress dev --dir docs"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.2",
-    "@types/mdx": "^2.0.13",
-    "@types/node": "^25.5.0",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "postcss": "^8.5.8",
-    "serve": "^14.2.6",
-    "tailwindcss": "^4.2.2",
-    "typescript": "^6.0.2"
+    "@fontsource/geist": "^5.2.8",
+    "@fontsource/geist-mono": "^5.2.7",
+    "stropress": "0.0.6"
   }
 }
