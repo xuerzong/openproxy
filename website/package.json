@@ -10,8 +10,11 @@
     "dev": "stropress dev --dir docs"
   },
   "devDependencies": {
+    "@astrojs/internal-helpers": "0.8.0",
     "@fontsource/geist": "^5.2.8",
     "@fontsource/geist-mono": "^5.2.7",
+    "astro": "6.1.3",
+    "piccolore": "^0.1.3",
     "stropress": "0.0.6"
   }
 }
