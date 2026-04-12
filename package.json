@@ -18,6 +18,7 @@
     "turbo": "^2.9.3"
   },
   "scripts": {
+    "build:website": "bun run --cwd website build",
     "dev": "turbo run dev --filter=server & turbo run dev:admin --filter=web & turbo run dev:tenant --filter=web & wait",
     "lint": "turbo run lint --filter=server --filter=web",
     "lint:server": "turbo run lint --filter=server",
