@@ -15,7 +15,7 @@
     "website"
   ],
   "dependencies": {
-    "turbo": "^2.9.3"
+    "turbo": "^2.9.6"
   },
   "scripts": {
     "dev": "turbo run dev --filter=server & turbo run dev:admin --filter=web & turbo run dev:tenant --filter=web & wait",
