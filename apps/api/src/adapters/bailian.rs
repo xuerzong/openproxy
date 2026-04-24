@@ -1,7 +1,14 @@
-use serde_json::{json, Value};
+use serde_json::Value;
 
-use super::ProviderAdapter;
+use super::{ensure_stream_options_include_usage, ProviderAdapter};
 
+/// Alibaba Cloud Bailian (DashScope compatible-mode) adapter.
+///
+/// Base URL: `https://dashscope.aliyuncs.com/compatible-mode/v1`
+///
+/// Quirks:
+/// - Streaming OpenAI chat/completions requires `stream_options.include_usage: true`
+///   for the final `usage` chunk to be emitted; without it we cannot bill.
 pub struct BailianProviderAdapter;
 
 impl ProviderAdapter for BailianProviderAdapter {
@@ -9,24 +16,7 @@ impl ProviderAdapter for BailianProviderAdapter {
         if !is_stream {
             return;
         }
-
         ensure_stream_options_include_usage(body);
-    }
-}
-
-fn ensure_stream_options_include_usage(body: &mut Value) {
-    let Some(obj) = body.as_object_mut() else {
-        return;
-    };
-
-    let stream_options = obj.entry("stream_options").or_insert_with(|| json!({}));
-
-    if !stream_options.is_object() {
-        *stream_options = json!({});
-    }
-
-    if let Some(stream_options_obj) = stream_options.as_object_mut() {
-        stream_options_obj.insert("include_usage".to_string(), Value::Bool(true));
     }
 }
 
@@ -36,7 +26,7 @@ mod tests {
     use crate::models::provider::ProviderInfo;
     use crate::utils::chat::UsageStyle;
 
-    fn provider(_name: &str, base_url: &str) -> ProviderInfo {
+    fn provider(base_url: &str) -> ProviderInfo {
         ProviderInfo {
             model_model_name: "qwen-plus".to_string(),
             model_base_url: base_url.to_string(),
@@ -50,13 +40,9 @@ mod tests {
 
     #[test]
     fn bailian_openai_stream_adds_stream_options_include_usage() {
-        let mut body = serde_json::json!({
-            "model": "qwen-plus",
-            "stream": true
-        });
+        let mut body = serde_json::json!({"model": "qwen-plus", "stream": true});
 
         let adapter = crate::adapters::ProviderAdapterFactory::for_provider(&provider(
-            "Bailian",
             "https://dashscope.aliyuncs.com/compatible-mode/v1",
         ));
         adapter.adapt_request_body(&mut body, UsageStyle::OpenAI, true);
@@ -71,13 +57,9 @@ mod tests {
 
     #[test]
     fn bailian_anthropic_entry_keeps_body_unchanged_for_now() {
-        let mut body = serde_json::json!({
-            "model": "claude-sonnet-4",
-            "stream": true
-        });
+        let mut body = serde_json::json!({"model": "claude-sonnet-4", "stream": true});
 
         let adapter = crate::adapters::ProviderAdapterFactory::for_provider(&provider(
-            "Bailian",
             "https://dashscope.aliyuncs.com/compatible-mode/v1",
         ));
         adapter.adapt_request_body(&mut body, UsageStyle::Anthropic, true);

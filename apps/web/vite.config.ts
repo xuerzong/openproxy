@@ -10,6 +10,7 @@ export default defineConfig({
   plugins: [react(), viteCompression(), tailwindcss()],
   resolve: {
     tsconfigPaths: true,
+    dedupe: ['react', 'react-dom', 'react-i18next'],
   },
   build: {
     rollupOptions: {

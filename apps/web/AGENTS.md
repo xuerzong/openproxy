@@ -29,6 +29,7 @@ When adding or modifying any visible text (labels, tooltips, placeholders, error
 - Styles: TailwindCSS utility classes + CSS modules (`*.module.css`) when needed.
 - Path aliases: `@/` → `src/`, `@openproxy/` → workspace packages.
 - Vite path aliases should use the native `resolve.tsconfigPaths: true` option in `vite.config.ts`; do not add `vite-tsconfig-paths` unless a Vite limitation requires it.
+- When `apps/web` imports React-based workspace packages, keep `resolve.dedupe` in `vite.config.ts` aligned for `react`, `react-dom`, and `react-i18next` so the dev server does not load multiple React instances.
 - Analytics: Umami is loaded via `index.html` inline script gated by `VITE_UMAMI_WEBSITE_ID`; leave the env var empty in dev to skip the script.
 - Sidebar menus in `src/layouts/DashboardLayout.tsx` may include non-clickable `label` and `separator` entries to create grouped navigation sections.
 

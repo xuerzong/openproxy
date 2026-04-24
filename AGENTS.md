@@ -9,6 +9,10 @@ apps/web/       → React (Vite) frontend — tenant dashboard + admin panel
 packages/       → Shared packages (schema, ui, utils, phone-auth, payment-provider)
 ```
 
+Key shared packages:
+- `packages/config/` → Shared JSON/config artifacts consumed by multiple apps at build/runtime.
+- `packages/schema/` → Shared TypeScript schema/types package.
+
 ## General Rules
 
 - Use English for code (variable names, comments). User-facing text follows each app's i18n rules.
@@ -20,6 +24,7 @@ packages/       → Shared packages (schema, ui, utils, phone-auth, payment-prov
 - Shared `DropdownMenu` items in `packages/ui` support a `disabled` state; prefer disabling unavailable actions instead of conditionally hiding them when the user should still see the action exists.
 - In `apps/web` and `apps/server`, use arrow functions for regular function definitions; avoid `function` declarations/expressions. Exception: `apps/web/src/utils/qr/codegen.ts` keeps its upstream function style.
 - Shared ESLint presets live in `packages/eslint-config`; app-level `eslint.config.js` files should import from this package and only keep local overrides.
+- Cross-app static registries or metadata blobs that must be read by more than one app should live in `packages/config`, preferably as JSON. If one app reads such a file at compile time (for example Rust `include_str!`) or a bundled server reads it at runtime, update Dockerfiles/CI so the file is present in the relevant build context and runtime image.
 
 ## Convention Maintenance — MANDATORY
 

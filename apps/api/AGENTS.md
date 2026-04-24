@@ -21,8 +21,16 @@ src/
 ├── router.rs           # Axum router setup
 ├── adapters/           # Provider-specific adapters
 │   ├── bailian.rs      # Alibaba Cloud Bailian adapter
-│   ├── default.rs      # Default OpenAI-compatible adapter
-│   └── mod.rs          # Adapter factory & trait
+│   ├── default.rs      # Fallback adapter (passthrough)
+│   ├── deepseek.rs     # DeepSeek adapter
+│   ├── kimi.rs         # Moonshot / Kimi adapter
+│   ├── minimax.rs      # MiniMax adapter (OpenAI-compat endpoints only)
+│   ├── opencode.rs     # OpenCode Zen gateway adapter
+│   ├── openai.rs       # OpenAI official adapter
+│   ├── openrouter.rs   # OpenRouter adapter
+│   ├── vercel.rs       # Vercel AI Gateway adapter
+│   ├── zai.rs          # Z.ai / 智谱 BigModel adapter
+│   └── mod.rs          # Adapter trait, factory & shared helpers
 ├── db/                 # Database queries (sqlx)
 ├── handlers/           # Route handlers
 ├── middleware/          # Auth, logging middleware
@@ -108,20 +116,55 @@ src/
 
 ### Architecture
 
-- `adapters/` directory contains provider-specific request/response adapters.
-- Implement `ProviderAdapter` trait to customize request transformation for different AI provider APIs.
-- Use `ProviderAdapterFactory::for_provider()` in handlers to get the appropriate adapter.
+- The supported AI providers are defined once in `packages/config/src/ai-providers.json`.
+  `apps/api/src/models/ai_provider.rs` and `apps/server/constants/ai-providers.ts` both load
+  that file. Administrators cannot create free-form providers — they select from this registry
+  and only manage API keys. When a new provider is added, update the JSON and the adapter
+  dispatch map in `adapters/mod.rs`.
+- `adapters/` contains provider-specific request/response adapters.
+- `ProviderAdapter` trait has three request-style methods (all default to no-op):
+  - `adapt_openai_request(body, is_stream)` — OpenAI `/v1/chat/completions` style.
+  - `adapt_anthropic_request(body, is_stream)` — Anthropic `/v1/messages` style.
+  - `adapt_responses_request(body, is_stream)` — OpenAI `/v1/responses` style (currently
+    unused internally; responses are pre-translated to chat/completions, but the hook is
+    available for future direct routing).
+- `ProviderAdapterFactory::for_provider()` dispatches by matching the provider's
+  `model_base_url` host against registry entries. Unmatched URLs fall back to
+  `DefaultProviderAdapter` (passthrough).
+- Shared helper `ensure_stream_options_include_usage(body)` lives in `adapters/mod.rs`.
+  Adapters that need the final `usage` chunk on streaming OpenAI responses should call it
+  from `adapt_openai_request`.
+
+### `/v1/providers` Endpoint
+
+- `GET /v1/providers` (public, no auth) returns the full registry with `id`, `name`,
+  `name_zh`, `icon_id`, `base_url`, per-style `base_urls`, `supported_styles`, and `docs_url`.
+- The server app exposes the same JSON-backed list at `/providers` for admin UI consumption.
 
 ### Creating a New Adapter
 
-1. Create a new file (e.g., `adapters/my_provider.rs`) with a struct that implements `ProviderAdapter`.
-2. Implement required methods:
-   - `adapt_openai_request(&self, body: &mut Value, is_stream: bool)`: Transform OpenAI-style request to provider format.
-   - `adapt_openai_response(&self, body: &mut Value)`: Transform provider response back to OpenAI format.
-3. Add to `ProviderAdapterFactory` in `adapters/mod.rs` to map provider ID → adapter.
-4. Ensure tests validate both request and response transformations.
+1. Add an entry to `packages/config/src/ai-providers.json`.
+2. Create a new file (e.g., `adapters/my_provider.rs`) with a struct that implements
+   `ProviderAdapter`, overriding only the style methods that need quirks.
+3. Wire the new adapter into `ProviderAdapterFactory::adapter_for_id` in `adapters/mod.rs`.
+4. Document the provider in the **Provider Registry** section below (base URLs, styles,
+   quirks, docs URL).
+5. Add tests that cover request transformations for each overridden style.
 
-### Existing Adapters
+### Provider Registry (single source in `packages/config/src/ai-providers.json`)
 
-- **Default** (`default.rs`): OpenAI-compatible providers (passthrough).
-- **Bailian** (`bailian.rs`): Alibaba Cloud Bailian (ensures `stream_options.include_usage` for streaming).
+| id | Display | iconId | Styles | Notes |
+|----|---------|--------|--------|-------|
+| `bailian` | 百炼 / Bailian | `Bailian` | OpenAI chat, Embeddings | `stream_options.include_usage` required on streaming. Regional hosts: `dashscope-us.aliyuncs.com`, `dashscope-intl.aliyuncs.com`. |
+| `vercel` | Vercel AI Gateway | `Vercel` | OpenAI chat, Anthropic messages, Responses, Embeddings | Split base URLs per style. Model IDs must be `provider/model`. Enforce `include_usage` on streaming. |
+| `kimi` | Kimi (Moonshot) | `Kimi` | OpenAI chat | Enforce `include_usage`. Supports `thinking` (k2.6+) and `prompt_cache_key`. |
+| `deepseek` | DeepSeek | `DeepSeek` | OpenAI chat, Anthropic messages | Separate `/anthropic` base. Enforce `include_usage`. Supports `reasoning_effort` / `thinking`. |
+| `minimax` | MiniMax | `Minimax` | OpenAI chat, Anthropic messages | Use ONLY the OpenAI-compat base — native `/v1/text/chatcompletion*` endpoints are not supported. Enforce `include_usage`. Separate `/anthropic` base. |
+| `opencode` | OpenCode Zen | `OpenCode` | OpenAI chat, Anthropic messages, Responses | Curated gateway. Enforce `include_usage`. |
+| `openrouter` | OpenRouter | `OpenRouter` | OpenAI chat | Model IDs must be `provider/model`. Enforce `include_usage`. Optional attribution headers (`HTTP-Referer`, `X-OpenRouter-Title`) are NOT added by the adapter — must be set at the HTTP client layer if desired. |
+| `openai` | OpenAI | `OpenAI` | OpenAI chat, Responses, Embeddings | Canonical. No quirks. Does NOT inject `stream_options` so client-provided bodies pass through untouched. |
+| `zai` | 智谱 BigModel / Z.ai | `Zai` | OpenAI chat, Anthropic messages | Bases: `api.z.ai/api/paas/v4` (OpenAI), `api.z.ai/api/anthropic` (Anthropic), `open.bigmodel.cn/api/paas/v4` (CN mainland alt). GLM-4.5+ accepts `thinking: { type: "enabled" }`. Enforce `include_usage`. |
+
+Keep this table in sync with `AI_PROVIDERS` — CI tests check every registry entry has a
+dispatch arm, but this table is the human reference. When you update provider docs or
+endpoints, refresh this section as part of the same commit.
