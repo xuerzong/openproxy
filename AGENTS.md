@@ -26,6 +26,7 @@ Key shared packages:
 - Shared ESLint presets live in `packages/eslint-config`; app-level `eslint.config.js` files should import from this package and only keep local overrides.
 - Cross-app static registries or metadata blobs that must be read by more than one app should live in `packages/config`, preferably as JSON. If one app reads such a file at compile time (for example Rust `include_str!`) or a bundled server reads it at runtime, update Dockerfiles/CI so the file is present in the relevant build context and runtime image.
 - When a Docker image uses an app-scoped build context instead of the repository root but still depends on files under `packages/config`, pass that directory through Docker named build contexts in CI and copy it explicitly in the Dockerfile.
+- If a deployment target cannot pass Docker named build contexts, generate and commit the required `packages/config` artifact under the app directory and keep it synchronized with a checked-in script.
 
 ## Convention Maintenance — MANDATORY
 
@@ -46,6 +47,7 @@ Examples of changes that require an `AGENTS.md` update:
 
 - Shared test automation lives in `.github/workflows/test.yml`.
 - The test workflow currently runs Bun tests for `apps/server` and Rust tests for `apps/api`.
+- The test workflow also verifies `apps/api/generated/ai-providers.json` stays synchronized with `packages/config/src/ai-providers.json` by running `bun run sync:api-provider-registry` and checking for no diff.
 
 ## Development
 

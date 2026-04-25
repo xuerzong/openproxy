@@ -61,14 +61,12 @@ impl AIProvider {
 
 /// Shared AI provider registry loaded from the single source of truth JSON file.
 ///
-/// Source file: `packages/config/src/ai-providers.json`
+/// Generated source file: `apps/api/generated/ai-providers.json`
 pub static AI_PROVIDERS: LazyLock<Vec<AIProvider>> = LazyLock::new(load_ai_providers);
 
 fn load_ai_providers() -> Vec<AIProvider> {
-    serde_json::from_str(include_str!(
-        "../../../../packages/config/src/ai-providers.json"
-    ))
-    .expect("packages/config/src/ai-providers.json must contain valid AI provider JSON")
+    serde_json::from_str(include_str!("../../generated/ai-providers.json"))
+        .expect("apps/api/generated/ai-providers.json must contain valid AI provider JSON")
 }
 
 /// Look up a provider by id.

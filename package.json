@@ -22,7 +22,8 @@
     "dev": "turbo run dev --filter=server & turbo run dev:admin --filter=web & turbo run dev:tenant --filter=web & wait",
     "lint": "turbo run lint --filter=server --filter=web",
     "lint:server": "turbo run lint --filter=server",
-    "lint:web": "turbo run lint --filter=web"
+    "lint:web": "turbo run lint --filter=web",
+    "sync:api-provider-registry": "bun run scripts/syncApiProviderRegistry.ts"
   },
   "packageManager": "bun@1.3.5"
 }

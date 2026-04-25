@@ -117,10 +117,12 @@ src/
 ### Architecture
 
 - The supported AI providers are defined once in `packages/config/src/ai-providers.json`.
-  `apps/api/src/models/ai_provider.rs` and `apps/server/constants/ai-providers.ts` both load
-  that file. Administrators cannot create free-form providers — they select from this registry
-  and only manage API keys. When a new provider is added, update the JSON and the adapter
-  dispatch map in `adapters/mod.rs`.
+  `apps/api/generated/ai-providers.json` is a checked-in generated copy used by Docker builds
+  that only have `apps/api` as context. Refresh it with `bun run sync:api-provider-registry`
+  from the repository root whenever the shared JSON changes. Administrators cannot create
+  free-form providers — they select from this registry and only manage API keys. When a new
+  provider is added, update the shared JSON, regenerate `apps/api/generated/ai-providers.json`,
+  and update the adapter dispatch map in `adapters/mod.rs`.
 - `adapters/` contains provider-specific request/response adapters.
 - `ProviderAdapter` trait has three request-style methods (all default to no-op):
   - `adapt_openai_request(body, is_stream)` — OpenAI `/v1/chat/completions` style.

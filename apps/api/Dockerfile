@@ -3,7 +3,7 @@ FROM rustlang/rust:nightly-bookworm AS builder
 
 WORKDIR /app/apps/api
 
-# Main build context is apps/api. Shared config is provided via a named build context.
+# Main build context is apps/api.
 COPY Cargo.toml Cargo.lock ./
 
 # Prebuild dependencies
@@ -11,9 +11,9 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
 RUN rm -f target/release/deps/api*
 
-# Copy application sources and shared config for the final build
+# Copy application sources and generated config for the final build
 COPY src ./src
-COPY --from=config . /app/packages/config
+COPY generated ./generated
 ENV SQLX_OFFLINE=true
 RUN cargo build --release
 
