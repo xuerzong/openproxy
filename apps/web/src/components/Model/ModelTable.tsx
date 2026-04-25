@@ -190,14 +190,17 @@ export const ModelTable: React.FC<ModelTableProps> = ({
               label: t('models.providers', { defaultValue: 'Providers' }),
               width: 120,
               render(_, record) {
-                const providers = record.providers || []
-                const uniqueProviders = Array.from(
-                  new Map(providers.map((p) => [p.id, p])).values()
+                const providers = Array.from(
+                  new Map(
+                    (record.providers || [])
+                      .filter((provider) => provider?.id)
+                      .map((provider) => [provider.id, provider])
+                  ).values()
                 )
-                return uniqueProviders.length > 0 ? (
+                return providers.length > 0 ? (
                   <div className="flex items-center">
-                    {uniqueProviders.map((provider, providerIndex) => (
-                      <Tooltip key={providerIndex} content={provider.name}>
+                    {providers.map((provider) => (
+                      <Tooltip key={provider.id} content={provider.name}>
                         <span className="inline-flex mr-1">
                           <ModelIcon model={provider.id} />
                         </span>
