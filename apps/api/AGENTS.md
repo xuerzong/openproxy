@@ -138,7 +138,7 @@ src/
 ### `/v1/providers` Endpoint
 
 - `GET /v1/providers` (public, no auth) returns the full registry with `id`, `name`,
-  `name_zh`, `icon_id`, `base_url`, per-style `base_urls`, `supported_styles`, and `docs_url`.
+  `base_url`, per-style `base_urls`, `supported_styles`, and `docs_url`.
 - The server app exposes the same JSON-backed list at `/providers` for admin UI consumption.
 
 ### Creating a New Adapter
@@ -153,13 +153,13 @@ src/
 
 ### Provider Registry (single source in `packages/config/src/ai-providers.json`)
 
-| id | Display | iconId | Styles | Notes |
-|----|---------|--------|--------|-------|
-| `bailian` | 百炼 / Bailian | `Bailian` | OpenAI chat, Embeddings | `stream_options.include_usage` required on streaming. Regional hosts: `dashscope-us.aliyuncs.com`, `dashscope-intl.aliyuncs.com`. |
-| `vercel` | Vercel AI Gateway | `Vercel` | OpenAI chat, Anthropic messages, Responses, Embeddings | Split base URLs per style. Model IDs must be `provider/model`. Enforce `include_usage` on streaming. |
-| `kimi` | Kimi (Moonshot) | `Kimi` | OpenAI chat | Enforce `include_usage`. Supports `thinking` (k2.6+) and `prompt_cache_key`. |
-| `deepseek` | DeepSeek | `DeepSeek` | OpenAI chat, Anthropic messages | Separate `/anthropic` base. Enforce `include_usage`. Supports `reasoning_effort` / `thinking`. |
-| `minimax` | MiniMax | `Minimax` | OpenAI chat, Anthropic messages | Use ONLY the OpenAI-compat base — native `/v1/text/chatcompletion*` endpoints are not supported. Enforce `include_usage`. Separate `/anthropic` base. |
+| id | Display | Styles | Notes |
+|----|---------|--------|-------|
+| `bailian` | 百炼 / Bailian | OpenAI chat, Embeddings | `stream_options.include_usage` required on streaming. Regional hosts: `dashscope-us.aliyuncs.com`, `dashscope-intl.aliyuncs.com`. |
+| `vercel` | Vercel AI Gateway | OpenAI chat, Anthropic messages, Responses, Embeddings | Split base URLs per style. Model IDs must be `provider/model`. Enforce `include_usage` on streaming. |
+| `kimi` | Kimi (Moonshot) | OpenAI chat | Enforce `include_usage`. Supports `thinking` (k2.6+) and `prompt_cache_key`. |
+| `deepseek` | DeepSeek | OpenAI chat, Anthropic messages | Separate `/anthropic` base. Enforce `include_usage`. Supports `reasoning_effort` / `thinking`. |
+| `minimax` | MiniMax | OpenAI chat, Anthropic messages | Use ONLY the OpenAI-compat base — native `/v1/text/chatcompletion*` endpoints are not supported. Enforce `include_usage`. Separate `/anthropic` base. |
 | `opencode` | OpenCode Zen | `OpenCode` | OpenAI chat, Anthropic messages, Responses | Curated gateway. Enforce `include_usage`. |
 | `openrouter` | OpenRouter | `OpenRouter` | OpenAI chat | Model IDs must be `provider/model`. Enforce `include_usage`. Optional attribution headers (`HTTP-Referer`, `X-OpenRouter-Title`) are NOT added by the adapter — must be set at the HTTP client layer if desired. |
 | `openai` | OpenAI | `OpenAI` | OpenAI chat, Responses, Embeddings | Canonical. No quirks. Does NOT inject `stream_options` so client-provided bodies pass through untouched. |

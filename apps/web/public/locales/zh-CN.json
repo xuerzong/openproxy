@@ -95,7 +95,6 @@
     "id": "ID",
     "name": "名称",
     "type": "类型",
-    "baseUrl": "基础 URL",
     "provider": "供应商",
     "icon": "图标",
     "apiKey": "API Key",
@@ -429,18 +428,13 @@
   },
   "aiProviders": {
     "title": "AI 供应商",
-    "add": "添加供应商",
-    "addTitle": "添加 AI 供应商",
-    "editTitle": "编辑 AI 供应商",
-    "deleteConfirm": "确定删除供应商吗",
+    "registryHint": "供应商元数据来自内置配置注册表，这里只管理 API Key。",
     "apiKeys": "API Keys",
-    "apiKeysHelp": "逐条添加 API Key，并在表格中查看",
+    "supportedStyles": "支持的风格",
     "apiKeysPlaceholder": "请输入 API Key",
-    "apiKeysRequired": "请至少添加一个 API Key",
     "addApiKey": "添加 API Key",
     "manageApiKeys": "AI Keys",
-    "noApiKeys": "暂未添加 API Key",
-    "apiKeyCount": "{{count}} 个 Key"
+    "noApiKeys": "暂未添加 API Key"
   },
   "models": {
     "title": "模型列表",

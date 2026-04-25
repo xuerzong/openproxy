@@ -2,8 +2,6 @@
   {
     "id": "bailian",
     "name": "Bailian",
-    "nameZh": "百炼",
-    "iconId": "Bailian",
     "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
     "baseUrls": [],
     "supportedStyles": ["openai_chat", "embeddings"],
@@ -12,8 +10,6 @@
   {
     "id": "vercel",
     "name": "Vercel AI Gateway",
-    "nameZh": "Vercel AI Gateway",
-    "iconId": "Vercel",
     "baseUrl": "https://ai-gateway.vercel.sh/v1",
     "baseUrls": [
       {
@@ -44,8 +40,6 @@
   {
     "id": "kimi",
     "name": "Kimi",
-    "nameZh": "Kimi",
-    "iconId": "Kimi",
     "baseUrl": "https://api.moonshot.cn/v1",
     "baseUrls": [],
     "supportedStyles": ["openai_chat"],
@@ -54,8 +48,6 @@
   {
     "id": "deepseek",
     "name": "DeepSeek",
-    "nameZh": "DeepSeek",
-    "iconId": "DeepSeek",
     "baseUrl": "https://api.deepseek.com/v1",
     "baseUrls": [
       {
@@ -69,8 +61,6 @@
   {
     "id": "minimax",
     "name": "MiniMax",
-    "nameZh": "MiniMax",
-    "iconId": "Minimax",
     "baseUrl": "https://api.minimaxi.com/v1",
     "baseUrls": [
       {
@@ -84,8 +74,6 @@
   {
     "id": "opencode",
     "name": "OpenCode Zen",
-    "nameZh": "OpenCode Zen",
-    "iconId": "OpenCode",
     "baseUrl": "https://opencode.ai/zen/v1",
     "baseUrls": [],
     "supportedStyles": [
@@ -98,8 +86,6 @@
   {
     "id": "openrouter",
     "name": "OpenRouter",
-    "nameZh": "OpenRouter",
-    "iconId": "OpenRouter",
     "baseUrl": "https://openrouter.ai/api/v1",
     "baseUrls": [],
     "supportedStyles": ["openai_chat"],
@@ -108,8 +94,6 @@
   {
     "id": "openai",
     "name": "OpenAI",
-    "nameZh": "OpenAI",
-    "iconId": "OpenAI",
     "baseUrl": "https://api.openai.com/v1",
     "baseUrls": [],
     "supportedStyles": ["openai_chat", "openai_responses", "embeddings"],
@@ -118,8 +102,6 @@
   {
     "id": "zai",
     "name": "Z.ai (BigModel)",
-    "nameZh": "智谱 BigModel",
-    "iconId": "Zai",
     "baseUrl": "https://api.z.ai/api/paas/v4",
     "baseUrls": [
       {

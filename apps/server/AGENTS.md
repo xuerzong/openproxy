@@ -43,6 +43,11 @@
   runtime, and Rust loads the same file from `apps/api/src/models/ai_provider.rs`. Update the
   JSON plus the reference table in `apps/api/AGENTS.md` when provider metadata changes.
 - `GET /api/providers` exposes the registry (public, no auth) for the admin UI.
+- `GET /api/aiProviders` must also be registry-driven for provider metadata (`name`, `baseUrl`,
+  `icon`) rather than trusting mutable columns in `ai_providers`. The database still remains the
+  storage layer for provider rows, API keys, and foreign-key relations such as
+  `models_to_ai_providers`; service code should reconcile/sync built-in provider rows instead of
+  introducing new freeform providers.
 - The legacy `/api/aiProviders` CRUD remains for migration; new deployments should only
   allow admins to manage API keys (`POST /api/aiProviders/apiKeys`, etc.) against provider
   rows whose `id` matches a registry entry. Do not add new freeform-creation flows.

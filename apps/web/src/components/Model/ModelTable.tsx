@@ -192,14 +192,14 @@ export const ModelTable: React.FC<ModelTableProps> = ({
               render(_, record) {
                 const providers = record.providers || []
                 const uniqueProviders = Array.from(
-                  new Map(providers.map((p) => [p.icon, p])).values()
+                  new Map(providers.map((p) => [p.id, p])).values()
                 )
                 return uniqueProviders.length > 0 ? (
                   <div className="flex items-center">
                     {uniqueProviders.map((provider, providerIndex) => (
                       <Tooltip key={providerIndex} content={provider.name}>
                         <span className="inline-flex mr-1">
-                          <ModelIcon model={provider.icon} />
+                          <ModelIcon model={provider.id} />
                         </span>
                       </Tooltip>
                     ))}

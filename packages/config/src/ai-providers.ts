@@ -12,8 +12,6 @@ export type ProviderBaseUrl = {
 export type AIProvider = {
   id: string
   name: string
-  nameZh: string
-  iconId: string
   baseUrl: string
   baseUrls: ProviderBaseUrl[]
   supportedStyles: ProviderStyle[]

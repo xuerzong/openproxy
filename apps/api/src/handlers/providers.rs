@@ -16,8 +16,6 @@ struct ProviderBaseUrlDto {
 struct ProviderDto {
     id: String,
     name: String,
-    name_zh: String,
-    icon_id: String,
     base_url: String,
     base_urls: Vec<ProviderBaseUrlDto>,
     supported_styles: Vec<ProviderStyle>,
@@ -29,8 +27,6 @@ impl From<&AIProvider> for ProviderDto {
         Self {
             id: p.id.clone(),
             name: p.name.clone(),
-            name_zh: p.name_zh.clone(),
-            icon_id: p.icon_id.clone(),
             base_url: p.base_url.clone(),
             base_urls: p
                 .base_urls

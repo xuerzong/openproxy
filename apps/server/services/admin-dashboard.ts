@@ -199,7 +199,7 @@ export const getAdminDashboardUsageByProvider = async (rangeHours = 24) => {
   const normalizedProviders = providers.map((provider) => ({
     providerId: provider.id,
     providerName: provider.name,
-    providerIcon: provider.icon,
+    providerIcon: provider.id,
     requests: requestsByProviderId.get(provider.id) || 0,
   }))
   const knownProviderIds = new Set(providers.map((provider) => provider.id))

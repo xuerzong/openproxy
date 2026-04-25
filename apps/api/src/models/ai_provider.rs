@@ -39,10 +39,6 @@ pub struct AIProvider {
     pub id: String,
     /// Display name (English or primary brand name).
     pub name: String,
-    /// Chinese display name when distinct from `name`, else same as `name`.
-    pub name_zh: String,
-    /// Icon identifier; frontend maps this to a local SVG asset.
-    pub icon_id: String,
     /// Default base URL used when a per-style override is not provided.
     pub base_url: String,
     /// Per-style base URL overrides (used when a provider exposes different hosts per style).
@@ -123,7 +119,6 @@ mod tests {
         for p in AI_PROVIDERS.iter() {
             assert!(!p.id.is_empty());
             assert!(!p.name.is_empty());
-            assert!(!p.icon_id.is_empty());
             assert!(!p.base_url.is_empty());
             assert!(!p.supported_styles.is_empty());
         }
