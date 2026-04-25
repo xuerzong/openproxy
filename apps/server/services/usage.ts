@@ -184,6 +184,7 @@ export const getUsagesByTeamId = async (
     .select({
       usage: dbSchema.usages,
       aiProvider: {
+        id: dbSchema.aiProviders.id,
         name: dbSchema.aiProviders.name,
         icon: dbSchema.aiProviders.icon,
       },

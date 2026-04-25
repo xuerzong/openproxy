@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 import type { AIProviderItem } from '@/hooks/queries/useAIProvidersQuery'
 
+type AIProviderAPIKeyRecord = AIProviderItem['apiKeys'][number]
+
 interface AIProviderAPIKeysProps {
   provider: AIProviderItem | null
   open: boolean
@@ -116,7 +118,7 @@ export const AIProviderAPIKeys: React.FC<AIProviderAPIKeysProps> = ({
         </div>
 
         <div className="rounded-md border border-border overflow-hidden">
-          <Table
+          <Table<AIProviderAPIKeyRecord>
             rowKey={(record) => record.id}
             data={provider?.apiKeys || []}
             columns={[

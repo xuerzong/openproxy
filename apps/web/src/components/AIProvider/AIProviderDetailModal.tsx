@@ -4,6 +4,9 @@ import { ModelIcon } from '@/components/ModelIcon'
 import type { AIProviderItem } from '@/hooks/queries/useAIProvidersQuery'
 import { AIProviderSupportedStyleTag } from '@/components/AIProvider/AIProviderSupportedStyleTag'
 
+type AIProviderStyle = AIProviderItem['supportedStyles'][number]
+type AIProviderBaseUrl = AIProviderItem['baseUrls'][number]
+
 interface AIProviderDetailModalProps {
   provider: AIProviderItem | null
   open: boolean
@@ -71,7 +74,7 @@ export const AIProviderDetailModal: React.FC<AIProviderDetailModalProps> = ({
             </div>
             <div className="flex flex-wrap gap-1">
               {provider.supportedStyles?.length
-                ? provider.supportedStyles.map((style) => (
+                ? provider.supportedStyles.map((style: AIProviderStyle) => (
                     <AIProviderSupportedStyleTag key={style} style={style} />
                   ))
                 : '-'}
@@ -86,7 +89,7 @@ export const AIProviderDetailModal: React.FC<AIProviderDetailModalProps> = ({
             </div>
             {provider.baseUrls?.length ? (
               <div className="space-y-2 rounded-md border border-border p-3">
-                {provider.baseUrls.map((item) => (
+                {provider.baseUrls.map((item: AIProviderBaseUrl) => (
                   <div
                     key={`${provider.id}-${item.style}`}
                     className="space-y-1"

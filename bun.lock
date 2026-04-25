@@ -66,6 +66,7 @@
       "dependencies": {
         "@elysiajs/eden": "^1.4.9",
         "@number-flow/react": "^0.6.0",
+        "@openproxy/config": "workspace:*",
         "@openproxy/phone-auth": "workspace:*",
         "@openproxy/schema": "workspace:*",
         "@openproxy/ui": "workspace:*",

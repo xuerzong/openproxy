@@ -1,7 +1,7 @@
 import { queryKeys } from '@/constants/query-keys'
 import { useRequest } from '@/contexts/ApiContext'
 import { useQuery, type UseQueryResult } from '@tanstack/react-query'
-import type { AIProvider as RegistryAIProvider } from '@openproxy/config/ai-providers'
+import type { AIProvider as RegistryAIProvider } from '@openproxy/config'
 
 type AIProviderAPIKey = {
   id: string
