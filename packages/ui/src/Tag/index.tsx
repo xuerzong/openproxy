@@ -6,25 +6,18 @@ const tagBaseClass = 'inline-block text-xs font-medium rounded-sm px-2 py-0.5'
 const tagVariants = cva(tagBaseClass, {
   variants: {
     color: {
-      default:
-        'text-[var(--color-tag-default-foreground)] bg-[var(--color-tag-default-background)]',
-      gray: 'text-[var(--color-tag-gray-foreground)] bg-[var(--color-tag-gray-background)]',
-      slate:
-        'text-[var(--color-tag-slate-foreground)] bg-[var(--color-tag-slate-background)]',
-      blue: 'text-[var(--color-tag-blue-foreground)] bg-[var(--color-tag-blue-background)]',
-      cyan: 'text-[var(--color-tag-cyan-foreground)] bg-[var(--color-tag-cyan-background)]',
-      red: 'text-[var(--color-tag-red-foreground)] bg-[var(--color-tag-red-background)]',
-      orange:
-        'text-[var(--color-tag-orange-foreground)] bg-[var(--color-tag-orange-background)]',
-      yellow:
-        'text-[var(--color-tag-yellow-foreground)] bg-[var(--color-tag-yellow-background)]',
-      green:
-        'text-[var(--color-tag-green-foreground)] bg-[var(--color-tag-green-background)]',
-      emerald:
-        'text-[var(--color-tag-emerald-foreground)] bg-[var(--color-tag-emerald-background)]',
-      purple:
-        'text-[var(--color-tag-purple-foreground)] bg-[var(--color-tag-purple-background)]',
-      pink: 'text-[var(--color-tag-pink-foreground)] bg-[var(--color-tag-pink-background)]',
+      default: 'text-tag-default-foreground bg-tag-default-background',
+      gray: 'text-tag-gray-foreground bg-tag-gray-background',
+      slate: 'text-tag-slate-foreground bg-tag-slate-background',
+      blue: 'text-tag-blue-foreground bg-tag-blue-background',
+      cyan: 'text-tag-cyan-foreground bg-tag-cyan-background',
+      red: 'text-tag-red-foreground bg-tag-red-background',
+      orange: 'text-tag-orange-foreground bg-tag-orange-background',
+      yellow: 'text-tag-yellow-foreground bg-tag-yellow-background',
+      green: 'text-tag-green-foreground bg-tag-green-background',
+      emerald: 'text-tag-emerald-foreground bg-tag-emerald-background',
+      purple: 'text-tag-purple-foreground bg-tag-purple-background',
+      pink: 'text-tag-pink-foreground bg-tag-pink-background',
     },
   },
 })
