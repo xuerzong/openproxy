@@ -23,6 +23,30 @@ body {
   --muted: 249, 250, 251;
   --danger: 220, 38, 38;
   --success: 21, 128, 61;
+  --color-tag-default-foreground: rgb(17 24 39);
+  --color-tag-default-background: rgb(17 24 39 / 0.1);
+  --color-tag-gray-foreground: rgb(17 24 39);
+  --color-tag-gray-background: rgb(229 231 235);
+  --color-tag-slate-foreground: rgb(15 23 42);
+  --color-tag-slate-background: rgb(226 232 240);
+  --color-tag-blue-foreground: rgb(30 64 175);
+  --color-tag-blue-background: rgb(191 219 254);
+  --color-tag-cyan-foreground: rgb(22 78 99);
+  --color-tag-cyan-background: rgb(165 243 252);
+  --color-tag-red-foreground: rgb(127 29 29);
+  --color-tag-red-background: rgb(254 202 202);
+  --color-tag-orange-foreground: rgb(154 52 18);
+  --color-tag-orange-background: rgb(254 215 170);
+  --color-tag-yellow-foreground: rgb(133 77 14);
+  --color-tag-yellow-background: rgb(254 240 138);
+  --color-tag-green-foreground: rgb(20 83 45);
+  --color-tag-green-background: rgb(187 247 208);
+  --color-tag-emerald-foreground: rgb(6 78 59);
+  --color-tag-emerald-background: rgb(167 243 208);
+  --color-tag-purple-foreground: rgb(88 28 135);
+  --color-tag-purple-background: rgb(233 213 255);
+  --color-tag-pink-foreground: rgb(157 23 77);
+  --color-tag-pink-background: rgb(251 207 232);
   font-family: var(--font-sans);
   font-size: 15px;
 }
@@ -35,6 +59,30 @@ body {
   --primary-foreground: 0, 0, 0;
   --secondary: 156, 163, 175;
   --muted: 23, 23, 23;
+  --color-tag-default-foreground: rgb(243 244 246);
+  --color-tag-default-background: rgb(243 244 246 / 0.15);
+  --color-tag-gray-foreground: rgb(243 244 246);
+  --color-tag-gray-background: rgb(55 65 81);
+  --color-tag-slate-foreground: rgb(241 245 249);
+  --color-tag-slate-background: rgb(51 65 85);
+  --color-tag-blue-foreground: rgb(219 234 254);
+  --color-tag-blue-background: rgb(30 58 138 / 0.5);
+  --color-tag-cyan-foreground: rgb(207 250 254);
+  --color-tag-cyan-background: rgb(22 78 99 / 0.5);
+  --color-tag-red-foreground: rgb(254 226 226);
+  --color-tag-red-background: rgb(127 29 29 / 0.5);
+  --color-tag-orange-foreground: rgb(255 237 213);
+  --color-tag-orange-background: rgb(154 52 18 / 0.5);
+  --color-tag-yellow-foreground: rgb(254 249 195);
+  --color-tag-yellow-background: rgb(133 77 14 / 0.5);
+  --color-tag-green-foreground: rgb(220 252 231);
+  --color-tag-green-background: rgb(20 83 45 / 0.5);
+  --color-tag-emerald-foreground: rgb(209 250 229);
+  --color-tag-emerald-background: rgb(6 78 59 / 0.5);
+  --color-tag-purple-foreground: rgb(243 232 255);
+  --color-tag-purple-background: rgb(88 28 135 / 0.5);
+  --color-tag-pink-foreground: rgb(252 231 243);
+  --color-tag-pink-background: rgb(157 23 77 / 0.5);
 }
 
 input:-webkit-autofill {

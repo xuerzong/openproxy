@@ -429,8 +429,13 @@
   "aiProviders": {
     "title": "AI 供应商",
     "registryHint": "供应商元数据来自内置配置注册表，这里只管理 API Key。",
+    "detail": "详情",
+    "detailTitle": "AI 供应商详情",
     "apiKeys": "API Keys",
+    "baseUrl": "基础 URL",
+    "docsUrl": "文档地址",
     "supportedStyles": "支持的风格",
+    "styleBaseUrls": "风格基础 URL",
     "apiKeysPlaceholder": "请输入 API Key",
     "addApiKey": "添加 API Key",
     "manageApiKeys": "AI Keys",

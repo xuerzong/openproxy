@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MoreHorizontalIcon, KeyRoundIcon } from 'lucide-react'
+import { MoreHorizontalIcon, KeyRoundIcon, InfoIcon } from 'lucide-react'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { PageContainer } from '@/components/PageContainer'
 import { Button } from '@openproxy/ui/Button'
@@ -7,32 +7,26 @@ import { Table } from '@openproxy/ui/Table'
 import { useAIProvidersQuery } from '@/hooks/queries/useAIProvidersQuery'
 import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { AIProviderAPIKeys } from '@/components/AIProvider/AIProviderAPIKeys'
+import { AIProviderDetailModal } from '@/components/AIProvider/AIProviderDetailModal'
+import { AIProviderSupportedStyleTag } from '@/components/AIProvider/AIProviderSupportedStyleTag'
 import { useTranslation } from 'react-i18next'
 import { ModelIcon } from '@/components/ModelIcon'
 import { Tag } from '@openproxy/ui'
-
-const supportedStyleTagColors = {
-  openai_chat: 'blue',
-  anthropic_messages: 'purple',
-  openai_responses: 'green',
-  embeddings: 'orange',
-} as const
-
-const getSupportedStyleTagColor = (style: string) => {
-  return (
-    supportedStyleTagColors[style as keyof typeof supportedStyleTagColors] ??
-    'gray'
-  )
-}
 
 const Page = () => {
   const { t } = useTranslation('common')
   const aiProvidersQuery = useAIProvidersQuery()
   const [manageAPIKeysProviderId, setManageAPIKeysProviderId] = useState('')
+  const [detailProviderId, setDetailProviderId] = useState('')
 
   const manageAPIKeysProvider =
     aiProvidersQuery.data?.find(
       (provider) => provider.id === manageAPIKeysProviderId
+    ) || null
+
+  const detailProvider =
+    aiProvidersQuery.data?.find(
+      (provider) => provider.id === detailProviderId
     ) || null
 
   return (
@@ -71,9 +65,7 @@ const Page = () => {
                 <div className="flex flex-wrap gap-1">
                   {Array.isArray(text) && text.length
                     ? text.map((s) => (
-                        <Tag key={s} color={getSupportedStyleTagColor(s)}>
-                          {s}
-                        </Tag>
+                        <AIProviderSupportedStyleTag key={s} style={s} />
                       ))
                     : '-'}
                 </div>
@@ -101,6 +93,17 @@ const Page = () => {
                   <div>
                     <DropdownMenu
                       menus={[
+                        {
+                          type: 'item',
+                          key: 'detail',
+                          label: t('aiProviders.detail', {
+                            defaultValue: 'Detail',
+                          }),
+                          icon: <InfoIcon />,
+                          onClick: () => {
+                            setDetailProviderId(record.id)
+                          },
+                        },
                         {
                           type: 'item',
                           key: 'manageAPIKeys',
@@ -142,6 +145,16 @@ const Page = () => {
         }}
         onSuccess={() => {
           aiProvidersQuery.refetch()
+        }}
+      />
+
+      <AIProviderDetailModal
+        provider={detailProvider}
+        open={Boolean(detailProviderId)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDetailProviderId('')
+          }
         }}
       />
     </PageContainer>

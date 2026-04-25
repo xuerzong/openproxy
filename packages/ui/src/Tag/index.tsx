@@ -1,27 +1,33 @@
 import { cn } from '../utils/cn'
 import { cva, type VariantProps } from 'class-variance-authority'
 
-const tagVariants = cva(
-  'inline-block text-xs font-medium rounded-sm px-2 py-0.5',
-  {
-    variants: {
-      color: {
-        default: 'text-gray-900 bg-gray-900/10',
-        gray: 'text-gray-900 bg-gray-200',
-        slate: 'text-slate-900 bg-slate-200',
-        blue: 'text-blue-900 bg-blue-200',
-        cyan: 'text-cyan-900 bg-cyan-200',
-        red: 'text-red-900 bg-red-200',
-        orange: 'text-orange-900 bg-orange-200',
-        yellow: 'text-yellow-800 bg-yellow-200',
-        green: 'text-green-900 bg-green-200',
-        emerald: 'text-emerald-900 bg-emerald-200',
-        purple: 'text-purple-900 bg-purple-200',
-        pink: 'text-pink-900 bg-pink-200',
-      },
+const tagBaseClass = 'inline-block text-xs font-medium rounded-sm px-2 py-0.5'
+
+const tagVariants = cva(tagBaseClass, {
+  variants: {
+    color: {
+      default:
+        'text-[var(--color-tag-default-foreground)] bg-[var(--color-tag-default-background)]',
+      gray: 'text-[var(--color-tag-gray-foreground)] bg-[var(--color-tag-gray-background)]',
+      slate:
+        'text-[var(--color-tag-slate-foreground)] bg-[var(--color-tag-slate-background)]',
+      blue: 'text-[var(--color-tag-blue-foreground)] bg-[var(--color-tag-blue-background)]',
+      cyan: 'text-[var(--color-tag-cyan-foreground)] bg-[var(--color-tag-cyan-background)]',
+      red: 'text-[var(--color-tag-red-foreground)] bg-[var(--color-tag-red-background)]',
+      orange:
+        'text-[var(--color-tag-orange-foreground)] bg-[var(--color-tag-orange-background)]',
+      yellow:
+        'text-[var(--color-tag-yellow-foreground)] bg-[var(--color-tag-yellow-background)]',
+      green:
+        'text-[var(--color-tag-green-foreground)] bg-[var(--color-tag-green-background)]',
+      emerald:
+        'text-[var(--color-tag-emerald-foreground)] bg-[var(--color-tag-emerald-background)]',
+      purple:
+        'text-[var(--color-tag-purple-foreground)] bg-[var(--color-tag-purple-background)]',
+      pink: 'text-[var(--color-tag-pink-foreground)] bg-[var(--color-tag-pink-background)]',
     },
-  }
-)
+  },
+})
 
 export interface TagProps extends VariantProps<typeof tagVariants> {}
 

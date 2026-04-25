@@ -429,8 +429,13 @@
   "aiProviders": {
     "title": "AI Providers",
     "registryHint": "Provider metadata is read from the built-in config registry. Only API keys are managed here.",
+    "detail": "Detail",
+    "detailTitle": "AI Provider Detail",
     "apiKeys": "API Keys",
+    "baseUrl": "Base URL",
+    "docsUrl": "Docs URL",
     "supportedStyles": "Supported Styles",
+    "styleBaseUrls": "Style Base URLs",
     "apiKeysPlaceholder": "Please input an API key",
     "addApiKey": "Add API Key",
     "manageApiKeys": "AI Keys",
