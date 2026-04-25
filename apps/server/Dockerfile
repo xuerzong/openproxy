@@ -22,6 +22,7 @@ WORKDIR /app
 COPY --from=builder /app/apps/server/dist/index.js .
 COPY --from=builder /app/apps/server/dist/migrate.js .
 COPY --from=builder /app/apps/server/drizzle ./drizzle
+COPY --from=builder /app/packages/config ./packages/config
 
 ENV PORT=3888
 ENV NODE_ENV=production

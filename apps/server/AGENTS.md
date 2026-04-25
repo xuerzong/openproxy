@@ -36,6 +36,22 @@
 - Default API key folders are system folders: they cannot be deleted, and delete flows should still promote another folder to default if historical data ends up without one.
 - Team monthly usage archives live in `team_monthly_usages`; raw `usages` rows should only be retained for the current month, with prior months archived via the `/cron/archiveMonthlyUsage` endpoint before cleanup.
 
+## AI Provider Registry
+
+- The set of supported AI providers is defined once in
+  `packages/config/src/ai-providers.json`. `constants/ai-providers.ts` loads that JSON at
+  runtime, and Rust loads the same file from `apps/api/src/models/ai_provider.rs`. Update the
+  JSON plus the reference table in `apps/api/AGENTS.md` when provider metadata changes.
+- `GET /api/providers` exposes the registry (public, no auth) for the admin UI.
+- `GET /api/aiProviders` must also be registry-driven for provider metadata (`name`, `baseUrl`,
+  `icon`) rather than trusting mutable columns in `ai_providers`. The database still remains the
+  storage layer for provider rows, API keys, and foreign-key relations such as
+  `models_to_ai_providers`; service code should reconcile/sync built-in provider rows instead of
+  introducing new freeform providers.
+- The legacy `/api/aiProviders` CRUD remains for migration; new deployments should only
+  allow admins to manage API keys (`POST /api/aiProviders/apiKeys`, etc.) against provider
+  rows whose `id` matches a registry entry. Do not add new freeform-creation flows.
+
 ## Environment
 
 - `.env` with `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `RSA_PRIVATE_KEY`, `RSA_PUBLIC_KEY`.

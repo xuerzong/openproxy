@@ -16,7 +16,7 @@ export const getModels = async () => {
         with: {
           provider: {
             columns: {
-              icon: true,
+              id: true,
               name: true,
             },
           },

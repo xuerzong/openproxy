@@ -3,17 +3,19 @@ FROM rustlang/rust:nightly-bookworm AS builder
 
 WORKDIR /app
 
-# 1. 此时 Context 是 apps/api，所以直接拷贝当前目录下的锁文件
-COPY Cargo.toml Cargo.lock ./
+# Build context must be the repository root so shared config under packages/ is available.
+COPY apps/api/Cargo.toml apps/api/Cargo.lock ./apps/api/
 
-# 2. 预编译依赖
+WORKDIR /app/apps/api
+
+# 预编译依赖
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
-# 注意：这里的 api 替换为你的 [package] name
 RUN rm -f target/release/deps/api*
 
-# 3. 拷贝源码并正式编译
-COPY src ./src
+# 正式编译源码，并包含共享配置文件
+COPY apps/api/src ./src
+COPY packages/config /app/packages/config
 ENV SQLX_OFFLINE=true
 RUN cargo build --release
 
@@ -24,8 +26,7 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 WORKDIR /app
 
 # 拷贝二进制文件
-# 在独立项目中，target 就在当前目录的 target 里
-COPY --from=builder /app/target/release/api /app/axum_server
+COPY --from=builder /app/apps/api/target/release/api /app/axum_server
 
 ENV PORT=5060
 ENV RUST_LOG=info

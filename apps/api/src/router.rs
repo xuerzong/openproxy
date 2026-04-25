@@ -33,6 +33,7 @@ pub fn create_app(state: Arc<AppState>) -> Router {
     Router::new()
         .route("/health", get(handlers::health_check_handler))
         .route("/v1/models", get(handlers::list_models_handler))
+        .route("/v1/providers", get(handlers::list_providers_handler))
         .nest("/v1", proxy_routers)
         .layer(TraceLayer::new_for_http())
         .layer(cors)

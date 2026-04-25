@@ -1,0 +1,13 @@
+{
+  "name": "@openproxy/config",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./ai-providers": "./src/ai-providers.ts"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

@@ -270,8 +270,8 @@ const Page = () => {
               render: (_, record) => {
                 return (
                   <div className="flex items-center gap-1">
-                    {record.aiProvider?.icon && (
-                      <ModelIcon model={record.aiProvider.icon} />
+                    {record.aiProvider?.id && (
+                      <ModelIcon model={record.aiProvider.id} />
                     )}
                     <span>{record.aiProvider?.name || '-'}</span>
                   </div>
