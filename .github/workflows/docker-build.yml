@@ -18,8 +18,10 @@ jobs:
             context: .
             file: apps/server/Dockerfile
           - app: api
-            context: .
+            context: apps/api
             file: apps/api/Dockerfile
+            build-contexts: |
+              config=./packages/config
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,6 +41,7 @@ jobs:
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.file }}
+          build-contexts: ${{ matrix.build-contexts || '' }}
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/openproxy-${{ matrix.app }}:latest

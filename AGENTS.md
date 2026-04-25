@@ -25,6 +25,7 @@ Key shared packages:
 - In `apps/web` and `apps/server`, use arrow functions for regular function definitions; avoid `function` declarations/expressions. Exception: `apps/web/src/utils/qr/codegen.ts` keeps its upstream function style.
 - Shared ESLint presets live in `packages/eslint-config`; app-level `eslint.config.js` files should import from this package and only keep local overrides.
 - Cross-app static registries or metadata blobs that must be read by more than one app should live in `packages/config`, preferably as JSON. If one app reads such a file at compile time (for example Rust `include_str!`) or a bundled server reads it at runtime, update Dockerfiles/CI so the file is present in the relevant build context and runtime image.
+- When a Docker image uses an app-scoped build context instead of the repository root but still depends on files under `packages/config`, pass that directory through Docker named build contexts in CI and copy it explicitly in the Dockerfile.
 
 ## Convention Maintenance — MANDATORY
 
