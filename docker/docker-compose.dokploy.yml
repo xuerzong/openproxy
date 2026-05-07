@@ -26,6 +26,7 @@ services:
       - ZPAYZ_PAY_KEY
       - ZPAYZ_GATEWAY
       - REDIS_URL
+      - CRON_SECRET
     restart: always
 
   web-tenant:
