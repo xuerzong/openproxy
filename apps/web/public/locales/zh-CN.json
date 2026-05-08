@@ -400,6 +400,7 @@
     "confirmPayment": "确认支付",
     "finishPayment": "完成支付",
     "maxAmount": "最大金额不能超过 1000",
+    "minAmount": "充值金额必须大于 0",
     "scanHint": "打开手机「支付宝」扫码支付"
   },
   "apiKeys": {

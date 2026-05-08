@@ -153,7 +153,7 @@ export const payRouter = new Elysia({ name: 'pay-router', prefix: '/pay' })
     },
     {
       body: t.Object({
-        amount: t.Number(),
+        amount: t.Number({ minimum: 0.01 }),
         type: t.String(),
       }),
       auth: { role: true },

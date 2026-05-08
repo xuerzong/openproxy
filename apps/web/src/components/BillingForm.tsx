@@ -77,6 +77,10 @@ const AmountSelector: React.FC<AmountSelectorProps> = ({ onValueChange }) => {
                 setAmount(0)
                 return
               }
+              if (nextAmount <= 0) {
+                setAmount(0)
+                return
+              }
               if (nextAmount >= 1000) {
                 toast.error(
                   t('billing.maxAmount', {
@@ -209,6 +213,15 @@ export const BillingForm: React.FC<BillingFormProps> = ({ onFinish }) => {
   }, [qrCodeStatus])
 
   const onSubmit = async () => {
+    if (amount <= 0) {
+      toast.error(
+        t('billing.minAmount', {
+          defaultValue: 'Minimum amount is 1',
+        })
+      )
+      return
+    }
+
     setLoading(true)
 
     toastApiPromise(
@@ -249,7 +262,12 @@ export const BillingForm: React.FC<BillingFormProps> = ({ onFinish }) => {
       <div className="flex flex-col gap-6">
         <AmountSelector onValueChange={setAmount} />
         <PaymentTypeSelector />
-        <Button className="w-full" onClick={onSubmit} loading={loading}>
+        <Button
+          className="w-full"
+          onClick={onSubmit}
+          loading={loading}
+          disabled={amount <= 0}
+        >
           {t('billing.confirmPayment', { defaultValue: 'Confirm payment' })}
         </Button>
       </div>
