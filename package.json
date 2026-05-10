@@ -15,7 +15,7 @@
     "website"
   ],
   "dependencies": {
-    "turbo": "^2.9.6"
+    "turbo": "^2.9.12"
   },
   "scripts": {
     "build:website": "bun run --cwd website build",
