@@ -532,6 +532,7 @@
     "bindEmail": "Bind Email",
     "newPhone": "New Phone Number",
     "newEmail": "New Email Address",
+    "emailPendingVerification": "This email is not verified yet. Please check your inbox.",
     "verificationCode": "Verification Code",
     "sendCode": "Send Code",
     "verifyAndUpdate": "Verify & Update",
