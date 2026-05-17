@@ -1,6 +1,5 @@
-use std::sync::LazyLock;
-
 use serde::{Deserialize, Serialize};
+use sqlx::{FromRow, PgPool, types::Json};
 
 /// API style supported by a provider endpoint.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -29,9 +28,6 @@ pub struct ProviderBaseUrl {
     pub base_url: String,
 }
 
-/// A hardcoded AI provider definition. The list of supported providers is compiled
-/// into the binary; administrators pick from this registry instead of defining
-/// providers freeform.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AIProvider {
@@ -59,53 +55,41 @@ impl AIProvider {
     }
 }
 
-/// Shared AI provider registry loaded from the single source of truth JSON file.
-///
-/// Generated source file: `apps/api/generated/ai-providers.json`
-pub static AI_PROVIDERS: LazyLock<Vec<AIProvider>> = LazyLock::new(load_ai_providers);
-
-fn load_ai_providers() -> Vec<AIProvider> {
-    serde_json::from_str(include_str!("../../generated/ai-providers.json"))
-        .expect("apps/api/generated/ai-providers.json must contain valid AI provider JSON")
+#[derive(Debug, FromRow)]
+struct AIProviderRow {
+    id: String,
+    name: String,
+    base_url: String,
+    base_urls: Json<Vec<ProviderBaseUrl>>,
+    supported_styles: Json<Vec<ProviderStyle>>,
+    docs_url: String,
 }
 
-/// Look up a provider by id.
-pub fn find_provider_by_id(id: &str) -> Option<&'static AIProvider> {
-    AI_PROVIDERS.iter().find(|p| p.id == id)
-}
-
-/// Find a provider whose base URL matches the given URL (any registered style).
-/// Matching is by case-insensitive substring; the first match wins.
-pub fn find_provider_by_base_url(url: &str) -> Option<&'static AIProvider> {
-    let lower = url.to_ascii_lowercase();
-    AI_PROVIDERS.iter().find(|p| {
-        if lower.contains(&p.base_url.to_ascii_lowercase()) {
-            return true;
+impl From<AIProviderRow> for AIProvider {
+    fn from(row: AIProviderRow) -> Self {
+        Self {
+            id: row.id,
+            name: row.name,
+            base_url: row.base_url,
+            base_urls: row.base_urls.0,
+            supported_styles: row.supported_styles.0,
+            docs_url: row.docs_url,
         }
-        p.base_urls
-            .iter()
-            .any(|b| lower.contains(&b.base_url.to_ascii_lowercase()))
-    })
+    }
 }
 
-/// Find a provider whose base URL's host matches the given URL.
-/// Useful when model base URLs contain different path suffixes than the registry.
-pub fn find_provider_by_host(url: &str) -> Option<&'static AIProvider> {
-    let host = extract_host(url)?;
-    AI_PROVIDERS.iter().find(|p| {
-        if extract_host(&p.base_url).as_deref() == Some(host) {
-            return true;
-        }
-        p.base_urls
-            .iter()
-            .any(|b| extract_host(&b.base_url).as_deref() == Some(host))
-    })
-}
+pub async fn get_all_providers(pool: &PgPool) -> Result<Vec<AIProvider>, sqlx::Error> {
+    let rows = sqlx::query_as::<_, AIProviderRow>(
+        r#"
+        SELECT id, name, base_url, base_urls, supported_styles, docs_url
+        FROM ai_providers
+        ORDER BY name ASC
+        "#,
+    )
+    .fetch_all(pool)
+    .await?;
 
-fn extract_host(url: &str) -> Option<&str> {
-    let without_scheme = url.split_once("://").map(|(_, rest)| rest).unwrap_or(url);
-    let host = without_scheme.split('/').next()?;
-    Some(host)
+    Ok(rows.into_iter().map(AIProvider::from).collect())
 }
 
 #[cfg(test)]
@@ -113,35 +97,26 @@ mod tests {
     use super::*;
 
     #[test]
-    fn every_provider_has_nonempty_slug_and_name() {
-        for p in AI_PROVIDERS.iter() {
-            assert!(!p.id.is_empty());
-            assert!(!p.name.is_empty());
-            assert!(!p.base_url.is_empty());
-            assert!(!p.supported_styles.is_empty());
-        }
-    }
+    fn base_url_for_uses_override_when_present() {
+        let provider = AIProvider {
+            id: "vercel".to_string(),
+            name: "Vercel".to_string(),
+            base_url: "https://ai-gateway.vercel.sh/v1".to_string(),
+            base_urls: vec![ProviderBaseUrl {
+                style: ProviderStyle::AnthropicMessages,
+                base_url: "https://ai-gateway.vercel.sh".to_string(),
+            }],
+            supported_styles: vec![ProviderStyle::OpenAIChat],
+            docs_url: "https://vercel.com/docs/ai-gateway".to_string(),
+        };
 
-    #[test]
-    fn find_provider_by_id_works() {
         assert_eq!(
-            find_provider_by_id("bailian").map(|p| p.id.as_str()),
-            Some("bailian")
+            provider.base_url_for(ProviderStyle::AnthropicMessages),
+            "https://ai-gateway.vercel.sh"
         );
-        assert!(find_provider_by_id("nope").is_none());
-    }
-
-    #[test]
-    fn find_provider_by_host_matches_bailian() {
-        let p = find_provider_by_host(
-            "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+        assert_eq!(
+            provider.base_url_for(ProviderStyle::OpenAIChat),
+            "https://ai-gateway.vercel.sh/v1"
         );
-        assert_eq!(p.map(|p| p.id.as_str()), Some("bailian"));
-    }
-
-    #[test]
-    fn find_provider_by_host_matches_vercel_anthropic() {
-        let p = find_provider_by_host("https://ai-gateway.vercel.sh/v1/messages");
-        assert_eq!(p.map(|p| p.id.as_str()), Some("vercel"));
     }
 }

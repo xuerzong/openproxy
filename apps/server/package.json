@@ -9,6 +9,7 @@
     "test": "bun test",
     "lint": "bunx eslint .",
     "migrate": "bun run scripts/migrate.ts",
+    "seed:ai-providers": "bun run scripts/seedAIProviders.ts",
     "build": "bun build ./index.ts --outdir ./dist --target bun --external thread-stream",
     "drizzle": "drizzle-kit"
   },

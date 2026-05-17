@@ -11,6 +11,8 @@ type AIProviderAPIKey = {
 }
 
 export type AIProviderItem = RegistryAIProvider & {
+  icon: string
+  isBuiltIn: boolean
   apiKeys: AIProviderAPIKey[]
   apiKeyCount: number
 }

@@ -8,7 +8,8 @@
       "openai_chat",
       "embeddings"
     ],
-    "docsUrl": "https://help.aliyun.com/zh/model-studio/"
+    "docsUrl": "https://help.aliyun.com/zh/model-studio/",
+    "adapterKind": "stream_usage"
   },
   {
     "id": "vercel",
@@ -38,7 +39,8 @@
       "openai_responses",
       "embeddings"
     ],
-    "docsUrl": "https://vercel.com/docs/ai-gateway"
+    "docsUrl": "https://vercel.com/docs/ai-gateway",
+    "adapterKind": "stream_usage"
   },
   {
     "id": "kimi",
@@ -48,7 +50,8 @@
     "supportedStyles": [
       "openai_chat"
     ],
-    "docsUrl": "https://platform.moonshot.cn/docs/api"
+    "docsUrl": "https://platform.moonshot.cn/docs/api",
+    "adapterKind": "stream_usage"
   },
   {
     "id": "deepseek",
@@ -64,7 +67,8 @@
       "openai_chat",
       "anthropic_messages"
     ],
-    "docsUrl": "https://api-docs.deepseek.com/"
+    "docsUrl": "https://api-docs.deepseek.com/",
+    "adapterKind": "stream_usage"
   },
   {
     "id": "minimax",
@@ -80,7 +84,8 @@
       "openai_chat",
       "anthropic_messages"
     ],
-    "docsUrl": "https://platform.minimaxi.com/document/"
+    "docsUrl": "https://platform.minimaxi.com/document/",
+    "adapterKind": "stream_usage"
   },
   {
     "id": "opencode",
@@ -92,7 +97,8 @@
       "anthropic_messages",
       "openai_responses"
     ],
-    "docsUrl": "https://opencode.ai/docs/zen/"
+    "docsUrl": "https://opencode.ai/docs/zen/",
+    "adapterKind": "stream_usage"
   },
   {
     "id": "openrouter",
@@ -102,7 +108,8 @@
     "supportedStyles": [
       "openai_chat"
     ],
-    "docsUrl": "https://openrouter.ai/docs/"
+    "docsUrl": "https://openrouter.ai/docs/",
+    "adapterKind": "stream_usage"
   },
   {
     "id": "openai",
@@ -114,7 +121,8 @@
       "openai_responses",
       "embeddings"
     ],
-    "docsUrl": "https://platform.openai.com/docs/api-reference"
+    "docsUrl": "https://platform.openai.com/docs/api-reference",
+    "adapterKind": "openai"
   },
   {
     "id": "zai",
@@ -130,6 +138,7 @@
       "openai_chat",
       "anthropic_messages"
     ],
-    "docsUrl": "https://docs.z.ai/api-reference/"
+    "docsUrl": "https://docs.z.ai/api-reference/",
+    "adapterKind": "stream_usage"
   }
 ]
