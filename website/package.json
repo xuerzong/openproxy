@@ -10,8 +10,8 @@
     "dev": "stropress dev --dir docs"
   },
   "devDependencies": {
-    "@fontsource/geist": "^5.2.8",
-    "@fontsource/geist-mono": "^5.2.7",
-    "stropress": "0.0.6"
+    "@fontsource/geist": "^5.2.9",
+    "@fontsource/geist-mono": "^5.2.8",
+    "stropress": "0.0.7"
   }
 }
