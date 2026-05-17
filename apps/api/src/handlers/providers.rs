@@ -1,9 +1,10 @@
-use axum::{http::StatusCode, response::IntoResponse};
+use axum::{extract::State, http::StatusCode, response::IntoResponse};
 use serde::Serialize;
+use std::sync::Arc;
 
 use crate::{
-    models::ai_provider::{AIProvider, AI_PROVIDERS, ProviderStyle},
-    shared::ApiResponse,
+    models::ai_provider::{AIProvider, ProviderStyle, get_all_providers},
+    shared::{ApiResponse, AppState},
 };
 
 #[derive(Debug, Clone, Serialize)]
@@ -42,7 +43,16 @@ impl From<&AIProvider> for ProviderDto {
     }
 }
 
-pub async fn list_providers_handler() -> impl IntoResponse {
-    let providers: Vec<ProviderDto> = AI_PROVIDERS.iter().map(ProviderDto::from).collect();
-    ApiResponse::success(providers).to_res(StatusCode::OK)
+pub async fn list_providers_handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
+    match get_all_providers(&state.db).await {
+        Ok(providers) => {
+            let providers: Vec<ProviderDto> = providers.iter().map(ProviderDto::from).collect();
+            ApiResponse::success(providers).to_res(StatusCode::OK)
+        }
+        Err(error) => {
+            tracing::error!(error = %error, "Failed to fetch AI providers");
+            ApiResponse::<()>::error("Failed to fetch AI providers", "DB_ERROR")
+                .to_res(StatusCode::INTERNAL_SERVER_ERROR)
+        }
+    }
 }

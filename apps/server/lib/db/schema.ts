@@ -510,6 +510,16 @@ export const aiProviders = pgTable(
     apiKey: text('api_key').notNull(),
     apiKeyHash: varchar('api_key_hash').notNull(),
     icon: text('icon').notNull().default(''),
+    baseUrls: jsonb('base_urls')
+      .$type<Array<{ style: string; baseUrl: string }>>()
+      .notNull()
+      .default([]),
+    supportedStyles: jsonb('supported_styles')
+      .$type<string[]>()
+      .notNull()
+      .default([]),
+    docsUrl: text('docs_url').notNull().default(''),
+    isBuiltIn: boolean('is_built_in').notNull().default(false),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
       .defaultNow()
       .notNull(),

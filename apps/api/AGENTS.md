@@ -116,13 +116,19 @@ src/
 
 ### Architecture
 
-- The supported AI providers are defined once in `packages/config/src/ai-providers.json`.
-  `apps/api/generated/ai-providers.json` is a checked-in generated copy used by Docker builds
-  that only have `apps/api` as context. Refresh it with `bun run sync:api-provider-registry`
-  from the repository root whenever the shared JSON changes. Administrators cannot create
-  free-form providers — they select from this registry and only manage API keys. When a new
-  provider is added, update the shared JSON, regenerate `apps/api/generated/ai-providers.json`,
-  and update the adapter dispatch map in `adapters/mod.rs`.
+- Provider metadata used by the Rust runtime is database-backed. `GET /v1/providers` reads from
+  `ai_providers`, and request-time adapter selection uses `ProviderInfo.ai_provider_id` from
+  access validation rather than matching hosts against a static registry.
+- `packages/config/src/ai-providers.json` and `apps/api/generated/ai-providers.json` remain seed /
+  distribution artifacts for provisioning and build workflows, but they are no longer the runtime
+  source of truth for provider metadata inside `apps/api`.
+- When a new provider is added, update the shared JSON (including `adapterKind` if the provider
+  needs anything beyond the default no-op adapter), regenerate `apps/api/generated/ai-providers.json`
+  via `bun run sync:api-provider-registry`, and seed the database. The Rust adapter dispatcher
+  reads adapter selection from the generated JSON at startup — no Rust code change is required
+  unless a brand-new adapter kind is being introduced.
+- Most OpenAI-compatible providers share `StreamUsageProviderAdapter`; only providers with
+  materially different behavior should keep dedicated adapter files.
 - `adapters/` contains provider-specific request/response adapters.
 - `ProviderAdapter` trait has three request-style methods (all default to no-op):
   - `adapt_openai_request(body, is_stream)` — OpenAI `/v1/chat/completions` style.
@@ -130,28 +136,32 @@ src/
   - `adapt_responses_request(body, is_stream)` — OpenAI `/v1/responses` style (currently
     unused internally; responses are pre-translated to chat/completions, but the hook is
     available for future direct routing).
-- `ProviderAdapterFactory::for_provider()` dispatches by matching the provider's
-  `model_base_url` host against registry entries. Unmatched URLs fall back to
-  `DefaultProviderAdapter` (passthrough).
+- `ProviderAdapterFactory::for_provider()` dispatches by `ProviderInfo.ai_provider_id` →
+  `adapterKind` (from the registry JSON) → adapter impl. IDs absent from the registry or
+  without an `adapterKind` fall back to `DefaultProviderAdapter` (passthrough). Custom
+  providers created via the admin UI always behave as `default`.
 - Shared helper `ensure_stream_options_include_usage(body)` lives in `adapters/mod.rs`.
   Adapters that need the final `usage` chunk on streaming OpenAI responses should call it
   from `adapt_openai_request`.
 
 ### `/v1/providers` Endpoint
 
-- `GET /v1/providers` (public, no auth) returns the full registry with `id`, `name`,
-  `base_url`, per-style `base_urls`, `supported_styles`, and `docs_url`.
-- The server app exposes the same JSON-backed list at `/providers` for admin UI consumption.
+- `GET /v1/providers` (public, no auth) returns provider metadata from the `ai_providers` table
+  with `id`, `name`, `base_url`, per-style `base_urls`, `supported_styles`, and `docs_url`.
+- The server app exposes the same database-backed list at `/providers` for admin UI consumption.
 
-### Creating a New Adapter
+### Adapter Selection
 
-1. Add an entry to `packages/config/src/ai-providers.json`.
-2. Create a new file (e.g., `adapters/my_provider.rs`) with a struct that implements
-   `ProviderAdapter`, overriding only the style methods that need quirks.
-3. Wire the new adapter into `ProviderAdapterFactory::adapter_for_id` in `adapters/mod.rs`.
-4. Document the provider in the **Provider Registry** section below (base URLs, styles,
-   quirks, docs URL).
-5. Add tests that cover request transformations for each overridden style.
+1. Add an entry to `packages/config/src/ai-providers.json`. Set `"adapterKind"` to one of
+  `"openai"` | `"stream_usage"` if the provider needs more than the default no-op behavior;
+  omit the field for default behavior.
+2. Run `bun run sync:api-provider-registry` to copy the registry into
+  `apps/api/generated/ai-providers.json` (CI also enforces this is in sync).
+3. Only add a new adapter file / `AdapterKind` variant when an entirely new request-mutation
+  behavior is required.
+4. Document the provider in the **Provider Registry** section below (base URLs, styles, quirks,
+  docs URL).
+5. Add tests that cover request transformations for any non-default behavior.
 
 ### Provider Registry (single source in `packages/config/src/ai-providers.json`)
 
@@ -167,6 +177,5 @@ src/
 | `openai` | OpenAI | `OpenAI` | OpenAI chat, Responses, Embeddings | Canonical. No quirks. Does NOT inject `stream_options` so client-provided bodies pass through untouched. |
 | `zai` | 智谱 BigModel / Z.ai | `Zai` | OpenAI chat, Anthropic messages | Bases: `api.z.ai/api/paas/v4` (OpenAI), `api.z.ai/api/anthropic` (Anthropic), `open.bigmodel.cn/api/paas/v4` (CN mainland alt). GLM-4.5+ accepts `thinking: { type: "enabled" }`. Enforce `include_usage`. |
 
-Keep this table in sync with `AI_PROVIDERS` — CI tests check every registry entry has a
-dispatch arm, but this table is the human reference. When you update provider docs or
+Keep this table in sync with the provider seed/config and adapter dispatch map. When you update provider docs or
 endpoints, refresh this section as part of the same commit.

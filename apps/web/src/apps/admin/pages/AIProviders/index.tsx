@@ -1,23 +1,39 @@
 import { useState } from 'react'
-import { MoreHorizontalIcon, KeyRoundIcon, InfoIcon } from 'lucide-react'
+import {
+  MoreHorizontalIcon,
+  KeyRoundIcon,
+  InfoIcon,
+  PlusIcon,
+  PencilIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import { FlexScrollViewer } from '@/components/FlexScrollViewer'
 import { PageContainer } from '@/components/PageContainer'
 import { Button } from '@openproxy/ui/Button'
 import { Table } from '@openproxy/ui/Table'
+import { Dialog, DialogFooter } from '@openproxy/ui/Dialog'
 import { useAIProvidersQuery } from '@/hooks/queries/useAIProvidersQuery'
 import { DropdownMenu } from '@openproxy/ui/DropdownMenu'
 import { AIProviderAPIKeys } from '@/components/AIProvider/AIProviderAPIKeys'
 import { AIProviderDetailModal } from '@/components/AIProvider/AIProviderDetailModal'
+import { AIProviderEditModal } from '@/components/AIProvider/AIProviderEditModal'
 import { AIProviderSupportedStyleTag } from '@/components/AIProvider/AIProviderSupportedStyleTag'
 import { useTranslation } from 'react-i18next'
 import { ModelIcon } from '@/components/ModelIcon'
 import { Tag } from '@openproxy/ui'
+import { useRequest } from '@/contexts/ApiContext'
+import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 
 const Page = () => {
   const { t } = useTranslation('common')
+  const request = useRequest()
   const aiProvidersQuery = useAIProvidersQuery()
   const [manageAPIKeysProviderId, setManageAPIKeysProviderId] = useState('')
   const [detailProviderId, setDetailProviderId] = useState('')
+  const [editProviderId, setEditProviderId] = useState<string | null>(null)
+  const [createOpen, setCreateOpen] = useState(false)
+  const [deleteProviderId, setDeleteProviderId] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const manageAPIKeysProvider =
     aiProvidersQuery.data?.find(
@@ -29,11 +45,42 @@ const Page = () => {
       (provider) => provider.id === detailProviderId
     ) || null
 
+  const editProvider =
+    aiProvidersQuery.data?.find((provider) => provider.id === editProviderId) ||
+    null
+
+  const deleteProvider =
+    aiProvidersQuery.data?.find(
+      (provider) => provider.id === deleteProviderId
+    ) || null
+
+  const handleDelete = () => {
+    if (!deleteProvider) return
+    setDeleting(true)
+    toastApiPromise(request.aiProviders({ id: deleteProvider.id }).delete(), {
+      loading: t('common.processing'),
+      success: t('common.operationSuccess'),
+      error: (error) =>
+        t('common.operationFailedWithStatus', {
+          status: getToastRequestStatus(error),
+        }),
+      onSuccess: () => {
+        setDeleteProviderId('')
+        aiProvidersQuery.refetch()
+      },
+    }).finally(() => {
+      setDeleting(false)
+    })
+  }
+
   return (
-    <PageContainer
-      title={t('aiProviders.title', { defaultValue: 'AI Providers' })}
-      className="h-screen"
-    >
+    <PageContainer title={t('aiProviders.title')} className="h-screen">
+      <div className="flex justify-end">
+        <Button onClick={() => setCreateOpen(true)}>
+          <PlusIcon className="size-4" />
+          {t('aiProviders.create')}
+        </Button>
+      </div>
       <FlexScrollViewer bordered>
         <Table
           rowKey={(d: any) => d.id}
@@ -42,23 +89,28 @@ const Page = () => {
           columns={[
             {
               key: 'name',
-              label: t('common.name', { defaultValue: 'Name' }),
+              label: t('common.name'),
               width: 240,
               fixed: 'left',
               render: (_, record) => {
                 return (
                   <div className="flex items-center gap-1">
                     <ModelIcon model={record.id} />
-                    <div className="min-w-0">{record.name}</div>
+                    <div className="min-w-0 flex items-center gap-2">
+                      <span>{record.name}</span>
+                      <Tag color={record.isBuiltIn ? 'gray' : 'blue'}>
+                        {record.isBuiltIn
+                          ? t('aiProviders.builtIn')
+                          : t('aiProviders.custom')}
+                      </Tag>
+                    </div>
                   </div>
                 )
               },
             },
             {
               key: 'supportedStyles',
-              label: t('aiProviders.supportedStyles', {
-                defaultValue: 'Supported Styles',
-              }),
+              label: t('aiProviders.supportedStyles'),
               width: 200,
               ellipsis: true,
               render: (text) => (
@@ -74,7 +126,7 @@ const Page = () => {
             {
               key: 'apiKey',
               width: 120,
-              label: t('aiProviders.apiKeys', { defaultValue: 'API Keys' }),
+              label: t('aiProviders.apiKeys'),
               render: (_, record) => {
                 if (!record.apiKeys?.length) {
                   return '-'
@@ -85,7 +137,7 @@ const Page = () => {
             },
             {
               key: 'operation',
-              label: t('common.operation', { defaultValue: 'Operation' }),
+              label: t('common.operation'),
               width: 80,
               fixed: 'right',
               render: (_, record) => {
@@ -96,9 +148,7 @@ const Page = () => {
                         {
                           type: 'item',
                           key: 'detail',
-                          label: t('aiProviders.detail', {
-                            defaultValue: 'Detail',
-                          }),
+                          label: t('aiProviders.detail'),
                           icon: <InfoIcon />,
                           onClick: () => {
                             setDetailProviderId(record.id)
@@ -107,12 +157,30 @@ const Page = () => {
                         {
                           type: 'item',
                           key: 'manageAPIKeys',
-                          label: t('aiProviders.manageApiKeys', {
-                            defaultValue: 'AI Keys',
-                          }),
+                          label: t('aiProviders.manageApiKeys'),
                           icon: <KeyRoundIcon />,
                           onClick: () => {
                             setManageAPIKeysProviderId(record.id)
+                          },
+                        },
+                        {
+                          type: 'item',
+                          key: 'edit',
+                          label: t('actions.edit'),
+                          icon: <PencilIcon />,
+                          disabled: record.isBuiltIn,
+                          onClick: () => {
+                            setEditProviderId(record.id)
+                          },
+                        },
+                        {
+                          type: 'item',
+                          key: 'delete',
+                          label: t('actions.delete'),
+                          icon: <Trash2Icon />,
+                          disabled: record.isBuiltIn,
+                          onClick: () => {
+                            setDeleteProviderId(record.id)
                           },
                         },
                       ]}
@@ -127,10 +195,8 @@ const Page = () => {
             },
           ]}
           locale={{
-            noData: t('common.noData', { defaultValue: 'No data' }),
-            emptyListHint: t('common.emptyListHint', {
-              defaultValue: 'No records yet',
-            }),
+            noData: t('common.noData'),
+            emptyListHint: t('common.emptyListHint'),
           }}
         />
       </FlexScrollViewer>
@@ -157,6 +223,51 @@ const Page = () => {
           }
         }}
       />
+
+      <AIProviderEditModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSuccess={() => {
+          aiProvidersQuery.refetch()
+        }}
+      />
+
+      <AIProviderEditModal
+        provider={editProvider}
+        open={Boolean(editProviderId)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setEditProviderId(null)
+          }
+        }}
+        onSuccess={() => {
+          aiProvidersQuery.refetch()
+        }}
+      />
+
+      <Dialog
+        open={Boolean(deleteProviderId)}
+        onOpenChange={(open) => {
+          if (!open) setDeleteProviderId('')
+        }}
+        title={t('aiProviders.deleteTitle')}
+        footer={
+          <DialogFooter
+            okText={t('actions.delete')}
+            cancelText={t('actions.cancel')}
+            onCancel={() => setDeleteProviderId('')}
+            onOk={handleDelete}
+            okButtonProps={{ loading: deleting, variant: 'danger' }}
+          />
+        }
+      >
+        <div className="text-sm">
+          {t('aiProviders.deleteConfirm')}
+          {deleteProvider && (
+            <div className="mt-2 font-medium">{deleteProvider.name}</div>
+          )}
+        </div>
+      </Dialog>
     </PageContainer>
   )
 }

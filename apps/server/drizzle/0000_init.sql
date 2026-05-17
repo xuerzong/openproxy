@@ -31,6 +31,10 @@ CREATE TABLE "ai_providers" (
     "api_key" text NOT NULL,
     "api_key_hash" varchar NOT NULL,
     "icon" text DEFAULT '' NOT NULL,
+    "base_urls" jsonb DEFAULT '[]'::jsonb NOT NULL,
+    "supported_styles" jsonb DEFAULT '[]'::jsonb NOT NULL,
+    "docs_url" text DEFAULT '' NOT NULL,
+    "is_built_in" boolean DEFAULT false NOT NULL,
     "created_at" timestamp with time zone DEFAULT now() NOT NULL,
     "updated_at" timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT "ai_providers_name_unique" UNIQUE ("name")

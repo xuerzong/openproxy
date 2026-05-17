@@ -39,18 +39,19 @@
 ## AI Provider Registry
 
 - The set of supported AI providers is defined once in
-  `packages/config/src/ai-providers.json`. `constants/ai-providers.ts` loads that JSON at
-  runtime, and Rust loads the same file from `apps/api/src/models/ai_provider.rs`. Update the
-  JSON plus the reference table in `apps/api/AGENTS.md` when provider metadata changes.
-- `GET /api/providers` exposes the registry (public, no auth) for the admin UI.
-- `GET /api/aiProviders` must also be registry-driven for provider metadata (`name`, `baseUrl`,
-  `icon`) rather than trusting mutable columns in `ai_providers`. The database still remains the
-  storage layer for provider rows, API keys, and foreign-key relations such as
-  `models_to_ai_providers`; service code should reconcile/sync built-in provider rows instead of
-  introducing new freeform providers.
-- The legacy `/api/aiProviders` CRUD remains for migration; new deployments should only
-  allow admins to manage API keys (`POST /api/aiProviders/apiKeys`, etc.) against provider
-  rows whose `id` matches a registry entry. Do not add new freeform-creation flows.
+  `packages/config/src/ai-providers.json`, but in `apps/server` that file is now a seed input
+  rather than a runtime dependency. Seed built-in providers with
+  `bun run seed:ai-providers`, then read provider metadata from the `ai_providers` table.
+- `GET /api/providers` in `apps/server` is database-backed and returns provider metadata from
+  `ai_providers` without API-key fields.
+- `GET /api/aiProviders` and related CRUD in `apps/server` are also database-backed. Built-in
+  providers are identified by `is_built_in`; runtime code must not reconcile against the JSON
+  registry on each request.
+- `apps/api/generated/ai-providers.json` remains a checked-in distribution artifact for sync /
+  compatibility workflows, but provider metadata at runtime is now database-backed in both
+  `apps/server` and `apps/api`. When provider metadata changes, update the JSON, run the server
+  seed script for the database, and keep the generated file synchronized via the existing sync
+  workflow.
 
 ## Environment
 
