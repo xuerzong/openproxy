@@ -1,6 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext'
 import { Input } from '@openproxy/ui/Input'
 import { Button } from '@openproxy/ui/Button'
+import { Tag } from '@openproxy/ui/Tag'
 import { useState } from 'react'
 import { authClient } from '@/utils/better-auth'
 import { useTranslation } from 'react-i18next'
@@ -12,6 +13,7 @@ export const EmailField = () => {
   const { session, refreshSession } = useAuth()
   const [dialogOpen, setDialogOpen] = useState(false)
   const hasEmail = Boolean(session?.user.email)
+  const emailUnverified = hasEmail && session?.user.emailVerified === false
   const emailLabel = hasEmail
     ? t('account.changeEmail', { defaultValue: 'Change Email' })
     : t('account.bindEmail', { defaultValue: 'Bind Email' })
@@ -45,6 +47,18 @@ export const EmailField = () => {
         <label className="font-medium text-sm" htmlFor="email">
           {t('account.email', { defaultValue: 'Email' })}
         </label>
+        {emailUnverified ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Tag color="yellow">
+              {t('common.unverified', { defaultValue: 'Unverified' })}
+            </Tag>
+            <span>
+              {t('account.emailPendingVerification', {
+                defaultValue: 'This email is not verified yet. Please check your inbox.',
+              })}
+            </span>
+          </div>
+        ) : null}
         <div className="flex items-center gap-4">
           <Input
             className="flex-1"

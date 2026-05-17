@@ -532,6 +532,7 @@
     "bindEmail": "绑定邮箱",
     "newPhone": "新手机号",
     "newEmail": "新邮箱地址",
+    "emailPendingVerification": "该邮箱尚未验证，请检查收件箱。",
     "verificationCode": "验证码",
     "sendCode": "发送验证码",
     "verifyAndUpdate": "验证并更新",
