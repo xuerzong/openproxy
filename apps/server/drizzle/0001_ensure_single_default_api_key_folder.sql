@@ -14,5 +14,3 @@ SET is_default = false,
 FROM ranked_defaults
 WHERE folders.id = ranked_defaults.id
   AND ranked_defaults.row_num > 1;
---> statement-breakpoint
-CREATE UNIQUE INDEX "api_key_folders_team_default_unique" ON "api_key_folders" USING btree ("team_id") WHERE "api_key_folders"."is_default" = true;
