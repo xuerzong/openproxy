@@ -28,7 +28,14 @@ DATABASE_URL=postgresql://postgres:postgres@postgresql:5432/openproxy
 BETTER_AUTH_SECRET=<随机 32 字节 base64>
 BETTER_AUTH_TRUSTED_ORIGINS=https://your-tenant-domain,https://your-admin-domain
 BETTER_AUTH_URL=https://your-tenant-domain/api
+# APP_DOMAIN 是顶级域名（如 example.com，默认 aiproxy.shop），控制：
+#   - 为 *.APP_DOMAIN 生成 better-auth 受信任来源
+#   - 将 better-auth 会话 Cookie 的 Domain 设为 .APP_DOMAIN，让 *.APP_DOMAIN 子域
+#     共享同一份登录态（仅在生产环境启用）
 APP_DOMAIN=
+# CLIENT_ORIGIN 是租户前端的对外 origin（协议 + 主机，无尾部斜杠，
+# 例如 https://app.example.com），用于拼接支付回调/跳转地址与邮件验证
+# 链接。默认生产为 https://app.${APP_DOMAIN}。
 CLIENT_ORIGIN=
 RSA_PRIVATE_KEY=<通过 bun scripts/generateRSAKey.ts 生成>
 RSA_PUBLIC_KEY=<同上生成>

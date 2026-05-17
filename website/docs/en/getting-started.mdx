@@ -45,7 +45,16 @@ DATABASE_URL=postgres://user:password@localhost:5432/openproxy
 BETTER_AUTH_SECRET=<random 32-byte base64 string>
 BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:5173
 BETTER_AUTH_URL=http://localhost:5173/api
+# APP_DOMAIN is the apex domain (e.g. example.com; defaults to aiproxy.shop).
+# It controls:
+#   - trusted origins generated for *.APP_DOMAIN
+#   - better-auth session cookie Domain (.APP_DOMAIN), so *.APP_DOMAIN
+#     subdomains share the same login session (production only)
 APP_DOMAIN=
+# CLIENT_ORIGIN is the public origin of the tenant web app (scheme + host,
+# no trailing slash, e.g. https://app.example.com). Used to build payment
+# notify/return URLs and email verification links. Defaults to
+# https://app.${APP_DOMAIN} in production and http://localhost:5173 in dev.
 CLIENT_ORIGIN=
 IS_OSS=true
 CRON_SECRET=

@@ -59,6 +59,17 @@ export const auth = betterAuth({
     database: {
       generateId: false,
     },
+    crossSubDomainCookies: {
+      enabled: !IS_DEV,
+      domain: `.${APP_DOMAIN}`,
+    },
+    ...(!IS_DEV && {
+      defaultCookieAttributes: {
+          sameSite: 'lax',
+          secure: true,
+          domain: `.${APP_DOMAIN}`,
+        }
+    })
   },
   database: drizzleAdapter(db, {
     provider: 'pg',
