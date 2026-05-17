@@ -14,8 +14,6 @@
     "drizzle": "drizzle-kit"
   },
   "dependencies": {
-    "@axiomhq/js": "^1.6.0",
-    "@axiomhq/pino": "^1.6.0",
     "@elysiajs/cookie": "^0.8.0",
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/html": "^1.4.0",

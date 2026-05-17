@@ -3,11 +3,9 @@ import { Elysia } from 'elysia'
 import { cors } from '@elysiajs/cors'
 import { router } from '@server/routers'
 import { sentryPlugin } from '@server/plugins/sentry'
-// import { axiomLoggerPlugin } from '@server/plugins/logger'
 
 const app = new Elysia({})
   .use(cors())
-  // .use(axiomLoggerPlugin)
   .use(sentryPlugin)
   .use(router)
   .listen(PORT)
