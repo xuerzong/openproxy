@@ -1,4 +1,4 @@
-const id = import.meta.env.VITE_UMAMI_WEBSITE_ID
+const id = window.__APP_CONFIG__?.UMAMI_WEBSITE_ID?.trim()
 if (
   id &&
   location.hostname !== 'localhost' &&
