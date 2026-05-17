@@ -64,7 +64,7 @@ Client → apps/api (Rust, 5060 端口)
 ### 1. 克隆并安装依赖
 
 ```bash
-git clone https://github.com/your-org/openproxy.git
+git clone https://github.com/xuerzong/openproxy.git
 cd openproxy
 bun install
 ```
@@ -84,9 +84,17 @@ DATABASE_URL=postgres://user:password@localhost:5432/openproxy
 # 生成密钥：openssl rand -base64 32
 BETTER_AUTH_SECRET=your-secret-here
 
-# 服务回调 URL
-BETTER_AUTH_URL=http://localhost:5080/api
+# 前端来源和认证回调 URL
 BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:5173
+BETTER_AUTH_URL=http://localhost:5173/api
+
+# 可选的域名 / 来源覆盖
+APP_DOMAIN=
+CLIENT_ORIGIN=
+
+# 可选的 OSS 模式与定时任务鉴权
+IS_OSS=true
+CRON_SECRET=
 
 # RSA 密钥对（加密供应商 API Key）
 # 生成：bun scripts/generateRSAKey.ts
@@ -95,7 +103,28 @@ RSA_PUBLIC_KEY=
 
 # 邮箱（任选其一）
 RESEND_API_KEY=         # Resend
-# 或 SMTP_HOST / SMTP_USER / SMTP_PASS / SMTP_FROM
+SMTP_HOST=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+
+# 可选日志上报
+AXIOM_DATASET=
+AXIOM_TOKEN=
+
+# 可选阿里云短信 / 验证码
+ALIBABA_CLOUD_ACCESS_KEY_ID=
+ALIBABA_CLOUD_ACCESS_KEY_SECRET=
+ALI_CAPTCHA_API_KEY=
+
+# 可选 ZPayZ 支付
+ZPAYZ_CID=
+ZPAYZ_PID=
+ZPAYZ_PAY_KEY=
+ZPAYZ_GATEWAY=https://zpayz.cn/submit.php
+
+# 可选 Redis
+REDIS_URL=
 
 # GitHub / Google OAuth（可选）
 GITHUB_CLIENT_ID=

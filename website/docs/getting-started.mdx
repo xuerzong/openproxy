@@ -15,7 +15,7 @@ description: 10 分钟完成 OpenProxy 本地启动
 ## 1. 克隆并安装依赖
 
 ```bash
-git clone https://github.com/your-org/openproxy.git
+git clone https://github.com/xuerzong/openproxy.git
 cd openproxy
 bun install
 ```
@@ -43,14 +43,39 @@ cp apps/server/.env.example apps/server/.env
 ```dotenv
 DATABASE_URL=postgres://user:password@localhost:5432/openproxy
 BETTER_AUTH_SECRET=<随机 32 字节 base64 字符串>
-BETTER_AUTH_URL=http://localhost:3888/api
 BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:5173
+BETTER_AUTH_URL=http://localhost:5173/api
+APP_DOMAIN=
+CLIENT_ORIGIN=
+IS_OSS=true
+CRON_SECRET=
 RSA_PRIVATE_KEY=<第 2 步生成的私钥>
 RSA_PUBLIC_KEY=<第 2 步生成的公钥>
 
 # 邮件（任选其一）
 RESEND_API_KEY=         # Resend
-# 或 SMTP_HOST / SMTP_USER / SMTP_PASS / SMTP_FROM
+SMTP_HOST=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+
+# 可选日志上报
+AXIOM_DATASET=
+AXIOM_TOKEN=
+
+# 可选阿里云短信 / 验证码
+ALIBABA_CLOUD_ACCESS_KEY_ID=
+ALIBABA_CLOUD_ACCESS_KEY_SECRET=
+ALI_CAPTCHA_API_KEY=
+
+# 可选 ZPayZ 支付
+ZPAYZ_CID=
+ZPAYZ_PID=
+ZPAYZ_PAY_KEY=
+ZPAYZ_GATEWAY=https://zpayz.cn/submit.php
+
+# 可选 Redis
+REDIS_URL=
 
 # OAuth（可选）
 GITHUB_CLIENT_ID=
@@ -123,7 +148,7 @@ curl http://localhost:3888/api/health
 
 ### 鉴权回调异常
 
-`BETTER_AUTH_URL` 必须指向 `apps/server` 实际可访问的地址；`BETTER_AUTH_TRUSTED_ORIGINS` 必须与前端 Web 的 origin 一致。
+本地开发时，`BETTER_AUTH_URL` 通常应保持为与前端同源的 `http://localhost:5173/api`；`BETTER_AUTH_TRUSTED_ORIGINS` 则需要包含所有允许完成认证流程的 Web origin。
 
 ### API Key 解密失败 / RSA 报错
 

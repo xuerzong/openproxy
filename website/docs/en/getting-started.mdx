@@ -15,7 +15,7 @@ This guide takes you from clone to a fully running local stack.
 ## 1. Clone and install dependencies
 
 ```bash
-git clone https://github.com/your-org/openproxy.git
+git clone https://github.com/xuerzong/openproxy.git
 cd openproxy
 bun install
 ```
@@ -43,14 +43,39 @@ Edit `apps/server/.env` with at minimum:
 ```dotenv
 DATABASE_URL=postgres://user:password@localhost:5432/openproxy
 BETTER_AUTH_SECRET=<random 32-byte base64 string>
-BETTER_AUTH_URL=http://localhost:3888/api
 BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:5173
+BETTER_AUTH_URL=http://localhost:5173/api
+APP_DOMAIN=
+CLIENT_ORIGIN=
+IS_OSS=true
+CRON_SECRET=
 RSA_PRIVATE_KEY=<from step 2>
 RSA_PUBLIC_KEY=<from step 2>
 
 # Email — choose one
 RESEND_API_KEY=         # Resend
-# or SMTP_HOST / SMTP_USER / SMTP_PASS / SMTP_FROM
+SMTP_HOST=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+
+# Optional logging
+AXIOM_DATASET=
+AXIOM_TOKEN=
+
+# Optional Alibaba Cloud SMS / captcha
+ALIBABA_CLOUD_ACCESS_KEY_ID=
+ALIBABA_CLOUD_ACCESS_KEY_SECRET=
+ALI_CAPTCHA_API_KEY=
+
+# Optional ZPayZ payment
+ZPAYZ_CID=
+ZPAYZ_PID=
+ZPAYZ_PAY_KEY=
+ZPAYZ_GATEWAY=https://zpayz.cn/submit.php
+
+# Optional Redis
+REDIS_URL=
 
 # Optional: OAuth
 GITHUB_CLIENT_ID=
@@ -123,7 +148,7 @@ Verify `DATABASE_URL` is correct, PostgreSQL is running, and the user has `CREAT
 
 ### Auth callback issues
 
-`BETTER_AUTH_URL` must point to where `apps/server` is accessible. `BETTER_AUTH_TRUSTED_ORIGINS` must match the origin of your web frontend.
+For local development, `BETTER_AUTH_URL` should usually stay aligned with the frontend origin as `http://localhost:5173/api`, while `BETTER_AUTH_TRUSTED_ORIGINS` must include every web origin allowed to complete auth flows.
 
 ### API key decryption failed / RSA error
 

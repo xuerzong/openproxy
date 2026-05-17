@@ -24,15 +24,18 @@ cp docker/.env.example docker/.env
 Edit `docker/.env`. Required variables:
 
 ```dotenv
-DATABASE_URL=postgres://user:password@postgres:5432/openproxy
+DATABASE_URL=postgresql://postgres:postgres@postgresql:5432/openproxy
 BETTER_AUTH_SECRET=<random 32-byte base64>
-BETTER_AUTH_URL=https://your-server-domain/api
 BETTER_AUTH_TRUSTED_ORIGINS=https://your-tenant-domain,https://your-admin-domain
+BETTER_AUTH_URL=https://your-tenant-domain/api
+APP_DOMAIN=
+CLIENT_ORIGIN=
 RSA_PRIVATE_KEY=<generated with bun scripts/generateRSAKey.ts>
 RSA_PUBLIC_KEY=<same generation>
+REDIS_URL=redis://redis:6379
 ```
 
-Also add email (RESEND or SMTP), OAuth, SMS, and payment variables as needed.
+Also add email (RESEND or SMTP), logging (AXIOM), OAuth, SMS/captcha, and payment variables as needed.
 
 ### 2. Start
 
@@ -133,7 +136,7 @@ Serve the `dist/` directories with Nginx or any static file host.
 ## Production checklist
 
 - [ ] Use HTTPS with valid certificates for all public domains
-- [ ] Set `BETTER_AUTH_URL` and `BETTER_AUTH_TRUSTED_ORIGINS` to production URLs
+- [ ] Set `BETTER_AUTH_URL` to the public frontend origin with `/api`, and set `BETTER_AUTH_TRUSTED_ORIGINS` to every production web origin
 - [ ] Enable PostgreSQL backups (e.g. pg_dump cron or managed DB snapshot)
 - [ ] Never log `RSA_PRIVATE_KEY` or plaintext API keys
 - [ ] Use secrets management (e.g. Docker secrets, Vault) rather than plain `.env` files in production
