@@ -64,7 +64,7 @@ Client → apps/api (Rust, port 5060)
 ### 1. Clone and install dependencies
 
 ```bash
-git clone https://github.com/your-org/openproxy.git
+git clone https://github.com/xuerzong/openproxy.git
 cd openproxy
 bun install
 ```
@@ -84,9 +84,17 @@ DATABASE_URL=postgres://user:password@localhost:5432/openproxy
 # Generate with: openssl rand -base64 32
 BETTER_AUTH_SECRET=your-secret-here
 
-# URL of the server (used for auth callbacks)
-BETTER_AUTH_URL=http://localhost:5080/api
+# Frontend origin and auth callback URL
 BETTER_AUTH_TRUSTED_ORIGINS=http://localhost:5173
+BETTER_AUTH_URL=http://localhost:5173/api
+
+# Optional domain/origin overrides
+APP_DOMAIN=
+CLIENT_ORIGIN=
+
+# Optional OSS mode and cron auth
+IS_OSS=true
+CRON_SECRET=
 
 # RSA key pair for encrypting provider API keys
 # Generate with: bun scripts/generateRSAKey.ts
@@ -95,7 +103,28 @@ RSA_PUBLIC_KEY=
 
 # Email (choose one)
 RESEND_API_KEY=         # Resend
-# or SMTP_HOST / SMTP_USER / SMTP_PASS / SMTP_FROM
+SMTP_HOST=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+
+# Optional logging
+AXIOM_DATASET=
+AXIOM_TOKEN=
+
+# Optional Alibaba Cloud SMS / captcha
+ALIBABA_CLOUD_ACCESS_KEY_ID=
+ALIBABA_CLOUD_ACCESS_KEY_SECRET=
+ALI_CAPTCHA_API_KEY=
+
+# Optional ZPayZ payment
+ZPAYZ_CID=
+ZPAYZ_PID=
+ZPAYZ_PAY_KEY=
+ZPAYZ_GATEWAY=https://zpayz.cn/submit.php
+
+# Optional Redis
+REDIS_URL=
 
 # Optional: GitHub / Google OAuth
 GITHUB_CLIENT_ID=
