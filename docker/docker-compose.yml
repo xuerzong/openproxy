@@ -26,7 +26,7 @@ services:
   server:
     image: ghcr.io/xuerzong/openproxy-server:latest
     ports:
-      - "5080:5080"
+      - "3888:3888"
     env_file:
       - .env
     depends_on:
@@ -51,7 +51,7 @@ services:
   web-tenant:
     image: ghcr.io/xuerzong/openproxy-web:latest
     ports:
-      - "5090:5090"
+      - "5090:80"
     environment:
       - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID:-}
     depends_on:
@@ -63,7 +63,7 @@ services:
   web-admin:
     image: ghcr.io/xuerzong/openproxy-web:latest
     ports:
-      - "5091:5091"
+      - "5091:80"
     environment:
       - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID:-}
     depends_on:
