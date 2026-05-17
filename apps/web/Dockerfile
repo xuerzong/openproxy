@@ -19,5 +19,7 @@ FROM nginx:stable-alpine
 WORKDIR /app
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 COPY --from=build /app/apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/web/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/docker-entrypoint.sh"]

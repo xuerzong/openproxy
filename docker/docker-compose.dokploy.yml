@@ -37,6 +37,8 @@ services:
         BUILD_MODE: tenant
     ports:
       - "5090:80"
+    environment:
+      - UMAMI_WEBSITE_ID
     depends_on:
       - server
     restart: always
@@ -49,6 +51,8 @@ services:
         BUILD_MODE: admin
     ports:
       - "5091:80"
+    environment:
+      - UMAMI_WEBSITE_ID
     depends_on:
       - server
     restart: always

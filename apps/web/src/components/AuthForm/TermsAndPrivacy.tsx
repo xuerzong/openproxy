@@ -1,9 +1,16 @@
 import { useTranslation } from 'react-i18next'
+import { useIsOSS } from '@/hooks/useIsOSS'
 
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://aiproxy.shop'
+const SITE_URL = 'https://aiproxy.shop'
 
 export const TermsAndPrivacy = () => {
   const { t } = useTranslation('common')
+  const isOSS = useIsOSS()
+
+  if (isOSS) {
+    return null
+  }
+
   return (
     <div className="text-sm">
       {t('auth.termsPrefix', {

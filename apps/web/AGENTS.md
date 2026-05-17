@@ -30,7 +30,7 @@ When adding or modifying any visible text (labels, tooltips, placeholders, error
 - Path aliases: `@/` → `src/`, `@openproxy/` → workspace packages.
 - Vite path aliases should use the native `resolve.tsconfigPaths: true` option in `vite.config.ts`; do not add `vite-tsconfig-paths` unless a Vite limitation requires it.
 - When `apps/web` imports React-based workspace packages, keep `resolve.dedupe` in `vite.config.ts` aligned for `react`, `react-dom`, and `react-i18next` so the dev server does not load multiple React instances.
-- Analytics: Umami is loaded via `index.html` inline script gated by `VITE_UMAMI_WEBSITE_ID`; leave the env var empty in dev to skip the script.
+- Analytics: Umami is loaded client-side from `window.__APP_CONFIG__.UMAMI_WEBSITE_ID` via `/runtime-config.js`; for Docker deployments, pass `UMAMI_WEBSITE_ID` at container runtime instead of baking a `VITE_*` value into the build.
 - Sidebar menus in `src/layouts/DashboardLayout.tsx` may include non-clickable `label` and `separator` entries to create grouped navigation sections.
 
 ## Project Structure

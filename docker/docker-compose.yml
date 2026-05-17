@@ -52,6 +52,8 @@ services:
     image: ghcr.io/xuerzong/openproxy-web:latest
     ports:
       - "5090:5090"
+    environment:
+      - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID:-}
     depends_on:
       - server
     restart: always
@@ -62,6 +64,8 @@ services:
     image: ghcr.io/xuerzong/openproxy-web:latest
     ports:
       - "5091:5091"
+    environment:
+      - UMAMI_WEBSITE_ID=${UMAMI_WEBSITE_ID:-}
     depends_on:
       - server
     restart: always
