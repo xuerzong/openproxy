@@ -115,6 +115,33 @@ prompt_app_domain() {
   done
 }
 
+prompt_admin_emails() {
+  local current_admin_emails="$1"
+  local input_admin_emails
+
+  if [[ -n "$current_admin_emails" ]]; then
+    echo "ADMIN_EMAILS already set, skipped"
+    return
+  fi
+
+  if ! read -r -p "Enter ADMIN_EMAILS (comma-separated signup emails to promote as admin). Leave blank to skip: " input_admin_emails; then
+    echo
+    echo "ADMIN_EMAILS is empty. You can set it manually in $ENV_FILE later."
+    return
+  fi
+
+  input_admin_emails="$(printf '%s' "$input_admin_emails" | tr '[:upper:]' '[:lower:]')"
+  input_admin_emails="$(printf '%s' "$input_admin_emails" | sed 's/, */,/g; s/^ *//; s/ *$//')"
+
+  if [[ -z "$input_admin_emails" ]]; then
+    echo "Skipped ADMIN_EMAILS"
+    return
+  fi
+
+  set_env_value "ADMIN_EMAILS" "$input_admin_emails"
+  print_success "Set ADMIN_EMAILS=$input_admin_emails"
+}
+
 if [[ ! -f "$ENV_FILE" ]]; then
   cp "$ENV_EXAMPLE" "$ENV_FILE"
   print_success "Created .env from .env.example"
@@ -144,6 +171,9 @@ prompt_app_domain "$current_app_domain"
 if [[ -n "$current_app_domain" ]]; then
   sync_better_auth_url "$current_app_domain"
 fi
+
+current_admin_emails="$(get_env_value ADMIN_EMAILS || true)"
+prompt_admin_emails "$current_admin_emails"
 
 current_rsa_private_key="$(get_env_value RSA_PRIVATE_KEY || true)"
 current_rsa_public_key="$(get_env_value RSA_PUBLIC_KEY || true)"

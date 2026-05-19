@@ -56,6 +56,7 @@ APP_DOMAIN=
 # 链接。默认生产为 https://app.${APP_DOMAIN}，开发为 http://localhost:5173。
 CLIENT_ORIGIN=
 IS_OSS=true
+ADMIN_EMAILS=owner@example.com
 CRON_SECRET=
 RSA_PRIVATE_KEY=<第 2 步生成的私钥>
 RSA_PUBLIC_KEY=<第 2 步生成的公钥>
@@ -70,6 +71,8 @@ SMTP_FROM=
 # 可选阿里云短信 / 验证码
 ALIBABA_CLOUD_ACCESS_KEY_ID=
 ALIBABA_CLOUD_ACCESS_KEY_SECRET=
+
+`ADMIN_EMAILS` 用逗号分隔管理员邮箱。自部署时，首次用这些邮箱注册的用户会自动被提升为 `admin`，这是推荐的管理员初始化方式。
 ALI_CAPTCHA_API_KEY=
 
 # 可选 ZPayZ 支付

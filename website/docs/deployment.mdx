@@ -45,12 +45,13 @@ APP_DOMAIN=
 # 例如 https://app.example.com），用于拼接支付回调/跳转地址与邮件验证
 # 链接。默认生产为 https://app.${APP_DOMAIN}。
 CLIENT_ORIGIN=
+ADMIN_EMAILS=owner@example.com
 RSA_PRIVATE_KEY=<通过 bun scripts/generateRSAKey.ts 生成>
 RSA_PUBLIC_KEY=<同上生成>
 REDIS_URL=redis://redis:6379
 ```
 
-根据实际需要补充邮件（RESEND/SMTP）、OAuth、短信/验证码、支付变量。
+根据实际需要补充邮件（RESEND/SMTP）、OAuth、短信/验证码、支付变量。自部署建议同时设置 `ADMIN_EMAILS`，这样对应邮箱注册后会自动获得后台管理员权限。
 
 ### 2. 启动
 

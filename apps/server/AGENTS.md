@@ -35,6 +35,7 @@
 - Every newly created team must get a `Default` API key folder with `isDefault=true` inside the same transaction as team creation.
 - Default API key folders are system folders: they cannot be deleted, and delete flows should still promote another folder to default if historical data ends up without one.
 - Team monthly usage archives live in `team_monthly_usages`; raw `usages` rows should only be retained for the current month, with prior months archived via the `/cron/archiveMonthlyUsage` endpoint before cleanup.
+- Admin bootstrap uses `ADMIN_EMAILS`; if existing users were created before that env was configured, reconcile them with the `/cron/syncAdminRole` endpoint instead of editing roles from the client.
 
 ## AI Provider Registry
 
@@ -59,6 +60,7 @@
 - Add `CRON_SECRET` in `.env` and call `/cron/*` endpoints with `Authorization: Bearer <CRON_SECRET>`.
 - OAuth providers enabled by env: `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`.
 - `IS_OSS=true` enables OSS mode and bypasses hosted plan limits.
+- `ADMIN_EMAILS` can be set to a comma-separated email list; matching users are promoted to `admin` immediately after signup, which is the supported self-host bootstrap path for admin access.
 
 ## Testing
 

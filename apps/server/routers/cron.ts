@@ -5,6 +5,7 @@ import * as dbSchema from '@server/lib/db/schema'
 import { PayStatus } from '@server/constants/pay'
 import { createTeam } from '@server/services/team'
 import { archiveMonthlyUsages } from '@server/services/usage'
+import { syncConfiguredAdminUsers } from '@server/services/user'
 
 const BEARER_PREFIX = 'Bearer '
 
@@ -67,6 +68,14 @@ export const cronRouter = new Elysia({
   })
   .post('/archiveMonthlyUsage', async () => {
     const result = await archiveMonthlyUsages()
+
+    return {
+      success: true,
+      ...result,
+    }
+  })
+  .post('/syncAdminRole', async () => {
+    const result = await syncConfiguredAdminUsers()
 
     return {
       success: true,

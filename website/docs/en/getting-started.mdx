@@ -58,6 +58,7 @@ APP_DOMAIN=
 # https://app.${APP_DOMAIN} in production and http://localhost:5173 in dev.
 CLIENT_ORIGIN=
 IS_OSS=true
+ADMIN_EMAILS=owner@example.com
 CRON_SECRET=
 RSA_PRIVATE_KEY=<from step 2>
 RSA_PUBLIC_KEY=<from step 2>
@@ -72,6 +73,8 @@ SMTP_FROM=
 # Optional Alibaba Cloud SMS / captcha
 ALIBABA_CLOUD_ACCESS_KEY_ID=
 ALIBABA_CLOUD_ACCESS_KEY_SECRET=
+
+`ADMIN_EMAILS` accepts a comma-separated list of admin emails. During self-hosted signup, users who register with one of these emails are promoted to `admin` automatically. This is the recommended admin bootstrap path.
 ALI_CAPTCHA_API_KEY=
 
 # Optional ZPayZ payment

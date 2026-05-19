@@ -11,6 +11,7 @@ import { IS_DEV, APP_DOMAIN } from '@server/constants'
 import { teamPlugin } from '@server/lib/better-auth/team'
 import { createPhoneAuthConfig } from '@openproxy/phone-auth/server'
 import { createTeam, getTeams } from '@server/services/team'
+import { isConfiguredAdminEmail } from '@server/lib/admin-role'
 
 const defaultTrustedOrigins = [
   `https://${APP_DOMAIN}`,
@@ -180,6 +181,13 @@ export const auth = betterAuth({
     user: {
       create: {
         after: async (user) => {
+          if (isConfiguredAdminEmail(user.email)) {
+            await db
+              .update(dbSchema.users)
+              .set({ role: 'admin' })
+              .where(eq(dbSchema.users.id, user.id))
+          }
+
           await createTeam(user.id)
         },
       },

@@ -1,7 +1,8 @@
-import { and, count, desc, eq } from 'drizzle-orm'
+import { and, count, desc, eq, inArray, ne } from 'drizzle-orm'
 import { db } from '@server/lib/db/client'
 import * as dbSchema from '@server/lib/db/schema'
 import Decimal from 'decimal.js'
+import { getConfiguredAdminEmails } from '@server/lib/admin-role'
 
 export const getUserByEmail = async (email: string) => {
   const [user] = await db
@@ -78,6 +79,35 @@ export const updateUserMonthlyFreeAllowance = async (
       monthlyFreeAllowance: new Decimal(monthlyFreeAllowance).toFixed(2),
     })
     .where(eq(dbSchema.userConfigs.userId, userId))
+}
+
+export const syncConfiguredAdminUsers = async () => {
+  const adminEmails = getConfiguredAdminEmails()
+
+  if (adminEmails.length === 0) {
+    return {
+      updatedCount: 0,
+      emails: [],
+    }
+  }
+
+  const updatedUsers = await db
+    .update(dbSchema.users)
+    .set({ role: 'admin' })
+    .where(
+      and(
+        inArray(dbSchema.users.email, adminEmails),
+        ne(dbSchema.users.role, 'admin')
+      )
+    )
+    .returning({ email: dbSchema.users.email })
+
+  return {
+    updatedCount: updatedUsers.length,
+    emails: updatedUsers
+      .map((user) => user.email)
+      .filter((email): email is string => Boolean(email)),
+  }
 }
 
 export const getUserTeamById = async (userId: string, teamId: string) => {

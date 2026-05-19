@@ -47,12 +47,13 @@ APP_DOMAIN=
 # notify/return URLs and email verification links. Defaults to
 # https://app.${APP_DOMAIN} in production.
 CLIENT_ORIGIN=
+ADMIN_EMAILS=owner@example.com
 RSA_PRIVATE_KEY=<generated with bun scripts/generateRSAKey.ts>
 RSA_PUBLIC_KEY=<same generation>
 REDIS_URL=redis://redis:6379
 ```
 
-Also add email (RESEND or SMTP), OAuth, SMS/captcha, and payment variables as needed.
+Also add email (RESEND or SMTP), OAuth, SMS/captcha, and payment variables as needed. For self-hosting, set `ADMIN_EMAILS` so the matching signup account is promoted to admin automatically.
 
 ### 2. Start
 
