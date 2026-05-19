@@ -18,15 +18,23 @@ Use `docker/docker-compose.yml` for a one-command production deployment. It incl
 ### 1. Prepare environment file
 
 ```bash
+cd docker
+./prepare.sh
+```
+
+This script creates `docker/.env` from `docker/.env.example` and fills required values such as `BETTER_AUTH_SECRET`, `CRON_SECRET`, `RSA_PRIVATE_KEY`, and `RSA_PUBLIC_KEY`.
+
+If you prefer to configure everything manually, you can still run:
+
+```bash
 cp docker/.env.example docker/.env
 ```
 
-Edit `docker/.env`. Required variables:
+Then review `docker/.env`. Required variables:
 
 ```dotenv
 DATABASE_URL=postgresql://postgres:postgres@postgresql:5432/openproxy
 BETTER_AUTH_SECRET=<random 32-byte base64>
-BETTER_AUTH_TRUSTED_ORIGINS=https://your-tenant-domain,https://your-admin-domain
 BETTER_AUTH_URL=https://your-tenant-domain/api
 # APP_DOMAIN is the apex domain (e.g. example.com; defaults to aiproxy.shop).
 # It controls:
@@ -145,7 +153,7 @@ Serve the `dist/` directories with Nginx or any static file host.
 ## Production checklist
 
 - [ ] Use HTTPS with valid certificates for all public domains
-- [ ] Set `BETTER_AUTH_URL` to the public frontend origin with `/api`, and set `BETTER_AUTH_TRUSTED_ORIGINS` to every production web origin
+- [ ] Set `BETTER_AUTH_URL` to the public frontend origin with `/api`, and set `APP_DOMAIN` so built-in trusted origins and cross-subdomain cookies match your deployment
 - [ ] Enable PostgreSQL backups (e.g. pg_dump cron or managed DB snapshot)
 - [ ] Never log `RSA_PRIVATE_KEY` or plaintext API keys
 - [ ] Use secrets management (e.g. Docker secrets, Vault) rather than plain `.env` files in production
