@@ -36,7 +36,7 @@
     "./utils/props": "./src/utils/props.ts"
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.1",
+    "@base-ui/react": "^1.5.0",
     "@number-flow/react": "^0.6.0",
     "@openproxy/schema": "workspace:*",
     "@openproxy/utils": "workspace:*",
@@ -65,7 +65,7 @@
     "@storybook/react": "^10",
     "@storybook/react-vite": "^10",
     "@tailwindcss/vite": "^4",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.15",
     "sass-embedded": "^1",
     "storybook": "^10",
     "tailwindcss": "^4",
