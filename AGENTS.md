@@ -47,7 +47,6 @@ Examples of changes that require an `AGENTS.md` update:
 
 - Shared test automation lives in `.github/workflows/test.yml`.
 - The test workflow currently runs Bun tests for `apps/server` and Rust tests for `apps/api`.
-- The test workflow also verifies `apps/api/generated/ai-providers.json` stays synchronized with `packages/config/src/ai-providers.json` by running `bun run sync:api-provider-registry` and checking for no diff.
 
 ## Development
 

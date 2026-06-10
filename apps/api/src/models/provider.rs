@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
+use std::collections::HashMap;
 
 /// A single API key entry for a provider.
 #[derive(Debug, Clone)]
@@ -14,6 +15,12 @@ pub struct ProviderInfo {
     pub model_model_name: String,
     pub model_base_url: String,
     pub ai_provider_id: String,
+    /// Per-style base URL overrides (style key, e.g. `openai_chat`/`anthropic_messages` -> base url).
+    /// Sourced from `ai_providers.base_urls`.
+    pub base_urls: HashMap<String, String>,
+    /// Adapter implementation key sourced from `ai_providers.adapter_kind`
+    /// (`default` | `openai` | `stream_usage`). Unknown values fall back to default.
+    pub adapter_kind: String,
     pub api_keys: Vec<ApiKeyEntry>,
 }
 

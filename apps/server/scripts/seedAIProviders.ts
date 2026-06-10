@@ -52,6 +52,7 @@ const seed = async () => {
         baseUrls: provider.baseUrls,
         supportedStyles: provider.supportedStyles,
         docsUrl: provider.docsUrl,
+        adapterKind: provider.adapterKind ?? 'default',
         icon: provider.id,
       }
 

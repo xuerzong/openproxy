@@ -27,6 +27,24 @@ pub struct ChatProxyHandler {
     target_style: UsageStyle,
 }
 
+fn target_style_key(style: UsageStyle) -> &'static str {
+    match style {
+        UsageStyle::OpenAI => "openai_chat",
+        UsageStyle::Anthropic => "anthropic_messages",
+    }
+}
+
+fn resolve_provider_base_url(
+    provider: &crate::models::provider::ProviderInfo,
+    style: UsageStyle,
+) -> String {
+    provider
+        .base_urls
+        .get(target_style_key(style))
+        .cloned()
+        .unwrap_or_else(|| provider.model_base_url.clone())
+}
+
 impl ChatProxyHandler {
     pub fn new(req_path: String, body_json: Value, target_style: UsageStyle) -> Self {
         Self {
@@ -45,6 +63,7 @@ impl ChatProxyHandler {
         provider: &crate::models::provider::ProviderInfo,
     ) -> PreparedUpstreamRequest {
         let mut retry_body_json = self.body_json.clone();
+        let target_base_url = resolve_provider_base_url(provider, self.target_style);
         retry_body_json["model"] = Value::String(provider.model_model_name.clone());
         ProviderAdapterFactory::for_provider(provider).adapt_request_body(
             &mut retry_body_json,
@@ -52,8 +71,13 @@ impl ChatProxyHandler {
             self.is_stream(),
         );
 
+        if cfg!(debug_assertions) {
+            println!("Base Url: {}", target_base_url);
+            println!("Target Url: {}{}", target_base_url, self.req_path);
+        }
+
         PreparedUpstreamRequest {
-            target_url: format!("{}{}", provider.model_base_url, self.req_path),
+            target_url: format!("{}{}", target_base_url, self.req_path),
             body_json: retry_body_json,
         }
     }
@@ -216,4 +240,103 @@ async fn handle_stream_line(
     }
 
     Some(data_str.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::provider::{ApiKeyEntry, ProviderInfo};
+    use serde_json::json;
+    use std::collections::HashMap;
+
+    fn provider(id: &str, base_url: &str, overrides: &[(&str, &str)]) -> ProviderInfo {
+        let mut base_urls = HashMap::new();
+        for (style, url) in overrides {
+            base_urls.insert((*style).to_string(), (*url).to_string());
+        }
+        ProviderInfo {
+            model_model_name: "test-model".to_string(),
+            model_base_url: base_url.to_string(),
+            ai_provider_id: id.to_string(),
+            base_urls,
+            adapter_kind: "default".to_string(),
+            api_keys: vec![ApiKeyEntry {
+                api_key_hash: "hash".to_string(),
+                api_key: "key".to_string(),
+            }],
+        }
+    }
+
+    #[test]
+    fn messages_selects_anthropic_messages_base_url_when_available() {
+        let handler = ChatProxyHandler::new(
+            "/messages".to_string(),
+            json!({"model": "placeholder"}),
+            UsageStyle::Anthropic,
+        );
+        let request = handler.prepare_upstream_request(&provider(
+            "deepseek",
+            "https://api.deepseek.com/v1",
+            &[("anthropic_messages", "https://api.deepseek.com/anthropic")],
+        ));
+
+        assert_eq!(
+            request.target_url,
+            "https://api.deepseek.com/anthropic/messages"
+        );
+    }
+
+    #[test]
+    fn messages_falls_back_to_default_base_url_without_anthropic_messages_override() {
+        let handler = ChatProxyHandler::new(
+            "/messages".to_string(),
+            json!({"model": "placeholder"}),
+            UsageStyle::Anthropic,
+        );
+        let request = handler.prepare_upstream_request(&provider(
+            "openai",
+            "https://api.openai.com/v1",
+            &[],
+        ));
+
+        assert_eq!(request.target_url, "https://api.openai.com/v1/messages");
+    }
+
+    #[test]
+    fn chat_completions_selects_openai_chat_base_url_when_available() {
+        let handler = ChatProxyHandler::new(
+            "/chat/completions".to_string(),
+            json!({"model": "placeholder"}),
+            UsageStyle::OpenAI,
+        );
+        let request = handler.prepare_upstream_request(&provider(
+            "vercel",
+            "https://fallback.example/v1",
+            &[("openai_chat", "https://ai-gateway.vercel.sh/v1")],
+        ));
+
+        assert_eq!(
+            request.target_url,
+            "https://ai-gateway.vercel.sh/v1/chat/completions"
+        );
+    }
+
+    #[test]
+    fn chat_completions_falls_back_to_default_base_url_without_openai_chat_override() {
+        let handler = ChatProxyHandler::new(
+            "/chat/completions".to_string(),
+            json!({"model": "placeholder"}),
+            UsageStyle::OpenAI,
+        );
+        let request = handler.prepare_upstream_request(&provider(
+            "custom-provider",
+            "https://custom.example/base",
+            &[],
+        ));
+
+        assert_eq!(
+            request.target_url,
+            "https://custom.example/base/chat/completions"
+        );
+    }
 }

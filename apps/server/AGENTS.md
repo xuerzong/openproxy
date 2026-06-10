@@ -48,11 +48,10 @@
 - `GET /api/aiProviders` and related CRUD in `apps/server` are also database-backed. Built-in
   providers are identified by `is_built_in`; runtime code must not reconcile against the JSON
   registry on each request.
-- `apps/api/generated/ai-providers.json` remains a checked-in distribution artifact for sync /
-  compatibility workflows, but provider metadata at runtime is now database-backed in both
-  `apps/server` and `apps/api`. When provider metadata changes, update the JSON, run the server
-  seed script for the database, and keep the generated file synchronized via the existing sync
-  workflow.
+- `apps/api` reads provider metadata (including `adapter_kind`) directly from the `ai_providers`
+  table at runtime. When provider metadata changes, update `packages/config/src/ai-providers.json`
+  and run the server seed script so the new values land in the database; no separate API-side
+  registry artifact needs to be regenerated.
 
 ## Environment
 

@@ -4,7 +4,7 @@ use axum::{
     http::HeaderMap,
     response::{IntoResponse, Response},
 };
-use reqwest::StatusCode;
+use reqwest::{StatusCode, Url};
 use serde_json::Value;
 use std::sync::Arc;
 use tokio_util::bytes;
@@ -85,6 +85,16 @@ fn record_sticky_combo(api_key_id: &str, fingerprint: &str, provider_id: &str, a
     crate::shared::redis::set_cached_string(&key, &payload, STICKY_COMBO_CACHE_TTL_SECONDS);
 }
 
+fn request_path_from_target_url(target_url: &str) -> String {
+    Url::parse(target_url)
+        .ok()
+        .map(|url| match url.query() {
+            Some(query) => format!("{}?{}", url.path(), query),
+            None => url.path().to_string(),
+        })
+        .unwrap_or_else(|| target_url.to_string())
+}
+
 #[cfg(test)]
 fn clear_sticky_combo_for(api_key_id: &str, fingerprint: &str) {
     let key = sticky_combo_cache_key(api_key_id, fingerprint);
@@ -146,6 +156,7 @@ where
 {
     let fingerprint = build_user_fingerprint(&user.api_key_id, &user.model_id, original_headers);
     let sticky_combo = get_sticky_combo(&user.api_key_id, &fingerprint);
+    let had_sticky_combo = sticky_combo.is_some();
 
     // Flatten to (provider, key) pairs and prioritize the sticky combo if present.
     let all: Vec<(&ProviderInfo, _)> = user
@@ -160,6 +171,14 @@ where
             provider.ai_provider_id == sticky_provider_id
                 && api_key_entry.api_key_hash == sticky_api_key_hash
         }) {
+            let sticky_request_path =
+                request_path_from_target_url(&prepare_request(all[sticky_index].0).target_url);
+            tracing::info!(
+                request_path = %sticky_request_path,
+                model_id = %user.model_id,
+                provider_id = %sticky_provider_id,
+                "Using sticky provider/key combo as first candidate"
+            );
             ordered.push(all[sticky_index]);
 
             for (idx, combo) in all.iter().enumerate() {
@@ -171,6 +190,13 @@ where
     }
 
     if ordered.is_empty() {
+        if had_sticky_combo {
+            tracing::warn!(
+                api_key_id = %user.api_key_id,
+                model_id = %user.model_id,
+                "Sticky provider/key combo not found in current provider list; fallback to default order"
+            );
+        }
         ordered = all;
     }
 
@@ -180,6 +206,16 @@ where
     for (i, (provider, api_key_entry)) in ordered.iter().enumerate() {
         let is_last_attempt = i == total.saturating_sub(1);
         let prepared = prepare_request(provider);
+        let request_path = request_path_from_target_url(&prepared.target_url);
+
+        tracing::info!(
+            request_path = %request_path,
+            model_id = %user.model_id,
+            attempt = i + 1,
+            total_attempts = total,
+            provider_id = %provider.ai_provider_id,
+            "Selecting provider/key combo"
+        );
 
         let mut headers = original_headers.clone();
         headers.remove("host");
@@ -207,7 +243,10 @@ where
                 if !status.is_success() {
                     if !is_last_attempt {
                         tracing::warn!(
+                            request_path = %request_path,
+                            model_id = %user.model_id,
                             combo = i + 1,
+                            provider_id = %provider.ai_provider_id,
                             status = %status,
                             "Provider/key failed, trying next"
                         );
@@ -218,6 +257,14 @@ where
 
                     return Err(forward_upstream_error(upstream_res).await);
                 }
+
+                tracing::info!(
+                    request_path = %request_path,
+                    model_id = %user.model_id,
+                    attempt = i + 1,
+                    provider_id = %provider.ai_provider_id,
+                    "Provider/key combo selected successfully"
+                );
 
                 // Keep successful combo sticky for this fingerprint to improve upstream cache hits.
                 record_sticky_combo(
@@ -238,7 +285,10 @@ where
             Err(error) => {
                 if !is_last_attempt {
                     tracing::warn!(
+                        request_path = %request_path,
+                        model_id = %user.model_id,
                         combo = i + 1,
+                        provider_id = %provider.ai_provider_id,
                         error = %error,
                         "Provider/key connection failed, trying next"
                     );
@@ -398,19 +448,20 @@ mod tests {
         let user = sample_user(
             "api-key-retry-test",
             vec![
-            (
-                fail_base_url,
-                "provider_fail".to_string(),
-                "fail-key".to_string(),
-                "fail-model".to_string(),
-            ),
-            (
-                success_base_url,
-                "provider_success".to_string(),
-                "success-key".to_string(),
-                "success-model".to_string(),
-            ),
-        ]);
+                (
+                    fail_base_url,
+                    "provider_fail".to_string(),
+                    "fail-key".to_string(),
+                    "fail-model".to_string(),
+                ),
+                (
+                    success_base_url,
+                    "provider_success".to_string(),
+                    "success-key".to_string(),
+                    "success-model".to_string(),
+                ),
+            ],
+        );
         let state = sample_state();
         let (_, usage_ctx) = build_usage_parts(&user, false);
 
@@ -418,21 +469,20 @@ mod tests {
         original_headers.insert("content-type", HeaderValue::from_static("application/json"));
         original_headers.insert("x-request-id", HeaderValue::from_static("req_456"));
         original_headers.insert("origin", HeaderValue::from_static("https://example.com"));
-        original_headers.insert("referer", HeaderValue::from_static("https://example.com/page"));
+        original_headers.insert(
+            "referer",
+            HeaderValue::from_static("https://example.com/page"),
+        );
 
-        let result = proxy_to_provider(
-            &state,
-            &user,
-            &original_headers,
-            &usage_ctx,
-            |provider| PreparedUpstreamRequest {
+        let result = proxy_to_provider(&state, &user, &original_headers, &usage_ctx, |provider| {
+            PreparedUpstreamRequest {
                 target_url: format!("{}/chat/completions", provider.model_base_url),
                 body_json: json!({
                     "model": provider.model_model_name,
                     "stream": false,
                 }),
-            },
-        )
+            }
+        })
         .await
         .unwrap();
 
@@ -440,7 +490,10 @@ mod tests {
         assert_eq!(result.upstream_res.status(), reqwest::StatusCode::OK);
 
         let captured = rx.recv().await.unwrap();
-        assert_eq!(captured.authorization.as_deref(), Some("Bearer success-key"));
+        assert_eq!(
+            captured.authorization.as_deref(),
+            Some("Bearer success-key")
+        );
         assert_eq!(captured.request_id.as_deref(), Some("req_456"));
         assert_eq!(captured.origin, None);
         assert_eq!(captured.referer, None);
@@ -466,11 +519,12 @@ mod tests {
         let user = sample_user(
             "api-key-error-test",
             vec![(
-            base_url,
-            "provider_error".to_string(),
-            "error-key".to_string(),
-            "error-model".to_string(),
-        )]);
+                base_url,
+                "provider_error".to_string(),
+                "error-key".to_string(),
+                "error-model".to_string(),
+            )],
+        );
         let state = sample_state();
         let (_, usage_ctx) = build_usage_parts(&user, false);
 
@@ -509,7 +563,10 @@ mod tests {
         let uid = "api-key-recent-skip-test";
         let mut headers = HeaderMap::new();
         headers.insert("content-type", HeaderValue::from_static("application/json"));
-        headers.insert("authorization", HeaderValue::from_static("Bearer client-key-1"));
+        headers.insert(
+            "authorization",
+            HeaderValue::from_static("Bearer client-key-1"),
+        );
         headers.insert("user-agent", HeaderValue::from_static("test-agent"));
         headers.insert("x-real-ip", HeaderValue::from_static("203.0.113.9"));
 
@@ -567,31 +624,43 @@ mod tests {
         let user = sample_user(
             uid,
             vec![
-                (url_b, "provider_b".to_string(), "key-b".to_string(), "model-b".to_string()),
-                (url_a, "provider_a".to_string(), "key-a".to_string(), "model-a".to_string()),
+                (
+                    url_b,
+                    "provider_b".to_string(),
+                    "key-b".to_string(),
+                    "model-b".to_string(),
+                ),
+                (
+                    url_a,
+                    "provider_a".to_string(),
+                    "key-a".to_string(),
+                    "model-a".to_string(),
+                ),
             ],
         );
 
         let state = sample_state();
         let (_, usage_ctx) = build_usage_parts(&user, false);
 
-        let result = proxy_to_provider(
-            &state,
-            &user,
-            &headers,
-            &usage_ctx,
-            |provider| PreparedUpstreamRequest {
+        let result = proxy_to_provider(&state, &user, &headers, &usage_ctx, |provider| {
+            PreparedUpstreamRequest {
                 target_url: format!("{}/chat", provider.model_base_url),
                 body_json: json!({"model": provider.model_model_name}),
-            },
-        )
+            }
+        })
         .await
         .unwrap();
 
         assert_eq!(result.provider_ctx.ai_provider_id, "provider_a");
 
-        assert!(rx_a.try_recv().is_ok(), "provider_a should have been called first");
-        assert!(rx_b.try_recv().is_err(), "provider_b should not have been called first");
+        assert!(
+            rx_a.try_recv().is_ok(),
+            "provider_a should have been called first"
+        );
+        assert!(
+            rx_b.try_recv().is_err(),
+            "provider_b should not have been called first"
+        );
 
         srv_a.abort();
         srv_b.abort();
@@ -642,17 +711,21 @@ mod tests {
             monthly_free_last_reset_at: None,
             providers: providers
                 .into_iter()
-                .map(|(model_base_url, ai_provider_id, model_api_key, model_model_name)| {
-                    ProviderInfo {
-                        model_model_name,
-                        model_base_url,
-                        ai_provider_id: ai_provider_id.clone(),
-                        api_keys: vec![crate::models::provider::ApiKeyEntry {
-                            api_key_hash: format!("{ai_provider_id}_hash"),
-                            api_key: model_api_key,
-                        }],
-                    }
-                })
+                .map(
+                    |(model_base_url, ai_provider_id, model_api_key, model_model_name)| {
+                        ProviderInfo {
+                            model_model_name,
+                            model_base_url,
+                            ai_provider_id: ai_provider_id.clone(),
+                            base_urls: std::collections::HashMap::new(),
+                            adapter_kind: "default".to_string(),
+                            api_keys: vec![crate::models::provider::ApiKeyEntry {
+                                api_key_hash: format!("{ai_provider_id}_hash"),
+                                api_key: model_api_key,
+                            }],
+                        }
+                    },
+                )
                 .collect(),
         }
     }

@@ -117,16 +117,14 @@ src/
 ### Architecture
 
 - Provider metadata used by the Rust runtime is database-backed. `GET /v1/providers` reads from
-  `ai_providers`, and request-time adapter selection uses `ProviderInfo.ai_provider_id` from
-  access validation rather than matching hosts against a static registry.
-- `packages/config/src/ai-providers.json` and `apps/api/generated/ai-providers.json` remain seed /
-  distribution artifacts for provisioning and build workflows, but they are no longer the runtime
-  source of truth for provider metadata inside `apps/api`.
+  `ai_providers`, and request-time adapter selection uses `ProviderInfo.adapter_kind` (sourced
+  from the `ai_providers.adapter_kind` column) rather than any static registry.
+- `packages/config/src/ai-providers.json` is the seed source consumed by the server's
+  `seedAIProviders.ts`; it is **not** read by `apps/api` at runtime or build time.
 - When a new provider is added, update the shared JSON (including `adapterKind` if the provider
-  needs anything beyond the default no-op adapter), regenerate `apps/api/generated/ai-providers.json`
-  via `bun run sync:api-provider-registry`, and seed the database. The Rust adapter dispatcher
-  reads adapter selection from the generated JSON at startup — no Rust code change is required
-  unless a brand-new adapter kind is being introduced.
+  needs anything beyond the default no-op adapter) and run the server's seed step so the new
+  row — including its `adapter_kind` value — is written to the database. No Rust rebuild or
+  artifact regeneration is required unless a brand-new adapter kind is being introduced.
 - Most OpenAI-compatible providers share `StreamUsageProviderAdapter`; only providers with
   materially different behavior should keep dedicated adapter files.
 - `adapters/` contains provider-specific request/response adapters.
@@ -136,14 +134,13 @@ src/
   - `adapt_responses_request(body, is_stream)` — OpenAI `/v1/responses` style (currently
     unused internally; responses are pre-translated to chat/completions, but the hook is
     available for future direct routing).
-- `ProviderAdapterFactory::for_provider()` dispatches by `ProviderInfo.ai_provider_id` →
-  `adapterKind` (from the registry JSON) → adapter impl. IDs absent from the registry or
-  without an `adapterKind` fall back to `DefaultProviderAdapter` (passthrough). Custom
-  providers created via the admin UI always behave as `default`.
+- `ProviderAdapterFactory::for_provider()` dispatches by `ProviderInfo.adapter_kind` → adapter
+  impl. Values are `"default"` | `"openai"` | `"stream_usage"`; unknown / empty values fall
+  back to `DefaultProviderAdapter` (passthrough). Custom providers created via the admin UI
+  default to `"default"` unless an admin sets a different kind.
 - Shared helper `ensure_stream_options_include_usage(body)` lives in `adapters/mod.rs`.
   Adapters that need the final `usage` chunk on streaming OpenAI responses should call it
   from `adapt_openai_request`.
-
 ### `/v1/providers` Endpoint
 
 - `GET /v1/providers` (public, no auth) returns provider metadata from the `ai_providers` table
@@ -155,10 +152,10 @@ src/
 1. Add an entry to `packages/config/src/ai-providers.json`. Set `"adapterKind"` to one of
   `"openai"` | `"stream_usage"` if the provider needs more than the default no-op behavior;
   omit the field for default behavior.
-2. Run `bun run sync:api-provider-registry` to copy the registry into
-  `apps/api/generated/ai-providers.json` (CI also enforces this is in sync).
-3. Only add a new adapter file / `AdapterKind` variant when an entirely new request-mutation
-  behavior is required.
+2. Run the server seed (`apps/server/scripts/seedAIProviders.ts`) so the new row — including
+  its `adapter_kind` value — is written into the `ai_providers` table.
+3. Only add a new adapter file / dispatch arm in `adapters/mod.rs` when an entirely new
+  request-mutation behavior is required.
 4. Document the provider in the **Provider Registry** section below (base URLs, styles, quirks,
   docs URL).
 5. Add tests that cover request transformations for any non-default behavior.

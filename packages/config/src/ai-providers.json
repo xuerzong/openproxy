@@ -15,7 +15,7 @@
     "baseUrls": [
       {
         "style": "anthropic_messages",
-        "baseUrl": "https://ai-gateway.vercel.sh"
+        "baseUrl": "https://ai-gateway.vercel.sh/v1"
       },
       {
         "style": "openai_chat",

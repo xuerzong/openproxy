@@ -19,6 +19,8 @@ mod tests {
             model_model_name: "some-model".to_string(),
             model_base_url: base_url.to_string(),
             ai_provider_id: "provider-id".to_string(),
+            base_urls: std::collections::HashMap::new(),
+            adapter_kind: "default".to_string(),
             api_keys: vec![crate::models::provider::ApiKeyEntry {
                 api_key_hash: "hash".to_string(),
                 api_key: "key".to_string(),
@@ -53,7 +55,10 @@ mod tests {
         ));
         adapter.adapt_request_body(&mut body, UsageStyle::OpenAI, true);
 
-        assert!(body.get("stream_options").is_none(), "OpenAI adapter should not inject stream_options");
+        assert!(
+            body.get("stream_options").is_none(),
+            "OpenAI adapter should not inject stream_options"
+        );
         let _ = Value::Null;
     }
 }

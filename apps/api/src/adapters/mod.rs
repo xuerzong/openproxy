@@ -1,7 +1,3 @@
-use std::collections::HashMap;
-use std::sync::OnceLock;
-
-use serde::Deserialize;
 use serde_json::{Value, json};
 
 use crate::models::provider::ProviderInfo;
@@ -45,68 +41,24 @@ static DEFAULT_PROVIDER_ADAPTER: DefaultProviderAdapter = DefaultProviderAdapter
 static OPENAI_PROVIDER_ADAPTER: OpenAIProviderAdapter = OpenAIProviderAdapter;
 static STREAM_USAGE_PROVIDER_ADAPTER: StreamUsageProviderAdapter = StreamUsageProviderAdapter;
 
-/// Adapter selection kinds — kept in sync with `ProviderAdapterKind` in
-/// `packages/config/src/ai-providers.ts`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
-#[serde(rename_all = "snake_case")]
-enum AdapterKind {
-    Default,
-    Openai,
-    StreamUsage,
-}
-
-impl AdapterKind {
-    fn resolve(self) -> &'static dyn ProviderAdapter {
-        match self {
-            AdapterKind::Default => &DEFAULT_PROVIDER_ADAPTER,
-            AdapterKind::Openai => &OPENAI_PROVIDER_ADAPTER,
-            AdapterKind::StreamUsage => &STREAM_USAGE_PROVIDER_ADAPTER,
-        }
+/// Pick the adapter implementation for a given `adapter_kind` value sourced from
+/// `ai_providers.adapter_kind`. Unknown or empty values fall back to the
+/// no-op default adapter.
+fn resolve_adapter(adapter_kind: &str) -> &'static dyn ProviderAdapter {
+    match adapter_kind {
+        "openai" => &OPENAI_PROVIDER_ADAPTER,
+        "stream_usage" => &STREAM_USAGE_PROVIDER_ADAPTER,
+        _ => &DEFAULT_PROVIDER_ADAPTER,
     }
-}
-
-/// Minimal registry entry — only fields we need for adapter dispatch.
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RegistryEntry {
-    id: String,
-    #[serde(default)]
-    adapter_kind: Option<AdapterKind>,
-}
-
-/// Built-in provider id → adapter kind, parsed from
-/// `apps/api/generated/ai-providers.json` (kept in sync with
-/// `packages/config/src/ai-providers.json` via `bun run sync:api-provider-registry`).
-/// Custom providers created via the admin UI are absent from this map and fall
-/// back to `AdapterKind::Default`.
-fn adapter_kind_map() -> &'static HashMap<String, AdapterKind> {
-    static MAP: OnceLock<HashMap<String, AdapterKind>> = OnceLock::new();
-    MAP.get_or_init(|| {
-        const REGISTRY_JSON: &str = include_str!("../../generated/ai-providers.json");
-        let entries: Vec<RegistryEntry> = serde_json::from_str(REGISTRY_JSON)
-            .expect("apps/api/generated/ai-providers.json is malformed");
-        entries
-            .into_iter()
-            .filter_map(|entry| entry.adapter_kind.map(|kind| (entry.id, kind)))
-            .collect()
-    })
 }
 
 pub struct ProviderAdapterFactory;
 
 impl ProviderAdapterFactory {
-    /// Pick an adapter for the given provider. Falls back to `DefaultProviderAdapter`
-    /// when the provider id is not in the built-in registry or has no `adapterKind`.
+    /// Pick an adapter for the given provider based on `provider.adapter_kind`,
+    /// which is sourced from the `ai_providers` table.
     pub fn for_provider(provider: &ProviderInfo) -> &'static dyn ProviderAdapter {
-        Self::for_provider_id(&provider.ai_provider_id)
-    }
-
-    pub fn for_provider_id(id: &str) -> &'static dyn ProviderAdapter {
-        adapter_kind_map()
-            .get(id)
-            .copied()
-            .unwrap_or(AdapterKind::Default)
-            .resolve()
+        resolve_adapter(&provider.adapter_kind)
     }
 }
 
@@ -134,11 +86,13 @@ mod tests {
     use super::*;
     use crate::models::provider::ApiKeyEntry;
 
-    fn provider(id: &str) -> ProviderInfo {
+    fn provider(id: &str, adapter_kind: &str) -> ProviderInfo {
         ProviderInfo {
             model_model_name: "model".to_string(),
             model_base_url: "https://example.com".to_string(),
             ai_provider_id: id.to_string(),
+            base_urls: std::collections::HashMap::new(),
+            adapter_kind: adapter_kind.to_string(),
             api_keys: vec![ApiKeyEntry {
                 api_key_hash: "hash".to_string(),
                 api_key: "key".to_string(),
@@ -147,43 +101,38 @@ mod tests {
     }
 
     #[test]
-    fn stream_usage_providers_inject_include_usage_on_streaming() {
-        let kinds = adapter_kind_map();
-        let stream_usage_ids: Vec<&String> = kinds
-            .iter()
-            .filter_map(|(id, kind)| (*kind == AdapterKind::StreamUsage).then_some(id))
-            .collect();
-        assert!(
-            !stream_usage_ids.is_empty(),
-            "registry should include at least one stream_usage provider"
+    fn stream_usage_adapter_injects_include_usage_on_streaming_openai() {
+        let adapter = ProviderAdapterFactory::for_provider(&provider("some-id", "stream_usage"));
+        let mut body = json!({"stream": true});
+        adapter.adapt_openai_request(&mut body, true);
+        assert_eq!(
+            body.pointer("/stream_options/include_usage")
+                .and_then(Value::as_bool),
+            Some(true)
         );
-
-        for id in stream_usage_ids {
-            let adapter = ProviderAdapterFactory::for_provider(&provider(id));
-            let mut body = json!({"stream": true});
-            adapter.adapt_openai_request(&mut body, true);
-            assert_eq!(
-                body.pointer("/stream_options/include_usage")
-                    .and_then(Value::as_bool),
-                Some(true),
-                "provider `{id}` should inject stream_options.include_usage"
-            );
-        }
     }
 
     #[test]
-    fn unknown_provider_falls_back_to_default_adapter() {
-        let adapter = ProviderAdapterFactory::for_provider_id("not-a-real-provider");
+    fn unknown_adapter_kind_falls_back_to_default() {
+        let adapter = ProviderAdapterFactory::for_provider(&provider("some-id", "not-a-real-kind"));
         let mut body = json!({"stream": true});
         adapter.adapt_openai_request(&mut body, true);
         assert!(body.get("stream_options").is_none());
     }
 
     #[test]
-    fn anthropic_entry_keeps_body_unchanged_for_anthropic_providers() {
+    fn empty_adapter_kind_falls_back_to_default() {
+        let adapter = ProviderAdapterFactory::for_provider(&provider("some-id", ""));
+        let mut body = json!({"stream": true});
+        adapter.adapt_openai_request(&mut body, true);
+        assert!(body.get("stream_options").is_none());
+    }
+
+    #[test]
+    fn anthropic_style_does_not_inject_stream_options_even_for_stream_usage() {
         let mut body = json!({"model": "claude-sonnet-4", "stream": true});
 
-        let adapter = ProviderAdapterFactory::for_provider(&provider("vercel"));
+        let adapter = ProviderAdapterFactory::for_provider(&provider("some-id", "stream_usage"));
         adapter.adapt_request_body(&mut body, UsageStyle::Anthropic, true);
 
         assert!(body.get("stream_options").is_none());

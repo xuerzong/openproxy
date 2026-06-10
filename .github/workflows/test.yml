@@ -56,11 +56,6 @@ jobs:
       - name: Install JavaScript dependencies
         run: bun install --frozen-lockfile
 
-      - name: Verify generated API provider registry is synchronized
-        run: |
-          bun run sync:api-provider-registry
-          git diff --exit-code -- apps/api/generated/ai-providers.json
-
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 

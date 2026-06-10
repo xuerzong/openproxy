@@ -519,6 +519,10 @@ export const aiProviders = pgTable(
       .notNull()
       .default([]),
     docsUrl: text('docs_url').notNull().default(''),
+    adapterKind: text('adapter_kind')
+      .$type<'default' | 'openai' | 'stream_usage'>()
+      .notNull()
+      .default('default'),
     isBuiltIn: boolean('is_built_in').notNull().default(false),
     createdAt: timestamp('created_at', { mode: 'date', withTimezone: true })
       .defaultNow()

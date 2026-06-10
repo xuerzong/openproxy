@@ -34,6 +34,10 @@ struct AccessRow {
     provider_id: String,
     provider_model_name: String,
     provider_base_url: String,
+    #[serde(default)]
+    provider_base_urls: serde_json::Value,
+    #[serde(default)]
+    provider_adapter_kind: String,
     provider_api_key_hash: String,
     provider_api_key: String,
     provider_weight: i32,
@@ -75,6 +79,8 @@ async fn fetch_access_rows(
                 ap.name as provider_name,
                 mtap.model as provider_model_name,
                 ap.base_url as provider_base_url,
+                ap.base_urls as provider_base_urls,
+                ap.adapter_kind as provider_adapter_kind,
                 apk.api_key_hash as provider_api_key_hash,
                 apk.api_key as provider_api_key,
                 apk.id as provider_api_key_id,
@@ -108,6 +114,8 @@ async fn fetch_access_rows(
             p.provider_id,
             p.provider_model_name,
             p.provider_base_url,
+            p.provider_base_urls,
+            p.provider_adapter_kind,
             p.provider_api_key_hash,
             p.provider_api_key,
             p.provider_weight,
@@ -226,15 +234,17 @@ pub async fn validate_model_access(
     use std::collections::HashMap;
     let mut provider_map: HashMap<String, ProviderCandidate> = HashMap::new();
     for r in &rows {
-        let entry = provider_map.entry(r.provider_id.clone()).or_insert_with(|| {
-            ProviderCandidate {
+        let entry = provider_map
+            .entry(r.provider_id.clone())
+            .or_insert_with(|| ProviderCandidate {
                 weight: r.provider_weight,
                 id: r.provider_id.clone(),
                 model_name: r.provider_model_name.clone(),
                 base_url: r.provider_base_url.clone(),
+                base_urls: parse_provider_base_urls(&r.provider_base_urls),
+                adapter_kind: r.provider_adapter_kind.clone(),
                 api_keys: Vec::new(),
-            }
-        });
+            });
         if !entry.api_keys.iter().any(|k| k.id == r.provider_api_key_id) {
             entry.api_keys.push(ProviderApiKeyCandidate {
                 id: r.provider_api_key_id.clone(),
@@ -320,7 +330,28 @@ struct ProviderCandidate {
     id: String,
     model_name: String,
     base_url: String,
+    base_urls: std::collections::HashMap<String, String>,
+    adapter_kind: String,
     api_keys: Vec<ProviderApiKeyCandidate>,
+}
+
+fn parse_provider_base_urls(raw: &serde_json::Value) -> std::collections::HashMap<String, String> {
+    let mut result = std::collections::HashMap::new();
+    if let Some(arr) = raw.as_array() {
+        for item in arr {
+            let Some(style) = item.get("style").and_then(|v| v.as_str()) else {
+                continue;
+            };
+            let url = item
+                .get("baseUrl")
+                .or_else(|| item.get("base_url"))
+                .and_then(|v| v.as_str());
+            if let Some(url) = url {
+                result.insert(style.to_string(), url.to_string());
+            }
+        }
+    }
+    result
 }
 
 fn weighted_random_sort(candidates: &[ProviderCandidate]) -> Vec<ProviderInfo> {
@@ -355,6 +386,8 @@ fn weighted_random_sort(candidates: &[ProviderCandidate]) -> Vec<ProviderInfo> {
             model_model_name: selected.model_name,
             model_base_url: selected.base_url,
             ai_provider_id: selected.id,
+            base_urls: selected.base_urls,
+            adapter_kind: selected.adapter_kind,
             api_keys: selected
                 .api_keys
                 .into_iter()
