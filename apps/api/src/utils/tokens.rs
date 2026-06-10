@@ -1,15 +1,15 @@
 use serde_json::Value;
-use tiktoken_rs::get_bpe_from_model;
+use tiktoken_rs::bpe_for_model;
 
 /// Count tokens in a message content string using tiktoken.
 /// Falls back to a simple character-based estimation if tiktoken initialization fails.
 pub fn count_tokens_for_content(content: &str, model: &str) -> i32 {
-    if let Ok(bpe) = get_bpe_from_model(model) {
+    if let Ok(bpe) = bpe_for_model(model) {
         let tokens = bpe.encode_ordinary(content);
         return tokens.len() as i32;
     }
 
-    if let Ok(bpe) = get_bpe_from_model("gpt-3.5-turbo") {
+    if let Ok(bpe) = bpe_for_model("gpt-3.5-turbo") {
         let tokens = bpe.encode_ordinary(content);
         return tokens.len() as i32;
     }
