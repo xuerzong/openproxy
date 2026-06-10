@@ -11,9 +11,8 @@ RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
 RUN rm -f target/release/deps/api*
 
-# Copy application sources and generated config for the final build
+# Copy application sources for the final build
 COPY src ./src
-COPY generated ./generated
 ENV SQLX_OFFLINE=true
 RUN cargo build --release
 
