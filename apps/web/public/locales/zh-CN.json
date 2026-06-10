@@ -263,11 +263,6 @@
       "expiresAt": "过期时间",
       "noExpiration": "永不过期",
       "expired": "已过期",
-      "scopeLabels": {
-        "api_keys:read": "API Key（读取）",
-        "api_keys:write": "API Key（写入）",
-        "balance:read": "余额（读取）"
-      },
       "table": {
         "name": "名称",
         "scopes": "权限",

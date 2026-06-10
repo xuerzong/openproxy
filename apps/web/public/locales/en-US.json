@@ -263,11 +263,6 @@
       "expiresAt": "Expiration Date",
       "noExpiration": "No expiration",
       "expired": "Expired",
-      "scopeLabels": {
-        "api_keys:read": "API Keys (Read)",
-        "api_keys:write": "API Keys (Write)",
-        "balance:read": "Balance (Read)"
-      },
       "table": {
         "name": "Name",
         "scopes": "Permissions",

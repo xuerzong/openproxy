@@ -14,19 +14,21 @@ import { CheckboxGroup } from '@openproxy/ui/Checkbox'
 import { DatePicker } from '@openproxy/ui/DatePicker'
 import { useRequest } from '@/contexts/ApiContext'
 import { useAccessTokensQuery } from '@/apps/tenant/hooks/queries/useAccessTokensQuery'
+import { useConstsQuery } from '@/hooks/queries/useConstsQuery'
 import { getToastRequestStatus, toastApiPromise } from '@/utils/toast'
 import { queryKeys } from '@/constants/query-keys'
 
-const SCOPES = ['api_keys:read', 'api_keys:write', 'balance:read'] as const
 const MAX_ACCESS_TOKENS = 20
 
 const Page = () => {
   const { t } = useTranslation('common')
   const request = useRequest()
   const queryClient = useQueryClient()
+  const constsQuery = useConstsQuery()
   const accessTokensQuery = useAccessTokensQuery()
   const tokens = accessTokensQuery.data || []
   const loading = accessTokensQuery.isLoading
+  const availableScopes = constsQuery.data?.accessTokenScopes || []
 
   const [createOpen, setCreateOpen] = useState(false)
   const [creating, setCreating] = useState(false)
@@ -39,11 +41,9 @@ const Page = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
-  const scopeOptions = SCOPES.map((scope) => ({
+  const scopeOptions = availableScopes.map((scope) => ({
     value: scope,
-    label: t(`teamSettings.accessTokens.scopeLabels.${scope}`, {
-      defaultValue: scope,
-    }),
+    label: scope,
   }))
 
   const resetCreateForm = () => {
@@ -201,9 +201,7 @@ const Page = () => {
                   <div className="flex flex-wrap gap-1">
                     {(token.scopes as string[]).map((scope: string) => (
                       <Tag key={scope} color="default">
-                        {t(`teamSettings.accessTokens.scopeLabels.${scope}`, {
-                          defaultValue: scope,
-                        })}
+                        {scope}
                       </Tag>
                     ))}
                   </div>
