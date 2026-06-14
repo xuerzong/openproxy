@@ -12,6 +12,6 @@
   "devDependencies": {
     "@fontsource/geist": "^5.2.9",
     "@fontsource/geist-mono": "^5.2.8",
-    "stropress": "0.0.7"
+    "stropress": "0.0.8"
   }
 }
