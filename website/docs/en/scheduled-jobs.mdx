@@ -1,0 +1,37 @@
+---
+title: Scheduled Jobs
+description: Configure and call OpenProxy production cron endpoints
+---
+
+OpenProxy exposes scheduled jobs through `/cron/*` endpoints on `apps/server`. Every request must include `CRON_SECRET`:
+
+```bash
+curl -X POST http://localhost:3888/cron/<task> \
+	-H "Authorization: Bearer <CRON_SECRET>"
+```
+
+## cleanupOrder
+
+- Path: `POST /cron/cleanupOrder`
+- Purpose: mark orders as canceled when they have been pending for more than 15 minutes.
+- Typical use: run on a schedule to clear expired unpaid orders so the dashboard does not keep stale pending records.
+
+Example:
+
+```bash
+curl -X POST http://localhost:3888/cron/cleanupOrder \
+	-H "Authorization: Bearer <CRON_SECRET>"
+```
+
+## archiveMonthlyUsage
+
+- Path: `POST /cron/archiveMonthlyUsage`
+- Purpose: archive usage from previous months into the monthly summary table and remove raw usage rows that no longer belong to the current month.
+- Typical use: run once at the beginning of each month to keep monthly reporting accurate and limit growth of the `usages` table.
+
+Example:
+
+```bash
+curl -X POST http://localhost:3888/cron/archiveMonthlyUsage \
+	-H "Authorization: Bearer <CRON_SECRET>"
+```

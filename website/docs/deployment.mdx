@@ -7,13 +7,13 @@ description: 通过 Docker Compose 或手动方式部署 OpenProxy
 
 使用 `docker/docker-compose.yml` 可一键启动完整的生产部署，包含以下服务：
 
-| 服务 | 主机端口 |
-| --- | --- |
-| `server`（Bun 后端） | `3888` |
-| `api`（Rust 代理） | `5060` |
-| `web-tenant`（用户端） | `5090` |
-| `web-admin`（管理后台） | `5091` |
-| `postgres` | 内部网络 |
+| 服务                    | 主机端口 |
+| ----------------------- | -------- |
+| `server`（Bun 后端）    | `3888`   |
+| `api`（Rust 代理）      | `5060`   |
+| `web-tenant`（用户端）  | `5090`   |
+| `web-admin`（管理后台） | `5091`   |
+| `postgres`              | 内部网络 |
 
 ### 1. 准备环境文件
 
@@ -149,11 +149,14 @@ bun run build:admin    # 输出到 dist/admin
 
 将生成的 `dist/` 目录通过 Nginx 或静态文件托管服务发布。
 
+定时任务配置与调用方式见 [定时任务](/scheduled-jobs)。
+
 ## 生产环境检查清单
 
 - [ ] 所有公开域名均启用 HTTPS 并使用有效证书
 - [ ] `BETTER_AUTH_URL` 已设置为对外前端域名加 `/api`，`APP_DOMAIN` 已正确配置为部署使用的主域名，以匹配内置 trusted origins 和跨子域 cookie
 - [ ] 开启 PostgreSQL 自动备份（如定时 pg_dump 或托管数据库快照）
+- [ ] 已配置 `cleanupOrder` 和 `archiveMonthlyUsage` 的定时触发，并确保请求携带正确的 `CRON_SECRET`
 - [ ] 禁止记录 `RSA_PRIVATE_KEY` 或明文 API 密钥
 - [ ] 生产环境使用密钥管理工具（Docker secrets、Vault 等），而非明文 `.env` 文件
 - [ ] 为 Rust 代理容器配置内存和 CPU 资源限制

@@ -1,0 +1,37 @@
+---
+title: 定时任务
+description: 配置和调用 OpenProxy 的生产定时任务
+---
+
+OpenProxy 的定时任务通过 `apps/server` 暴露的 `/cron/*` 接口触发，调用时需要带上 `CRON_SECRET`：
+
+```bash
+curl -X POST http://localhost:3888/cron/<task> \
+	-H "Authorization: Bearer <CRON_SECRET>"
+```
+
+## cleanupOrder
+
+- 路径：`POST /cron/cleanupOrder`
+- 用途：将创建超过 15 分钟且仍处于待支付状态的订单标记为已取消。
+- 适用场景：定时清理超时未支付订单，避免后台和用户端看到长期悬挂的待支付记录。
+
+示例：
+
+```bash
+curl -X POST http://localhost:3888/cron/cleanupOrder \
+	-H "Authorization: Bearer <CRON_SECRET>"
+```
+
+## archiveMonthlyUsage
+
+- 路径：`POST /cron/archiveMonthlyUsage`
+- 用途：归档历史月份的用量数据到月度汇总表，并清理不再属于当前月份的原始用量记录。
+- 适用场景：建议在每月初执行一次，确保月度统计可追溯，同时控制 `usages` 表体积。
+
+示例：
+
+```bash
+curl -X POST http://localhost:3888/cron/archiveMonthlyUsage \
+	-H "Authorization: Bearer <CRON_SECRET>"
+```

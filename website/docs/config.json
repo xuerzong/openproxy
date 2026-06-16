@@ -71,6 +71,10 @@
           "link": "/deployment"
         },
         {
+          "label": "定时任务",
+          "link": "/scheduled-jobs"
+        },
+        {
           "label": "API 参考",
           "link": "/api-reference"
         }
@@ -146,6 +150,10 @@
             {
               "label": "部署指南",
               "link": "/deployment"
+            },
+            {
+              "label": "定时任务",
+              "link": "/scheduled-jobs"
             },
             {
               "label": "API 参考",
@@ -224,6 +232,10 @@
             {
               "label": "Deployment",
               "link": "/en/deployment"
+            },
+            {
+              "label": "Scheduled Jobs",
+              "link": "/en/scheduled-jobs"
             },
             {
               "label": "API Reference",

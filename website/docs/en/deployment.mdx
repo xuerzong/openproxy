@@ -7,13 +7,13 @@ description: Deploy OpenProxy via Docker Compose or manually
 
 Use `docker/docker-compose.yml` for a one-command production deployment. It includes:
 
-| Service | Host port |
-| --- | --- |
-| `server` (Bun backend) | `3888` |
-| `api` (Rust proxy) | `5060` |
-| `web-tenant` | `5090` |
-| `web-admin` | `5091` |
-| `postgres` | internal only |
+| Service                | Host port     |
+| ---------------------- | ------------- |
+| `server` (Bun backend) | `3888`        |
+| `api` (Rust proxy)     | `5060`        |
+| `web-tenant`           | `5090`        |
+| `web-admin`            | `5091`        |
+| `postgres`             | internal only |
 
 ### 1. Prepare environment file
 
@@ -151,11 +151,14 @@ bun run build:admin    # outputs to dist/admin
 
 Serve the `dist/` directories with Nginx or any static file host.
 
+For scheduled job setup and endpoint usage, see [Scheduled Jobs](/en/scheduled-jobs).
+
 ## Production checklist
 
 - [ ] Use HTTPS with valid certificates for all public domains
 - [ ] Set `BETTER_AUTH_URL` to the public frontend origin with `/api`, and set `APP_DOMAIN` so built-in trusted origins and cross-subdomain cookies match your deployment
 - [ ] Enable PostgreSQL backups (e.g. pg_dump cron or managed DB snapshot)
+- [ ] Schedule `cleanupOrder` and `archiveMonthlyUsage`, and ensure each request uses the correct `CRON_SECRET`
 - [ ] Never log `RSA_PRIVATE_KEY` or plaintext API keys
 - [ ] Use secrets management (e.g. Docker secrets, Vault) rather than plain `.env` files in production
 - [ ] Configure resource limits (memory, CPU) for the Rust proxy container
