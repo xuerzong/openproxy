@@ -1,6 +1,6 @@
 # website
 
-This package now builds the OpenProxy docs site with `stropress@0.0.5` from the npm registry.
+This package now builds the OpenProxy docs site with `stropress@0.0.8` from the npm registry.
 
 ## Commands
 
@@ -16,7 +16,7 @@ bun run start
 
 ## Structure
 
-- `docs/config.json`: Stropress site configuration, navigation, sidebar, and locale metadata.
+- `docs/config.js`: Stropress site configuration, navigation, sidebar, and locale metadata.
 - `docs/`: Default locale documents.
 - `docs/en/`: English locale documents.
 - `docs/public/`: Static assets copied into the generated site.
