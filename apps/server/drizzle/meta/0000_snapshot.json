@@ -1,5 +1,5 @@
 {
-  "id": "540319d4-78a4-4e8e-b15f-fd0110e0e317",
+  "id": "64efc340-2917-4370-82d9-21dfbf197505",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -111,8 +111,12 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -210,8 +214,12 @@
           "name": "ai_provider_api_keys_ai_provider_id_ai_providers_id_fk",
           "tableFrom": "ai_provider_api_keys",
           "tableTo": "ai_providers",
-          "columnsFrom": ["ai_provider_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "ai_provider_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -284,6 +292,13 @@
           "notNull": true,
           "default": "''"
         },
+        "adapter_kind": {
+          "name": "adapter_kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'default'"
+        },
         "is_built_in": {
           "name": "is_built_in",
           "type": "boolean",
@@ -313,103 +328,11 @@
         "ai_providers_name_unique": {
           "name": "ai_providers_name_unique",
           "nullsNotDistinct": false,
-          "columns": ["name"]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.api_key_folders": {
-      "name": "api_key_folders",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "team_id": {
-          "name": "team_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "is_default": {
-          "name": "is_default",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "api_key_folders_team_id_index": {
-          "name": "api_key_folders_team_id_index",
           "columns": [
-            {
-              "expression": "team_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "api_key_folders_team_default_unique": {
-          "name": "api_key_folders_team_default_unique",
-          "columns": [
-            {
-              "expression": "team_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "where": "\"api_key_folders\".\"is_default\" = true",
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
+            "name"
+          ]
         }
       },
-      "foreignKeys": {
-        "api_key_folders_team_id_teams_id_fk": {
-          "name": "api_key_folders_team_id_teams_id_fk",
-          "tableFrom": "api_key_folders",
-          "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -435,12 +358,6 @@
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
-        },
-        "folder_id": {
-          "name": "folder_id",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
         },
         "name": {
           "name": "name",
@@ -568,8 +485,12 @@
           "name": "api_keys_user_id_team_users_id_fk",
           "tableFrom": "api_keys",
           "tableTo": "team_users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -577,18 +498,13 @@
           "name": "api_keys_team_id_teams_id_fk",
           "tableFrom": "api_keys",
           "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "api_keys_folder_id_api_key_folders_id_fk": {
-          "name": "api_keys_folder_id_api_key_folders_id_fk",
-          "tableFrom": "api_keys",
-          "tableTo": "api_key_folders",
-          "columnsFrom": ["folder_id"],
-          "columnsTo": ["id"],
-          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -621,8 +537,12 @@
           "name": "api_keys_to_models_api_key_id_api_keys_id_fk",
           "tableFrom": "api_keys_to_models",
           "tableTo": "api_keys",
-          "columnsFrom": ["api_key_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "api_key_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -630,8 +550,12 @@
           "name": "api_keys_to_models_model_id_models_id_fk",
           "tableFrom": "api_keys_to_models",
           "tableTo": "models",
-          "columnsFrom": ["model_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "model_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -639,7 +563,10 @@
       "compositePrimaryKeys": {
         "api_keys_to_models_api_key_id_model_id_pk": {
           "name": "api_keys_to_models_api_key_id_model_id_pk",
-          "columns": ["api_key_id", "model_id"]
+          "columns": [
+            "api_key_id",
+            "model_id"
+          ]
         }
       },
       "uniqueConstraints": {},
@@ -696,8 +623,12 @@
           "name": "invitations_user_id_users_id_fk",
           "tableFrom": "invitations",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -705,8 +636,12 @@
           "name": "invitations_invite_user_id_users_id_fk",
           "tableFrom": "invitations",
           "tableTo": "users",
-          "columnsFrom": ["invite_user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "invite_user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -940,8 +875,12 @@
           "name": "models_to_ai_providers_model_id_models_id_fk",
           "tableFrom": "models_to_ai_providers",
           "tableTo": "models",
-          "columnsFrom": ["model_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "model_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -949,8 +888,12 @@
           "name": "models_to_ai_providers_ai_provider_id_ai_providers_id_fk",
           "tableFrom": "models_to_ai_providers",
           "tableTo": "ai_providers",
-          "columnsFrom": ["ai_provider_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "ai_provider_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1076,8 +1019,12 @@
           "name": "orders_user_id_team_users_id_fk",
           "tableFrom": "orders",
           "tableTo": "team_users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1085,8 +1032,12 @@
           "name": "orders_team_id_teams_id_fk",
           "tableFrom": "orders",
           "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1195,8 +1146,12 @@
           "name": "sessions_team_id_teams_id_fk",
           "tableFrom": "sessions",
           "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1204,8 +1159,12 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1320,8 +1279,12 @@
           "name": "team_access_tokens_team_id_teams_id_fk",
           "tableFrom": "team_access_tokens",
           "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1329,8 +1292,12 @@
           "name": "team_access_tokens_created_by_team_users_id_fk",
           "tableFrom": "team_access_tokens",
           "tableTo": "team_users",
-          "columnsFrom": ["created_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1462,8 +1429,12 @@
           "name": "team_monthly_usages_team_id_teams_id_fk",
           "tableFrom": "team_monthly_usages",
           "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1516,8 +1487,12 @@
           "name": "team_users_team_id_teams_id_fk",
           "tableFrom": "team_users",
           "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1525,8 +1500,12 @@
           "name": "team_users_user_id_users_id_fk",
           "tableFrom": "team_users",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1741,8 +1720,12 @@
           "name": "usages_team_id_teams_id_fk",
           "tableFrom": "usages",
           "tableTo": "teams",
-          "columnsFrom": ["team_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "team_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1824,8 +1807,12 @@
           "name": "user_configs_user_id_users_id_fk",
           "tableFrom": "user_configs",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

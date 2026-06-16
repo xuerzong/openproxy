@@ -68,10 +68,6 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/AIProviders')),
       },
       {
-        path: 'folders',
-        Component: lazy(() => import('./pages/Folders')),
-      },
-      {
         path: 'orders',
         Component: lazy(() => import('./pages/Orders')),
       },

@@ -5,7 +5,6 @@ import {
 } from '@/layouts/DashboardLayout'
 import {
   BoxIcon,
-  FolderIcon,
   GaugeIcon,
   MegaphoneIcon,
   StampIcon,
@@ -80,14 +79,6 @@ export const DashboardLayout = () => {
       label: t('menu.aiProviders'),
       onClick() {
         navigate('/ai-providers')
-      },
-    },
-    {
-      key: '/folders',
-      icon: <FolderIcon className="w-5 h-5" />,
-      label: t('menu.folders'),
-      onClick() {
-        navigate('/folders')
       },
     },
     {

@@ -19,7 +19,6 @@ export const queryKeys = {
   usagesGrouped: 'usagesGrouped',
   teamMonthlyUsages: 'teamMonthlyUsages',
   apiKeys: 'apiKeys',
-  apiKeyFolders: 'apiKeyFolders',
   accessTokens: 'accessTokens',
 
   // Admin
@@ -27,7 +26,6 @@ export const queryKeys = {
   adminTeamsCount: 'admin/teams/count',
   adminTeamsDetail: 'admin/teams/detail',
   adminTeamsMembers: 'admin/teams/members',
-  adminApiKeyFolders: 'admin/apiKeyFolders',
   adminOrders: 'admin/orders',
   adminOrdersCount: 'admin/orders/count',
   adminDashboardStats: 'admin-dashboard-stats',

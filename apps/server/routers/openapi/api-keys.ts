@@ -29,7 +29,6 @@ export const openApiApiKeysRouter = new Elysia({ prefix: '/api-keys' })
           teamId: accessToken.teamId,
           teamUserId: '',
           name: body.name,
-          folderId: body.folderId,
           expiresAt: body.expiresAt ?? null,
           maxQuota: body.maxQuota,
           maxRequests: body.maxRequests,
@@ -47,7 +46,6 @@ export const openApiApiKeysRouter = new Elysia({ prefix: '/api-keys' })
       openapi: { scope: 'api_keys:write' },
       body: t.Object({
         name: t.String({ minLength: 1, maxLength: 32 }),
-        folderId: t.String({ minLength: 1 }),
         expiresAt: t.Optional(t.Nullable(t.Date())),
         maxQuota: t.Optional(t.Numeric({ minimum: 0 })),
         maxRequests: t.Optional(t.Number({ minimum: 0 })),

@@ -5,21 +5,6 @@ import { generateApiKey, generateDeApiKey } from '@server/lib/generate'
 import { hash } from '@server/lib/utils/hash'
 import Decimal from 'decimal.js'
 
-const assertFolderBelongsToTeam = async (teamId: string, folderId: string) => {
-  const folder = await db.query.apiKeyFolders.findFirst({
-    where: and(
-      eq(dbSchema.apiKeyFolders.id, folderId),
-      eq(dbSchema.apiKeyFolders.teamId, teamId)
-    ),
-    columns: {
-      id: true,
-    },
-  })
-  if (!folder) {
-    throw new Error('API key folder not found')
-  }
-}
-
 export const getApiKeysByTeamId = async (teamId: string) => {
   const apiKeys = await db.query.apiKeys.findMany({
     where: and(eq(dbSchema.apiKeys.teamId, teamId)),
@@ -43,7 +28,6 @@ export const createApiKey = async (params: {
   teamId: string
   teamUserId: string
   name: string
-  folderId: string
   expiresAt: Date | null
   maxQuota?: number
   maxRequests?: number
@@ -53,14 +37,12 @@ export const createApiKey = async (params: {
     teamId,
     teamUserId,
     name,
-    folderId,
     expiresAt,
     maxQuota,
     maxRequests,
     modelIds,
   } = params
   const apiKey = generateApiKey()
-  await assertFolderBelongsToTeam(teamId, folderId)
   await db.transaction(async (tx) => {
     const apiKeys = await tx
       .insert(dbSchema.apiKeys)
@@ -70,7 +52,6 @@ export const createApiKey = async (params: {
         apiKeyHash: await hash(apiKey),
         teamId,
         userId: teamUserId,
-        folderId,
         expiresAt,
         maxQuota: maxQuota?.toString(),
         maxRequests,
@@ -105,22 +86,13 @@ export const updateApiKey = async (params: {
   id: string
   teamId: string
   name: string
-  folderId?: string | null
   expiresAt: Date | null
   maxQuota?: number
   maxRequests?: number
   modelIds: string[]
 }) => {
-  const {
-    id,
-    teamId,
-    name,
-    folderId,
-    expiresAt,
-    maxQuota,
-    maxRequests,
-    modelIds,
-  } = params
+  const { id, teamId, name, expiresAt, maxQuota, maxRequests, modelIds } =
+    params
   const apiKeys = await db
     .select()
     .from(dbSchema.apiKeys)
@@ -128,15 +100,11 @@ export const updateApiKey = async (params: {
   if (apiKeys.length === 0) {
     throw new Error('权限不足')
   }
-  if (folderId) {
-    await assertFolderBelongsToTeam(teamId, folderId)
-  }
   await db.transaction(async (tx) => {
     await tx
       .update(dbSchema.apiKeys)
       .set({
         name,
-        folderId: folderId ?? null,
         expiresAt,
         maxQuota: maxQuota?.toString(),
         maxRequests,

@@ -5,7 +5,6 @@ import {
   BoxIcon,
   CircleUserRoundIcon,
   ChevronLeftIcon,
-  FoldersIcon,
   GaugeIcon,
   KeyRoundIcon,
   SettingsIcon,
@@ -74,15 +73,6 @@ export const DashboardLayout = () => {
       label: t('menu.models', { defaultValue: 'Models' }),
       onClick() {
         navigate('/models')
-      },
-      access: 'public',
-    },
-    {
-      key: '/folders',
-      icon: <FoldersIcon className="w-5 h-5" />,
-      label: t('menu.folders', { defaultValue: 'Folders' }),
-      onClick() {
-        navigate('/folders')
       },
       access: 'public',
     },

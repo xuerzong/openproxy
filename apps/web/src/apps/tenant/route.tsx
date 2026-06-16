@@ -24,10 +24,6 @@ const router = createBrowserRouter([
         Component: lazy(() => import('./pages/Analytics')),
       },
       {
-        path: 'folders',
-        Component: lazy(() => import('./pages/Folders')),
-      },
-      {
         path: 'settings/',
         Component: lazy(() => import('./layouts/TeamSettingsLayout')),
         children: [

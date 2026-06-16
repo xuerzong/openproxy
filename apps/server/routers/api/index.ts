@@ -2,7 +2,6 @@ import { Elysia } from 'elysia'
 import { betterAuthPlugin } from '@server/plugins/better-auth'
 import { payRouter } from '../pay'
 import { apiKeysRouter } from './api-keys'
-import { apiKeyFoldersRouter } from './api-key-folders'
 import { userConfigRouter } from './user-config'
 import { modelsRouter } from './models'
 import { constsRouter } from './consts'
@@ -16,7 +15,6 @@ import {
   adminOrdersRouter,
   adminTeamsRouter,
   adminUsersRouter,
-  adminApiKeyFoldersRouter,
 } from './admin'
 import { announcementRouter } from './announcement'
 
@@ -25,7 +23,6 @@ export const apiRouter = new Elysia({
 })
   .use(betterAuthPlugin)
   .use(apiKeysRouter)
-  .use(apiKeyFoldersRouter)
   .use(userConfigRouter)
   .use(adminUsersRouter)
   .use(modelsRouter)
@@ -39,5 +36,4 @@ export const apiRouter = new Elysia({
   .use(adminDashboardRouter)
   .use(adminOrdersRouter)
   .use(adminTeamsRouter)
-  .use(adminApiKeyFoldersRouter)
   .use(announcementRouter)

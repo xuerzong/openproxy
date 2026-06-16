@@ -52,19 +52,6 @@ const stringifyTeamMetadata = (metadata: TeamMetadata) => {
   return JSON.stringify(metadata)
 }
 
-const createDefaultApiKeyFolder = async (
-  tx: Parameters<typeof db.transaction>[0] extends (arg: infer T) => unknown
-    ? T
-    : never,
-  teamId: string
-) => {
-  await tx.insert(dbSchema.apiKeyFolders).values({
-    teamId,
-    name: 'Default',
-    isDefault: true,
-  })
-}
-
 const toAdminTeamView = (
   team: typeof dbSchema.teams.$inferSelect,
   memberCount = 0
@@ -122,8 +109,6 @@ export const createTeam = async (userId: string) => {
       role: 'owner',
     })
 
-    await createDefaultApiKeyFolder(tx, teamId)
-
     return teamId
   })
 
@@ -166,8 +151,6 @@ export const createTeamForUser = async (userId: string, name: string) => {
       teamId,
       role: 'owner',
     })
-
-    await createDefaultApiKeyFolder(tx, teamId)
 
     return teamId
   })
