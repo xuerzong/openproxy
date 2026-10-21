@@ -42,7 +42,7 @@ export class AliCloudSmsProvider implements SmsProvider {
   async sendSMS(phoneNumber: string, code: string): Promise<SmsResult> {
     const request = new SendSmsVerifyCodeRequest({
       phoneNumber,
-      signName: '速通互联验证码',
+      signName: '恒创联众',
       templateCode: '100001',
       templateParam: JSON.stringify({ code, min: '5' }),
     })
